@@ -16,25 +16,26 @@ type User = {
 
 type Project = Tables<'projects'>
 type Membership = Tables<'memberships'>
+type Prd = Tables<'prds'>
 
-interface PolicyPageProps {
+interface PrdPageProps {
   params: {
     orgId: string
     projectId: string
   }
 }
 
-export default function PolicyPage({ params }: PolicyPageProps) {
+export default function PrdPage({ params }: PrdPageProps) {
   const [user, setUser] = useState<User | null>(null)
   const [project, setProject] = useState<Project | null>(null)
   const [membership, setMembership] = useState<Membership | null>(null)
   const [loading, setLoading] = useState(true)
   
-  // 정책 관련 상태
-  const [policies, setPolicies] = useState<Tables<'policies'>[]>([])
-  const [policiesLoading, setPoliciesLoading] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
+  // PRD 관련 상태
+  const [prd, setPrd] = useState<Prd | null>(null)
+  const [prdContent, setPrdContent] = useState('')
+  const [prdLoading, setPrdLoading] = useState(false)
+  const [prdSaving, setPrdSaving] = useState(false)
   
   const router = useRouter()
 
@@ -77,8 +78,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setMembership(membershipData)
 
-      // 정책 로드
-      await loadPoliciesForProject(params.projectId)
+      // PRD 로드
+      await loadPrdForProject(params.projectId)
 
       setLoading(false)
     }
@@ -91,37 +92,80 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     router.push('/')
   }
 
-  // 정책 로드 함수
-  const loadPoliciesForProject = async (projectId: string) => {
-    setPoliciesLoading(true)
+  // PRD 로드 함수 (project ID를 직접 받는 버전)
+  const loadPrdForProject = async (projectId: string) => {
+    setPrdLoading(true)
     try {
       const { data, error } = await supabase
-        .from('policies')
+        .from('prds')
         .select('*')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
+        .single()
 
-      if (error) throw error
+      if (error && error.code !== 'PGRST116') {
+        throw error
+      }
 
-      setPolicies(data || [])
+      if (data) {
+        setPrd(data)
+        setPrdContent(data.content || '')
+      } else {
+        setPrdContent('')
+      }
     } catch (error) {
-      console.error('Error loading policies:', error)
-      showError('정책 로드 실패', '정책을 불러오는 중 오류가 발생했습니다.')
+      console.error('Error loading PRD:', error)
+      showError('PRD 로드 실패', 'PRD를 불러오는 중 오류가 발생했습니다.')
     } finally {
-      setPoliciesLoading(false)
+      setPrdLoading(false)
     }
   }
 
-  // 필터링된 정책 목록
-  const filteredPolicies = policies.filter(policy => {
-    const matchesSearch = policy.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         policy.body.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = !categoryFilter || policy.category === categoryFilter
-    return matchesSearch && matchesCategory
-  })
+  // PRD 로드 함수
+  const loadPrd = async () => {
+    if (!project) return
+    await loadPrdForProject(project.id)
+  }
 
-  // 고유한 카테고리 목록
-  const categories = Array.from(new Set(policies.map(policy => policy.category)))
+  const savePrd = async () => {
+    if (!project || !user) return
+
+    setPrdSaving(true)
+    try {
+      if (prd) {
+        // 기존 PRD 업데이트
+        const { error } = await supabase
+          .from('prds')
+          .update({
+            content: prdContent,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', prd.id)
+
+        if (error) throw error
+      } else {
+        // 새 PRD 생성
+        const { data: newPrd, error } = await supabase
+          .from('prds')
+          .insert({
+            project_id: project.id,
+            content: prdContent,
+            author_id: user.id
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+        setPrd(newPrd)
+      }
+
+      showSimpleSuccess('PRD가 저장되었습니다.')
+    } catch (error) {
+      console.error('Error saving PRD:', error)
+      showError('PRD 저장 실패', 'PRD를 저장하는 중 오류가 발생했습니다.')
+    } finally {
+      setPrdSaving(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -148,6 +192,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     )
   }
 
+  const canEditPrd = membership?.role === 'admin'
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* 왼쪽 사이드바 */}
@@ -173,7 +219,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             {/* 상단 메뉴 */}
             <button
               onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/prd`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors bg-primary text-primary-foreground"
             >
               <span className="text-lg">📄</span>
               <span>프로젝트 PRD</span>
@@ -189,7 +235,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             
             <button
               onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/policy`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors bg-primary text-primary-foreground"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
             >
               <span className="text-lg">📋</span>
               <span>정책 관리</span>
@@ -230,102 +276,58 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         <div>
           {/* 헤더 영역 */}
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">정책 관리</h2>
+            <h2 className="text-3xl font-bold mb-2">프로젝트 PRD</h2>
             <p className="text-muted-foreground">
-              프로젝트 정책과 가이드라인을 작성하고 관리합니다.
+              프로젝트의 요구사항과 목표를 정의합니다.
             </p>
           </div>
 
-          {/* 검색 및 필터 */}
-          <div className="flex gap-4 mb-6">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="정책 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div className="w-48">
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="">모든 카테고리</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-            <Button variant="outline" disabled>
-              ➕ 정책 추가
-            </Button>
-          </div>
-
-          {/* 정책 목록 */}
-          {policiesLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-              <p className="text-muted-foreground">정책을 불러오는 중...</p>
-            </div>
-          ) : filteredPolicies.length === 0 ? (
-            <Card>
-              <CardContent className="pt-8 pb-8">
-                <div className="text-center text-muted-foreground">
-                  <p className="mb-4">
-                    {searchTerm || categoryFilter ? '검색 결과가 없습니다.' : '아직 등록된 정책이 없습니다.'}
-                  </p>
-                  {!searchTerm && !categoryFilter && (
-                    <p className="text-sm mb-6">
-                      첫 번째 정책을 추가하여 팀의 가이드라인을 만들어보세요.
-                    </p>
+          {/* PRD 편집 영역 */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>프로젝트 요구사항 문서</CardTitle>
+                {canEditPrd && (
+                  <Button 
+                    onClick={savePrd}
+                    disabled={prdSaving}
+                  >
+                    {prdSaving ? '저장 중...' : '저장'}
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {prdLoading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-muted-foreground">PRD를 불러오는 중...</p>
+                </div>
+              ) : (
+                <div>
+                  {canEditPrd ? (
+                    <textarea
+                      value={prdContent}
+                      onChange={(e) => setPrdContent(e.target.value)}
+                      placeholder="프로젝트의 요구사항과 목표를 작성해주세요..."
+                      className="w-full h-96 p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      disabled={prdSaving}
+                    />
+                  ) : (
+                    <div className="w-full h-96 p-4 border rounded-md bg-muted/50 overflow-y-auto whitespace-pre-wrap">
+                      {prdContent || '아직 작성된 PRD가 없습니다.'}
+                    </div>
                   )}
-                  {!searchTerm && !categoryFilter && (
-                    <Button variant="outline" disabled>
-                      첫 번째 정책 추가하기
-                    </Button>
+                  
+                  {prd && (
+                    <div className="mt-4 text-sm text-muted-foreground">
+                      최종 수정: {new Date(prd.updated_at).toLocaleDateString('ko-KR')}
+                    </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {filteredPolicies.map((policy) => (
-                <Card key={policy.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-xl">{policy.title}</CardTitle>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {policy.category}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(policy.created_at).toLocaleDateString('ko-KR')}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p 
-                      className="text-sm text-muted-foreground overflow-hidden" 
-                      style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        maxHeight: '4.5rem'
-                      } as React.CSSProperties}
-                    >
-                      {policy.body}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

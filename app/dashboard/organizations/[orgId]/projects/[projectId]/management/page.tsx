@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
+import { MemberInviteModal } from '@/components/common/member-invite-modal'
 
 type User = {
   id: string
@@ -17,24 +18,19 @@ type User = {
 type Project = Tables<'projects'>
 type Membership = Tables<'memberships'>
 
-interface PolicyPageProps {
+interface ManagementPageProps {
   params: {
     orgId: string
     projectId: string
   }
 }
 
-export default function PolicyPage({ params }: PolicyPageProps) {
+export default function ManagementPage({ params }: ManagementPageProps) {
   const [user, setUser] = useState<User | null>(null)
   const [project, setProject] = useState<Project | null>(null)
   const [membership, setMembership] = useState<Membership | null>(null)
   const [loading, setLoading] = useState(true)
-  
-  // 정책 관련 상태
-  const [policies, setPolicies] = useState<Tables<'policies'>[]>([])
-  const [policiesLoading, setPoliciesLoading] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
+  const [showInviteModal, setShowInviteModal] = useState(false)
   
   const router = useRouter()
 
@@ -77,9 +73,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setMembership(membershipData)
 
-      // 정책 로드
-      await loadPoliciesForProject(params.projectId)
-
       setLoading(false)
     }
 
@@ -91,37 +84,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     router.push('/')
   }
 
-  // 정책 로드 함수
-  const loadPoliciesForProject = async (projectId: string) => {
-    setPoliciesLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('policies')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-
-      setPolicies(data || [])
-    } catch (error) {
-      console.error('Error loading policies:', error)
-      showError('정책 로드 실패', '정책을 불러오는 중 오류가 발생했습니다.')
-    } finally {
-      setPoliciesLoading(false)
-    }
+  const handleInviteSuccess = () => {
+    setShowInviteModal(false)
+    showSimpleSuccess('초대가 성공적으로 전송되었습니다.')
   }
-
-  // 필터링된 정책 목록
-  const filteredPolicies = policies.filter(policy => {
-    const matchesSearch = policy.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         policy.body.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = !categoryFilter || policy.category === categoryFilter
-    return matchesSearch && matchesCategory
-  })
-
-  // 고유한 카테고리 목록
-  const categories = Array.from(new Set(policies.map(policy => policy.category)))
 
   if (loading) {
     return (
@@ -147,6 +113,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       </div>
     )
   }
+
+  const isAdmin = membership?.role === 'admin'
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -189,7 +157,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             
             <button
               onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/policy`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors bg-primary text-primary-foreground"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
             >
               <span className="text-lg">📋</span>
               <span>정책 관리</span>
@@ -197,7 +165,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             
             <button
               onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/management`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors bg-primary text-primary-foreground"
             >
               <span className="text-lg">⚙️</span>
               <span>프로젝트 관리</span>
@@ -230,104 +198,78 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         <div>
           {/* 헤더 영역 */}
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">정책 관리</h2>
+            <h2 className="text-3xl font-bold mb-2">프로젝트 관리</h2>
             <p className="text-muted-foreground">
-              프로젝트 정책과 가이드라인을 작성하고 관리합니다.
+              프로젝트 설정과 멤버를 관리합니다.
             </p>
           </div>
 
-          {/* 검색 및 필터 */}
-          <div className="flex gap-4 mb-6">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="정책 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div className="w-48">
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="">모든 카테고리</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-            <Button variant="outline" disabled>
-              ➕ 정책 추가
-            </Button>
-          </div>
-
-          {/* 정책 목록 */}
-          {policiesLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-              <p className="text-muted-foreground">정책을 불러오는 중...</p>
-            </div>
-          ) : filteredPolicies.length === 0 ? (
-            <Card>
-              <CardContent className="pt-8 pb-8">
-                <div className="text-center text-muted-foreground">
-                  <p className="mb-4">
-                    {searchTerm || categoryFilter ? '검색 결과가 없습니다.' : '아직 등록된 정책이 없습니다.'}
+          {/* 관리자 전용 기능 */}
+          {isAdmin ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle>멤버 초대</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    프로젝트에 새로운 멤버를 초대합니다.
                   </p>
-                  {!searchTerm && !categoryFilter && (
-                    <p className="text-sm mb-6">
-                      첫 번째 정책을 추가하여 팀의 가이드라인을 만들어보세요.
-                    </p>
-                  )}
-                  {!searchTerm && !categoryFilter && (
-                    <Button variant="outline" disabled>
-                      첫 번째 정책 추가하기
-                    </Button>
-                  )}
-                </div>
+                </CardHeader>
+                <CardContent>
+                  <Button onClick={() => setShowInviteModal(true)}>
+                    멤버 초대
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>프로젝트 설정</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    프로젝트 이름이나 설정을 변경합니다.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" disabled>
+                    설정 (준비중)
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>알림 설정</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    프로젝트 알림을 관리합니다.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" disabled>
+                    알림 설정 (준비중)
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-muted-foreground text-center">
+                  프로젝트 관리 기능은 관리자만 사용할 수 있습니다.
+                </p>
               </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-4">
-              {filteredPolicies.map((policy) => (
-                <Card key={policy.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-xl">{policy.title}</CardTitle>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {policy.category}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(policy.created_at).toLocaleDateString('ko-KR')}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p 
-                      className="text-sm text-muted-foreground overflow-hidden" 
-                      style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        maxHeight: '4.5rem'
-                      } as React.CSSProperties}
-                    >
-                      {policy.body}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           )}
         </div>
       </div>
+
+      {/* 멤버 초대 모달 */}
+      {project && (
+        <MemberInviteModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={handleInviteSuccess}
+          project={project}
+        />
+      )}
     </div>
   )
 } 
