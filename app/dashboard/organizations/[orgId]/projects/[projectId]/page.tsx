@@ -113,13 +113,11 @@ export default function ProjectPage({ params }: ProjectPageProps) {
               variant="ghost" 
               onClick={() => router.push(`/dashboard/organizations/${params.orgId}`)}
             >
-              ← 조직
+              ←
             </Button>
             <div>
+              <p className="text-sm text-muted-foreground">프로젝트</p>
               <h1 className="text-2xl font-bold">{project.name}</h1>
-              <p className="text-sm text-muted-foreground">
-                조직: {(project as any).organizations?.name}
-              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">

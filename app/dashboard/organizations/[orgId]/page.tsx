@@ -172,25 +172,33 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
             <div>
               <h2 className="text-3xl font-bold">{organization.name}</h2>
               <p className="text-muted-foreground">
-                조직의 프로젝트를 관리하세요. ({projects.length}개의 프로젝트가 있습니다)
+                조직의 프로젝트를 관리하세요.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mb-6 flex gap-4">
-          {canCreateProjects && (
-            <Button onClick={() => setShowProjectModal(true)}>
-              새 프로젝트 생성
-            </Button>
-          )}
-          
-          {isOwner && (
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                조직 설정
+        <div className="mb-6">
+          <div className="flex gap-4 mb-2">
+            {canCreateProjects && (
+              <Button onClick={() => setShowProjectModal(true)}>
+                새 프로젝트 생성
               </Button>
-            </div>
+            )}
+            
+            {isOwner && (
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm">
+                  조직 설정
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          {projects.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              총 {projects.length}개의 프로젝트
+            </p>
           )}
         </div>
 
