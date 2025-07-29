@@ -127,8 +127,6 @@ export default function Dashboard() {
             ))
           )}
         </div>
-
-        <ErrorDemo />
       </main>
     </div>
   )

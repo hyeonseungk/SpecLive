@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import supabase from '@/lib/supabase-browser'
 import { showError, showSimpleError } from '@/lib/error-store'
+import { showSuccess } from '@/lib/success-store'
 import type { User } from '@supabase/supabase-js'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -22,7 +24,7 @@ export default function Home() {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       setUser(session?.user ?? null)
-      setLoading(false)
+      setInitialLoading(false)
       
       if (session?.user) {
         router.push('/dashboard')
@@ -45,18 +47,18 @@ export default function Home() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setSubmitting(true)
 
     try {
       if (isSignUp) {
         if (password !== passwordConfirm) {
           showError('비밀번호 확인 오류', '비밀번호가 일치하지 않습니다.')
-          setLoading(false)
+          setSubmitting(false)
           return
         }
         if (password.length < 4) {
           showError('비밀번호 길이 오류', '비밀번호는 4자 이상이어야 합니다.')
-          setLoading(false)
+          setSubmitting(false)
           return
         }
         const { error } = await supabase.auth.signUp({
@@ -64,7 +66,7 @@ export default function Home() {
           password,
         })
         if (error) throw error
-        showError('회원가입 완료', '회원가입이 완료되었습니다.\n이메일을 확인해주세요.', () => {
+        showSuccess('회원가입 완료', '회원가입이 완료되었습니다.\n이메일을 확인해서 인증을 완료해주세요', () => {
           setEmail('')
           setPassword('')
           setPasswordConfirm('')
@@ -80,11 +82,11 @@ export default function Home() {
     } catch (error) {
       showSimpleError(error instanceof Error ? error.message : '오류가 발생했습니다.')
     } finally {
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">로딩 중...</div>
@@ -149,7 +151,7 @@ export default function Home() {
                 />
               </div>
             )}
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={submitting}>
               {isSignUp ? '회원가입' : '로그인'}
             </Button>
           </form>
@@ -168,6 +170,18 @@ export default function Home() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 로딩 모달 */}
+      {submitting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <span className="text-lg font-medium">처리 중...</span>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 } 

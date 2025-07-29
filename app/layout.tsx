@@ -3,6 +3,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ErrorModal } from '@/components/common/error-modal'
+import { SuccessModal } from '@/components/common/success-modal'
 
 export default function RootLayout({
   children,
@@ -24,6 +25,7 @@ export default function RootLayout({
           {children}
         </div>
         <ErrorModal />
+        <SuccessModal />
       </body>
     </html>
   )
