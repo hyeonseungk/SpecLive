@@ -1,0 +1,200 @@
+---
+alwaysApply: true
+---
+# TRD: UbiLang – Glossary & Policy Management SaaS
+
+## 1. 기술 스택 요약
+
+| 레이어 | 기술 | 비고 |
+| --- | --- | --- |
+| **프론트엔드** | Next.js (App Router, **클라이언트 컴포넌트만**)<br/>TypeScript, Tailwind CSS, Radix UI / shadcn | 서버 컴포넌트 및 API Route 금지 |
+| **백엔드** | Supabase (PostgreSQL + Auth + Edge Functions + Realtime + Storage) | Supabase JS v2 |
+| **이메일 발송** | Supabase Edge Functions + Resend API | DB 트리거 → Edge Function → Resend |
+| **배포** | Vercel (프론트) / Supabase (백엔드) | Supabase Project URL 및 anon key 환경변수 |
+| **모니터링** | Vercel Analytics, Supabase Logs + Logflare, Sentry |  |
+
+---
+
+## 2. 시스템 아키텍처
+
+```
+Client (Next.js, 클라이언트 컴포넌트)
+  │   ▲
+  ▼   │
+Supabase PostgREST API ←→ Supabase PostgreSQL (RLS 적용)
+  │
+  ▼
+Edge Function (이메일 알림)
+  │
+  ▼
+Resend API
+```
+
+---
+
+## 3. 데이터 모델 (Supabase 스키마)
+
+> 모든 PK는 `id uuid default gen_random_uuid()`
+> naming convention: **snake_case**
+
+### 3.1 조직·프로젝트
+
+| 테이블 | 주요 컬럼 | 설명 |
+| --- | --- | --- |
+| organizations | id, name, created_at | 조직 |
+| projects | id, organization_id, name, created_at | 조직 1‑N 프로젝트 |
+| memberships | id, project_id, user_id, role (`admin`/`member`), receive_emails (bool) | 알림 토글 포함 |
+
+### 3.2 Glossary / Policy
+
+| 테이블 | 주요 컬럼 | 설명 |
+| --- | --- | --- |
+| glossaries | id, project_id, name, definition, author_id, updated_at | 용어 정의 |
+| policies | id, project_id, title, body, category, author_id, updated_at | 정책 |
+| policy_links | id, policy_id, url, type (`context`/`figma`/`github`) | 다중 URL |
+| glossary_links | id, glossary_id, url, type (`github`) |  |
+| 관계 매핑 | policy_terms (`policy_id`, `glossary_id`)<br/>glossary_relations (`glossary_id`, `related_id`) | 정책‑용어 / 용어‑용어 |
+
+### 3.3 알림 로그 (옵션)
+
+| 테이블 | 주요 컬럼 | 설명 |
+| --- | --- | --- |
+| email_events | id, target_user_id, event_type, resource_id, sent_at | 전송 기록 |
+
+### 3.4 RLS 정책 요약
+
+| 테이블 | 정책 |
+| --- | --- |
+| memberships | `user_id = auth.uid()` |
+| projects, glossaries, policies | 조직‑멤버십 존재 시 SELECT |
+| insert/update/delete | `role = 'admin'` 또는 작성자 본인 항목 수정만 |
+
+---
+
+## 4. 인증·권한
+
+- Supabase Auth (Email)
+- 관리자 초대: `supabase.auth.admin.inviteUserByEmail()`
+- 유저 메타데이터: `default_org`
+- 클라이언트 캐싱 + DB RLS 이중 보호
+
+---
+
+## 5. 기능별 구현
+
+| 기능 | 구현 |
+| --- | --- |
+| 용어·정책 CRUD | Supabase JS mutations → SWR mutate / Realtime |
+| GitHub·Figma 링크 | URL 필드 + 외부 링크 컴포넌트 |
+| 검색·필터 | 클라이언트 Fuse.js + PostgREST `ilike` |
+| 제안 흐름 | `status` (`draft`/`pending`/`approved`) |
+| 알림 토글 | `memberships.receive_emails` |
+| 이메일 발송 | PG Trigger → Edge Function → Resend |
+| 온보딩 템플릿 | `templates_*` → INSERT … SELECT |
+
+---
+
+## 6. 프론트엔드 폴더 구조 예시
+
+```
+/app
+ ├─ layout.tsx
+ ├─ dashboard/
+ │   ├─ page.tsx
+ │   └─ [projectId]/
+ │        ├─ glossary/
+ │        └─ policy/
+ ├─ components/
+ │   ├─ glossary/
+ │   ├─ policy/
+ │   └─ common/
+ ├─ lib/
+ │   ├─ supabase-browser.ts
+ │   └─ hooks/
+ └─ utils/
+```
+
+- **모든 페이지 최상단 `use client`**
+- 데이터 패칭: Supabase JS + SWR
+- 상태: Zustand / React Context
+
+---
+
+## 7. 이메일 워크플로
+
+```mermaid
+sequenceDiagram
+    participant DB
+    participant EdgeFn
+    participant Resend
+    participant User
+
+    DB->>EdgeFn: INSERT / UPDATE (glossaries, policies)
+    EdgeFn->>Resend: POST /emails
+    Resend-->>EdgeFn: 202
+    EdgeFn-->>DB: insert email_events
+    Resend-->>User: 📩
+```
+
+---
+
+## 8. 품질 & 테스트
+
+| 범주 | 도구 |
+| --- | --- |
+| 유닛 | Jest, RTL |
+| E2E | Playwright |
+| 마이그레이션 | Supabase CLI `db push` |
+| CI/CD | GitHub Actions + Vercel Preview |
+| 정적 분석 | ESLint, Prettier, TS strict |
+
+---
+
+## 9. 보안 & 컴플라이언스
+
+- RLS 필수
+- JWT 만료 1h, refresh via `supabase-js`
+- Storage: public false
+- Secrets: `RESEND_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- 로그 14일, PII 최소화
+
+---
+
+## 10. 오픈 이슈
+
+| # | 이슈 | 비고 |
+| --- | --- | --- |
+| 1 | 버전 관리 | `history_*` 테이블, soft delete |
+| 2 | 대규모 Realtime 부하 | Channel sharding |
+| 3 | SSO | Supabase Enterprise SAML |
+
+---
+
+## 부록 A. RLS 예시 SQL
+
+```sql
+-- SELECT
+create policy "Members can select glossaries"
+on glossaries for select
+using (
+  exists (
+    select 1
+    from memberships m
+    where m.project_id = glossaries.project_id
+      and m.user_id = auth.uid()
+  )
+);
+
+-- INSERT / UPDATE / DELETE
+create policy "Admins can modify glossaries"
+on glossaries for all
+using (
+  exists (
+    select 1
+    from memberships m
+    where m.project_id = glossaries.project_id
+      and m.user_id = auth.uid()
+      and m.role = 'admin'
+  )
+);
+```
