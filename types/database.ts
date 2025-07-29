@@ -13,16 +13,19 @@ export interface Database {
         Row: {
           id: string
           name: string
+          owner_id: string
           created_at: string
         }
         Insert: {
           id?: string
           name: string
+          owner_id: string
           created_at?: string
         }
         Update: {
           id?: string
           name?: string
+          owner_id?: string
           created_at?: string
         }
       }

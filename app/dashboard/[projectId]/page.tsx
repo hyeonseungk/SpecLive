@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ErrorModal } from '@/components/common/error-modal'
+import { SuccessModal } from '@/components/common/success-modal'
+import { MemberInviteModal } from '@/components/common/member-invite-modal'
 import supabase from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database'
@@ -22,6 +25,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const [project, setProject] = useState<Project | null>(null)
   const [membership, setMembership] = useState<Membership | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showInviteModal, setShowInviteModal] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -69,6 +73,11 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/')
+  }
+
+  const handleInviteSuccess = () => {
+    // 초대 성공 후 필요한 업데이트 로직
+    // 현재는 별다른 업데이트가 필요하지 않음
   }
 
   if (loading) {
@@ -186,7 +195,10 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex gap-4">
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowInviteModal(true)}
+                >
                   멤버 초대
                 </Button>
                 <Button variant="outline">
@@ -200,6 +212,19 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           </div>
         )}
       </main>
+
+      {/* 모달들 */}
+      {project && (
+        <MemberInviteModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={handleInviteSuccess}
+          project={project}
+        />
+      )}
+      
+      <ErrorModal />
+      <SuccessModal />
     </div>
   )
 } 
