@@ -34,6 +34,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const [glossaries, setGlossaries] = useState<Tables<'glossaries'>[]>([])
   const [glossariesLoading, setGlossariesLoading] = useState(false)
   const [glossaryViewMode, setGlossaryViewMode] = useState<'grid' | 'list'>('grid')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState<'name' | 'created_at' | 'created_at_old'>('created_at')
   
   // 용어 추가 모달 상태
   const [showGlossaryModal, setShowGlossaryModal] = useState(false)
@@ -342,6 +344,24 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     )
   }
 
+  // 필터링된 용어 목록
+  const filteredGlossaries = glossaries.filter(glossary => 
+    glossary.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    glossary.definition.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (glossary.examples && glossary.examples.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
+
+  // 정렬
+  const sortedGlossaries = [...filteredGlossaries].sort((a, b) => {
+    if (sortBy === 'name') {
+      return a.name.localeCompare(b.name)
+    } else if (sortBy === 'created_at') {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    } else {
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    }
+  })
+
   return (
     <div className="p-6">
       <div>
@@ -353,7 +373,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
           </p>
         </div>
 
-        {/* 뷰 선택, 버튼들, 개수 표시 */}
+        {/* 뷰 선택, 개수 표시, 검색, 정렬 */}
         <div className="flex items-center justify-between mb-4">
           {/* 좌측: 뷰 모드 선택과 개수 표시 */}
           <div className="flex items-center gap-4">
@@ -380,7 +400,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
               >
                 ☰
               </button>
-              </div>
+            </div>
             
             {/* 용어 개수 */}
             {glossaries.length > 0 && (
@@ -388,36 +408,66 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                 총 {glossaries.length}개의 용어
               </p>
             )}
-              </div>
+
+            {/* 검색창 */}
+            <div className="flex-1 max-w-xs">
+              <input
+                type="text"
+                placeholder="용어 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+
+            {/* 정렬 select */}
+            <div className="w-32">
+                              <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'name' | 'created_at' | 'created_at_old')}
+                  className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="created_at">최신순</option>
+                  <option value="created_at_old">오래된순</option>
+                  <option value="name">이름순</option>
+                </select>
+            </div>
+          </div>
 
           {/* 우측: 버튼들 */}
-              <div className="flex gap-2">
+          <div className="flex gap-2">
             <Button variant="outline" disabled>
               🤖 AI에게 용어 추천받기
             </Button>
             <Button onClick={() => setShowGlossaryModal(true)}>
               ➕ 용어 추가
-                </Button>
-              </div>
-      </div>
+            </Button>
+          </div>
+        </div>
 
-        {/* 용어 목록 */}
+        {/* 필터링된 용어 목록 */}
         {glossariesLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
             <p className="text-muted-foreground">용어를 불러오는 중...</p>
           </div>
-        ) : glossaries.length === 0 ? (
+        ) : sortedGlossaries.length === 0 ? (
           <Card>
             <CardContent className="pt-8 pb-8">
               <div className="text-center text-muted-foreground">
-                <p className="mb-4">아직 등록된 용어가 없습니다.</p>
-                <p className="text-sm mb-6">
-                  첫 번째 용어를 추가하여 팀의 용어집을 만들어보세요.
+                <p className="mb-4">
+                  {searchTerm ? '검색 결과가 없습니다.' : '아직 등록된 용어가 없습니다.'}
                 </p>
-                <Button onClick={() => setShowGlossaryModal(true)}>
-                  첫 번째 용어 추가하기
-                </Button>
+                {!searchTerm && (
+                  <p className="text-sm mb-6">
+                    첫 번째 용어를 추가하여 팀의 용어집을 만들어보세요.
+                  </p>
+                )}
+                {!searchTerm && (
+                  <Button onClick={() => setShowGlossaryModal(true)}>
+                    첫 번째 용어 추가하기
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -427,14 +477,14 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
               ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
               : 'space-y-4'
           }>
-            {glossaries.map((glossary) => (
+            {sortedGlossaries.map((glossary) => (
               <Card 
                 key={glossary.id}
                 className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => handleEditGlossary(glossary)}
               >
-              <CardHeader>
-                    <CardTitle className="text-xl">{glossary.name}</CardTitle>
+                <CardHeader>
+                  <CardTitle className="text-3xl">{glossary.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p 
@@ -446,7 +496,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                       maxHeight: '3rem'
                     } as React.CSSProperties}
                   >
-                      {glossary.definition}
+                    {glossary.definition}
                   </p>
                   {glossary.examples && (
                     <p className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 truncate">
@@ -482,13 +532,13 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                           </a>
                         ))}
                       </div>
-                  </div>
+                    </div>
                   )}
                   <div className="mt-auto text-xs text-muted-foreground">
                     {new Date(glossary.created_at).toLocaleDateString('ko-KR')}
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
