@@ -107,6 +107,7 @@ export interface Database {
           project_id: string
           name: string
           definition: string
+          examples: string | null
           author_id: string
           updated_at: string
           created_at: string
@@ -116,6 +117,7 @@ export interface Database {
           project_id: string
           name: string
           definition: string
+          examples?: string | null
           author_id: string
           updated_at?: string
           created_at?: string
@@ -125,6 +127,7 @@ export interface Database {
           project_id?: string
           name?: string
           definition?: string
+          examples?: string | null
           author_id?: string
           updated_at?: string
           created_at?: string
