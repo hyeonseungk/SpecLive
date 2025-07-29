@@ -138,32 +138,7 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
   const canCreateProjects = isOwner || userMembership?.role === 'admin'
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">UbiLang</h1>
-            {user && (
-              <OrganizationSelector
-                user={user}
-                selectedOrgId={params.orgId}
-                onOrgChange={handleOrgChange}
-                onOrgCreated={handleModalSuccess}
-              />
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              {user?.email}
-            </span>
-            <Button variant="outline" onClick={handleSignOut}>
-              로그아웃
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
@@ -253,7 +228,6 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
             })}
           </div>
         )}
-      </main>
 
       {/* 프로젝트 생성 모달 */}
       {user && (

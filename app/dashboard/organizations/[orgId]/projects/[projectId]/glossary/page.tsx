@@ -159,16 +159,16 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     try {
       // 1. 용어 추가
       const { data: glossary, error: glossaryError } = await supabase
-        .from('glossaries')
-        .insert({
+      .from('glossaries')
+      .insert({
           project_id: project.id,
           name: glossaryName.trim(),
           definition: glossaryDefinition.trim(),
           examples: glossaryExamples.trim() || null,
           author_id: user.id
-        })
-        .select()
-        .single()
+      })
+      .select()
+      .single()
 
       if (glossaryError) throw glossaryError
 
@@ -266,7 +266,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     try {
       // 1. 용어 정보 수정
       const { data: updatedGlossary, error: updateError } = await supabase
-        .from('glossaries')
+      .from('glossaries')
         .update({
           name: editName.trim(),
           definition: editDefinition.trim(),
@@ -281,7 +281,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       // 2. 기존 GitHub 링크 삭제
       const { error: deleteLinksError } = await supabase
         .from('glossary_links')
-        .delete()
+      .delete()
         .eq('glossary_id', editingGlossary.id)
 
       if (deleteLinksError) throw deleteLinksError
@@ -348,7 +348,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="flex h-screen">
       {/* 왼쪽 사이드바 */}
       <div className="w-64 border-r bg-card flex flex-col">
         {/* 헤더 */}
@@ -412,21 +412,13 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
               <span className="text-lg">🏠</span>
               <span>대시보드</span>
             </button>
-            
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">🚪</span>
-              <span>로그아웃</span>
-            </button>
           </div>
         </div>
       </div>
 
       {/* 메인 콘텐츠 */}
       <div className="flex-1 p-6">
-        <div>
+                <div>
           {/* 헤더 영역 */}
           <div className="mb-6">
             <h2 className="text-3xl font-bold mb-2">용어 관리</h2>
@@ -462,7 +454,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                 >
                   ☰
                 </button>
-              </div>
+                </div>
               
               {/* 용어 개수 */}
               {glossaries.length > 0 && (
@@ -470,18 +462,18 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                   총 {glossaries.length}개의 용어
                 </p>
               )}
-            </div>
+                </div>
 
             {/* 우측: 버튼들 */}
-            <div className="flex gap-2">
+                <div className="flex gap-2">
               <Button variant="outline" disabled>
                 🤖 AI에게 용어 추천받기
               </Button>
               <Button onClick={() => setShowGlossaryModal(true)}>
                 ➕ 용어 추가
-              </Button>
-            </div>
-          </div>
+                  </Button>
+                </div>
+        </div>
 
           {/* 용어 목록 */}
           {glossariesLoading ? (
@@ -515,8 +507,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                   className="cursor-pointer hover:shadow-md transition-shadow"
                   onClick={() => handleEditGlossary(glossary)}
                 >
-                  <CardHeader>
-                    <CardTitle className="text-xl">{glossary.name}</CardTitle>
+                <CardHeader>
+                      <CardTitle className="text-xl">{glossary.name}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p 
@@ -528,7 +520,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                         maxHeight: '3rem'
                       } as React.CSSProperties}
                     >
-                      {glossary.definition}
+                        {glossary.definition}
                     </p>
                     {glossary.examples && (
                       <p className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 truncate">
@@ -544,7 +536,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded hover:bg-gray-200 flex items-center gap-1"
+                              className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
                               title={link.url}
                             >
                               <span>
@@ -564,13 +556,13 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                             </a>
                           ))}
                         </div>
-                      </div>
+                    </div>
                     )}
                     <div className="mt-auto text-xs text-muted-foreground">
                       {new Date(glossary.created_at).toLocaleDateString('ko-KR')}
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </CardContent>
+              </Card>
               ))}
             </div>
           )}

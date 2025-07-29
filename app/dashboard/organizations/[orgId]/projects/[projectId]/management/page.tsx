@@ -117,7 +117,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const isAdmin = membership?.role === 'admin'
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="flex h-screen">
       {/* 왼쪽 사이드바 */}
       <div className="w-64 border-r bg-card flex flex-col">
         {/* 헤더 */}
@@ -180,14 +180,6 @@ export default function ManagementPage({ params }: ManagementPageProps) {
             >
               <span className="text-lg">🏠</span>
               <span>대시보드</span>
-            </button>
-            
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">🚪</span>
-              <span>로그아웃</span>
             </button>
           </div>
         </div>
