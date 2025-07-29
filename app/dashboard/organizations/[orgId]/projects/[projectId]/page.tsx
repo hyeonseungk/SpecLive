@@ -26,6 +26,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const [membership, setMembership] = useState<Membership | null>(null)
   const [loading, setLoading] = useState(true)
   const [showInviteModal, setShowInviteModal] = useState(false)
+  const [activeTab, setActiveTab] = useState<'glossary' | 'policy' | 'management'>('glossary')
   const router = useRouter()
 
   useEffect(() => {
@@ -80,6 +81,112 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     // 현재는 별다른 업데이트가 필요하지 않음
   }
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'glossary':
+        return (
+          <div>
+            <h2 className="text-3xl font-bold mb-2">용어 관리</h2>
+            <p className="text-muted-foreground mb-6">
+              프로젝트에서 사용하는 용어들을 정의하고 관리합니다.
+            </p>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <Button onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/glossary`)}>
+                    용어 관리 페이지로 이동
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      case 'policy':
+        return (
+          <div>
+            <h2 className="text-3xl font-bold mb-2">정책 관리</h2>
+            <p className="text-muted-foreground mb-6">
+              프로젝트 정책과 가이드라인을 작성하고 관리합니다.
+            </p>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <Button onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/policy`)}>
+                    정책 관리 페이지로 이동
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      case 'management':
+        return (
+          <div>
+            <h2 className="text-3xl font-bold mb-2">프로젝트 관리</h2>
+            <p className="text-muted-foreground mb-6">
+              프로젝트 설정과 멤버를 관리합니다.
+            </p>
+            
+            {membership?.role === 'admin' ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>멤버 초대</CardTitle>
+                    <CardDescription>
+                      프로젝트에 새로운 멤버를 초대합니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button onClick={() => setShowInviteModal(true)}>
+                      멤버 초대
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>프로젝트 설정</CardTitle>
+                    <CardDescription>
+                      프로젝트 이름이나 설정을 변경합니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" disabled>
+                      설정 (준비중)
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>알림 설정</CardTitle>
+                    <CardDescription>
+                      프로젝트 알림을 관리합니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" disabled>
+                      알림 설정 (준비중)
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-muted-foreground text-center">
+                    프로젝트 관리 기능은 관리자만 사용할 수 있습니다.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
   if (loading) {
     return <FullScreenLoading />
   }
@@ -105,107 +212,87 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-background flex">
+      {/* 왼쪽 사이드바 */}
+      <div className="w-64 border-r bg-card flex flex-col">
+        {/* 헤더 */}
+        <div className="p-4 border-b">
+          <div className="flex items-center gap-2 mb-2">
             <Button 
               variant="ghost" 
+              size="sm"
               onClick={() => router.push(`/dashboard/organizations/${params.orgId}`)}
             >
               ←
             </Button>
-            <div>
-              <p className="text-sm text-muted-foreground">프로젝트</p>
-              <h1 className="text-2xl font-bold">{project.name}</h1>
-            </div>
+            <span className="text-sm text-muted-foreground">프로젝트</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              {user?.email} ({membership.role === 'admin' ? '관리자' : '멤버'})
-            </span>
-            <Button variant="outline" onClick={handleSignOut}>
-              로그아웃
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">프로젝트 관리</h2>
-          <p className="text-muted-foreground">
-            용어와 정책을 관리하여 팀의 커뮤니케이션을 개선하세요.
-          </p>
+          <h1 className="text-xl font-bold">{project.name}</h1>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/glossary`)}
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                📖 용어 관리
-              </CardTitle>
-              <CardDescription>
-                프로젝트에서 사용하는 용어들을 정의하고 관리합니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground">
-                팀 내 용어 불일치를 방지하고 명확한 소통을 돕습니다.
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/policy`)}
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                📋 정책 관리
-              </CardTitle>
-              <CardDescription>
-                프로젝트 정책과 가이드라인을 작성하고 관리합니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground">
-                업무 규칙과 절차를 문서화하여 일관성 있는 업무를 지원합니다.
-              </div>
-            </CardContent>
-          </Card>
+        {/* 네비게이션 */}
+        <div className="flex-1 p-4 flex flex-col">
+          <div className="space-y-2 flex-1">
+            {/* 상단 메뉴 */}
+            <button
+              onClick={() => setActiveTab('glossary')}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
+                activeTab === 'glossary' 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'hover:bg-accent'
+              }`}
+            >
+              <span className="text-lg">📚</span>
+              <span>용어 관리</span>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('policy')}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
+                activeTab === 'policy' 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'hover:bg-accent'
+              }`}
+            >
+              <span className="text-lg">📋</span>
+              <span>정책 관리</span>
+            </button>
+          </div>
+          
+          {/* 하단 메뉴 */}
+          <div className="pt-4 border-t">
+            <button
+              onClick={() => setActiveTab('management')}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
+                activeTab === 'management' 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'hover:bg-accent'
+              }`}
+            >
+              <span className="text-lg">⚙️</span>
+              <span>프로젝트 관리</span>
+            </button>
+          </div>
         </div>
 
-        {membership.role === 'admin' && (
-          <div className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>관리자 도구</CardTitle>
-                <CardDescription>
-                  프로젝트 관리자만 사용할 수 있는 기능들입니다.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex gap-4">
-                <Button 
-                  variant="outline"
-                  onClick={() => setShowInviteModal(true)}
-                >
-                  멤버 초대
-                </Button>
-                <Button variant="outline">
-                  프로젝트 설정
-                </Button>
-                <Button variant="outline">
-                  알림 설정
-                </Button>
-              </CardContent>
-            </Card>
+        {/* 하단 사용자 정보 */}
+        <div className="p-4 border-t">
+          <div className="text-xs text-muted-foreground mb-2">
+            {user?.email}
           </div>
-        )}
-      </main>
+          <div className="text-xs text-muted-foreground mb-3">
+            {membership.role === 'admin' ? '관리자' : '멤버'}
+          </div>
+          <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full">
+            로그아웃
+          </Button>
+        </div>
+      </div>
+
+      {/* 오른쪽 메인 콘텐츠 */}
+      <div className="flex-1 p-8">
+        {renderContent()}
+      </div>
 
       {/* 모달들 */}
       {project && (
