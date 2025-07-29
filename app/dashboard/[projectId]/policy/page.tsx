@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import supabase from '@/lib/supabase-browser'
+import { showSimpleError } from '@/lib/error-store'
 import type { User } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database'
 
@@ -91,7 +92,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       .single()
 
     if (error) {
-      alert('정책 추가 중 오류가 발생했습니다: ' + error.message)
+      showSimpleError('정책 추가 중 오류가 발생했습니다: ' + error.message)
       return
     }
 
@@ -113,14 +114,14 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       .eq('id', id)
 
     if (error) {
-      alert('정책 삭제 중 오류가 발생했습니다: ' + error.message)
+      showSimpleError('정책 삭제 중 오류가 발생했습니다: ' + error.message)
       return
     }
 
     setPolicies(policies.filter(p => p.id !== id))
   }
 
-  const categories = [...new Set(policies.map(p => p.category))].sort()
+  const categories = Array.from(new Set(policies.map(p => p.category))).sort()
 
   const filteredPolicies = policies.filter(policy => {
     const matchesSearch = policy.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

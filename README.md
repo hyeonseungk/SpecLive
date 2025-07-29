@@ -170,6 +170,50 @@ npm run dev
 
 브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 애플리케이션을 확인하세요.
 
+## 에러 모달 사용법
+
+프로젝트 전역에서 사용할 수 있는 에러 모달이 구현되어 있습니다.
+
+### 기본 사용법
+
+```typescript
+import { showError, showSimpleError } from '@/lib/error-store'
+
+// 간단한 에러 메시지
+showSimpleError('오류가 발생했습니다.')
+
+// 상세한 에러 메시지 (제목, 내용, 콜백)
+showError(
+  '데이터 저장 오류',
+  '데이터를 저장하는 중 오류가 발생했습니다.\n다시 시도해주세요.',
+  () => {
+    console.log('사용자가 확인 버튼을 클릭했습니다.')
+  }
+)
+```
+
+### 컴포넌트에서 훅 사용
+
+```typescript
+import { useErrorHandler } from '@/lib/hooks/use-error-handler'
+
+function MyComponent() {
+  const { handleError, handleAsyncError } = useErrorHandler()
+
+  const handleSubmit = async () => {
+    const result = await handleAsyncError(
+      () => api.saveData(data),
+      '데이터 저장 실패'
+    )
+    
+    if (result) {
+      // 성공 처리
+    }
+  }
+
+  return <button onClick={handleSubmit}>저장</button>
+}
+
 ## 주요 기능
 
 - **인증**: Supabase Auth를 통한 이메일 기반 인증
@@ -179,6 +223,7 @@ npm run dev
 - **권한 관리**: 관리자/일반 멤버 역할 기반 권한 제어
 - **이메일 알림**: 용어/정책 변경 시 실시간 이메일 알림
 - **검색/필터**: Fuse.js를 활용한 고급 검색 기능
+- **전역 에러 모달**: Zustand + Radix UI 기반 전역 에러 핸들링
 
 ## 프로젝트 구조
 

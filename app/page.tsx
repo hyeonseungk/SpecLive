@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import supabase from '@/lib/supabase-browser'
+import { showError, showSimpleError } from '@/lib/error-store'
 import type { User } from '@supabase/supabase-js'
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const router = useRouter()
 
@@ -47,12 +49,27 @@ export default function Home() {
 
     try {
       if (isSignUp) {
+        if (password !== passwordConfirm) {
+          showError('비밀번호 확인 오류', '비밀번호가 일치하지 않습니다.')
+          setLoading(false)
+          return
+        }
+        if (password.length < 6) {
+          showError('비밀번호 길이 오류', '비밀번호는 6자 이상이어야 합니다.')
+          setLoading(false)
+          return
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
         })
         if (error) throw error
-        alert('회원가입이 완료되었습니다. 이메일을 확인해주세요.')
+        showError('회원가입 완료', '회원가입이 완료되었습니다.\n이메일을 확인해주세요.', () => {
+          setEmail('')
+          setPassword('')
+          setPasswordConfirm('')
+          setIsSignUp(false)
+        })
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -61,7 +78,7 @@ export default function Home() {
         if (error) throw error
       }
     } catch (error) {
-      alert(error instanceof Error ? error.message : '오류가 발생했습니다.')
+      showSimpleError(error instanceof Error ? error.message : '오류가 발생했습니다.')
     } finally {
       setLoading(false)
     }
@@ -104,6 +121,17 @@ export default function Home() {
                 required
               />
             </div>
+            {isSignUp && (
+              <div className="space-y-2">
+                <Input
+                  type="password"
+                  placeholder="비밀번호 확인"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  required
+                />
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
               {isSignUp ? '회원가입' : '로그인'}
             </Button>
@@ -111,7 +139,11 @@ export default function Home() {
           <div className="mt-4 text-center">
             <Button
               variant="link"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp)
+                setPassword('')
+                setPasswordConfirm('')
+              }}
               className="text-sm"
             >
               {isSignUp ? '이미 계정이 있으신가요?' : '계정이 없으신가요?'}

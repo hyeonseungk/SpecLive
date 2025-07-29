@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ErrorDemo } from '@/components/common/error-demo'
 import supabase from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database'
@@ -126,6 +127,8 @@ export default function Dashboard() {
             ))
           )}
         </div>
+
+        <ErrorDemo />
       </main>
     </div>
   )

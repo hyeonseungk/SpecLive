@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import supabase from '@/lib/supabase-browser'
+import { showSimpleError } from '@/lib/error-store'
 import type { User } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database'
 
@@ -89,7 +90,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       .single()
 
     if (error) {
-      alert('용어 추가 중 오류가 발생했습니다: ' + error.message)
+      showSimpleError('용어 추가 중 오류가 발생했습니다: ' + error.message)
       return
     }
 
@@ -111,7 +112,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       .eq('id', id)
 
     if (error) {
-      alert('용어 삭제 중 오류가 발생했습니다: ' + error.message)
+      showSimpleError('용어 삭제 중 오류가 발생했습니다: ' + error.message)
       return
     }
 
