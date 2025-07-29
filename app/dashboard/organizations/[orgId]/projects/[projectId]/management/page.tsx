@@ -117,76 +117,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const isAdmin = membership?.role === 'admin'
 
   return (
-    <div className="flex h-screen">
-      {/* 왼쪽 사이드바 */}
-      <div className="w-64 border-r bg-card flex flex-col">
-        {/* 헤더 */}
-        <div className="p-4 border-b">
-          <div className="flex items-center gap-2 mb-2">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}`)}
-            >
-              ←
-            </Button>
-            <span className="text-sm text-muted-foreground">프로젝트</span>
-          </div>
-          <h1 className="text-xl font-bold">{project.name}</h1>
-        </div>
-
-        {/* 네비게이션 */}
-        <div className="flex-1 p-4 flex flex-col">
-          <div className="space-y-2 flex-1">
-            {/* 상단 메뉴 */}
-            <button
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/prd`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">📄</span>
-              <span>프로젝트 PRD</span>
-            </button>
-            
-            <button
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/glossary`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">📚</span>
-              <span>용어 관리</span>
-            </button>
-            
-            <button
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/policy`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">📋</span>
-              <span>정책 관리</span>
-            </button>
-            
-            <button
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/management`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors bg-primary text-primary-foreground"
-            >
-              <span className="text-lg">⚙️</span>
-              <span>프로젝트 관리</span>
-            </button>
-          </div>
-
-          {/* 하단 메뉴 */}
-          <div className="space-y-2 pt-4 border-t">
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">🏠</span>
-              <span>대시보드</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 메인 콘텐츠 */}
-      <div className="flex-1 p-6">
+    <div className="p-6">
         <div>
           {/* 헤더 영역 */}
           <div className="mb-6">
@@ -251,7 +182,6 @@ export default function ManagementPage({ params }: ManagementPageProps) {
             </Card>
           )}
         </div>
-      </div>
 
       {/* 멤버 초대 모달 */}
       {project && (

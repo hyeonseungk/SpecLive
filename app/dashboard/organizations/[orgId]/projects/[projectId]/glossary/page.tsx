@@ -102,11 +102,6 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     loadProjectData()
   }, [params.projectId, router])
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
   // 용어 로드 함수 (project ID를 직접 받는 버전)
   const loadGlossariesForProject = async (projectId: string) => {
     setGlossariesLoading(true)
@@ -348,225 +343,155 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   }
 
   return (
-    <div className="flex h-screen">
-      {/* 왼쪽 사이드바 */}
-      <div className="w-64 border-r bg-card flex flex-col">
-        {/* 헤더 */}
-        <div className="p-4 border-b">
-          <div className="flex items-center gap-2 mb-2">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}`)}
-            >
-              ←
+    <div className="p-6">
+      <div>
+        {/* 헤더 영역 */}
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold mb-2">용어 관리</h2>
+          <p className="text-muted-foreground">
+            프로젝트에서 사용하는 용어들을 정의하고 관리합니다.
+          </p>
+        </div>
+
+        {/* 뷰 선택, 버튼들, 개수 표시 */}
+        <div className="flex items-center justify-between mb-4">
+          {/* 좌측: 뷰 모드 선택과 개수 표시 */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setGlossaryViewMode('grid')}
+                className={`p-2 rounded-md transition-colors ${
+                  glossaryViewMode === 'grid'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-accent'
+                }`}
+                title="그리드 뷰"
+              >
+                ⊞
+              </button>
+              <button
+                onClick={() => setGlossaryViewMode('list')}
+                className={`p-2 rounded-md transition-colors ${
+                  glossaryViewMode === 'list'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-accent'
+                }`}
+                title="리스트 뷰"
+              >
+                ☰
+              </button>
+              </div>
+            
+            {/* 용어 개수 */}
+            {glossaries.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                총 {glossaries.length}개의 용어
+              </p>
+            )}
+              </div>
+
+          {/* 우측: 버튼들 */}
+              <div className="flex gap-2">
+            <Button variant="outline" disabled>
+              🤖 AI에게 용어 추천받기
             </Button>
-            <span className="text-sm text-muted-foreground">프로젝트</span>
-          </div>
-          <h1 className="text-xl font-bold">{project.name}</h1>
-        </div>
-
-        {/* 네비게이션 */}
-        <div className="flex-1 p-4 flex flex-col">
-          <div className="space-y-2 flex-1">
-            {/* 상단 메뉴 */}
-            <button
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/prd`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">📄</span>
-              <span>프로젝트 PRD</span>
-            </button>
-            
-            <button
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/glossary`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors bg-primary text-primary-foreground"
-            >
-              <span className="text-lg">📚</span>
-              <span>용어 관리</span>
-            </button>
-            
-            <button
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/policy`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">📋</span>
-              <span>정책 관리</span>
-            </button>
-            
-            <button
-              onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/management`)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">⚙️</span>
-              <span>프로젝트 관리</span>
-            </button>
-          </div>
-
-          {/* 하단 메뉴 */}
-          <div className="space-y-2 pt-4 border-t">
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">🏠</span>
-              <span>대시보드</span>
-            </button>
-          </div>
-        </div>
+            <Button onClick={() => setShowGlossaryModal(true)}>
+              ➕ 용어 추가
+                </Button>
+              </div>
       </div>
 
-      {/* 메인 콘텐츠 */}
-      <div className="flex-1 p-6">
-                <div>
-          {/* 헤더 영역 */}
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">용어 관리</h2>
-            <p className="text-muted-foreground">
-              프로젝트에서 사용하는 용어들을 정의하고 관리합니다.
-            </p>
+        {/* 용어 목록 */}
+        {glossariesLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-muted-foreground">용어를 불러오는 중...</p>
           </div>
-
-          {/* 뷰 선택, 버튼들, 개수 표시 */}
-          <div className="flex items-center justify-between mb-4">
-            {/* 좌측: 뷰 모드 선택과 개수 표시 */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setGlossaryViewMode('grid')}
-                  className={`p-2 rounded-md transition-colors ${
-                    glossaryViewMode === 'grid'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-accent'
-                  }`}
-                  title="그리드 뷰"
-                >
-                  ⊞
-                </button>
-                <button
-                  onClick={() => setGlossaryViewMode('list')}
-                  className={`p-2 rounded-md transition-colors ${
-                    glossaryViewMode === 'list'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-accent'
-                  }`}
-                  title="리스트 뷰"
-                >
-                  ☰
-                </button>
-                </div>
-              
-              {/* 용어 개수 */}
-              {glossaries.length > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  총 {glossaries.length}개의 용어
+        ) : glossaries.length === 0 ? (
+          <Card>
+            <CardContent className="pt-8 pb-8">
+              <div className="text-center text-muted-foreground">
+                <p className="mb-4">아직 등록된 용어가 없습니다.</p>
+                <p className="text-sm mb-6">
+                  첫 번째 용어를 추가하여 팀의 용어집을 만들어보세요.
                 </p>
-              )}
-                </div>
-
-            {/* 우측: 버튼들 */}
-                <div className="flex gap-2">
-              <Button variant="outline" disabled>
-                🤖 AI에게 용어 추천받기
-              </Button>
-              <Button onClick={() => setShowGlossaryModal(true)}>
-                ➕ 용어 추가
-                  </Button>
-                </div>
-        </div>
-
-          {/* 용어 목록 */}
-          {glossariesLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-              <p className="text-muted-foreground">용어를 불러오는 중...</p>
-            </div>
-          ) : glossaries.length === 0 ? (
-            <Card>
-              <CardContent className="pt-8 pb-8">
-                <div className="text-center text-muted-foreground">
-                  <p className="mb-4">아직 등록된 용어가 없습니다.</p>
-                  <p className="text-sm mb-6">
-                    첫 번째 용어를 추가하여 팀의 용어집을 만들어보세요.
+                <Button onClick={() => setShowGlossaryModal(true)}>
+                  첫 번째 용어 추가하기
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className={
+            glossaryViewMode === 'grid'
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
+              : 'space-y-4'
+          }>
+            {glossaries.map((glossary) => (
+              <Card 
+                key={glossary.id}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handleEditGlossary(glossary)}
+              >
+              <CardHeader>
+                    <CardTitle className="text-xl">{glossary.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p 
+                    className="text-base text-muted-foreground overflow-hidden mb-2" 
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      maxHeight: '3rem'
+                    } as React.CSSProperties}
+                  >
+                      {glossary.definition}
                   </p>
-                  <Button onClick={() => setShowGlossaryModal(true)}>
-                    첫 번째 용어 추가하기
-                  </Button>
+                  {glossary.examples && (
+                    <p className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 truncate">
+                      예시: {glossary.examples}
+                    </p>
+                  )}
+                  {(glossary as any).glossary_links && (glossary as any).glossary_links.length > 0 && (
+                    <div className="mb-2">
+                      <div className="flex flex-col gap-1">
+                        {(glossary as any).glossary_links.map((link: any, index: number) => (
+                          <a
+                            key={index}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
+                            title={link.url}
+                          >
+                            <span>
+                              {link.url.includes('github.com') ? (
+                                <img 
+                                  src="/images/github-mark.png" 
+                                  alt="GitHub" 
+                                  className="w-4 h-4"
+                                />
+                              ) : (
+                                '🔗'
+                              )}
+                            </span>
+                            <span className="break-all">
+                              {link.url.replace(/^https?:\/\/(www\.)?github\.com\//, '')}
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                  </div>
+                  )}
+                  <div className="mt-auto text-xs text-muted-foreground">
+                    {new Date(glossary.created_at).toLocaleDateString('ko-KR')}
                 </div>
               </CardContent>
             </Card>
-          ) : (
-            <div className={
-              glossaryViewMode === 'grid'
-                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
-                : 'space-y-4'
-            }>
-              {glossaries.map((glossary) => (
-                <Card 
-                  key={glossary.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleEditGlossary(glossary)}
-                >
-                <CardHeader>
-                      <CardTitle className="text-xl">{glossary.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p 
-                      className="text-base text-muted-foreground overflow-hidden mb-2" 
-                      style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        maxHeight: '3rem'
-                      } as React.CSSProperties}
-                    >
-                        {glossary.definition}
-                    </p>
-                    {glossary.examples && (
-                      <p className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 truncate">
-                        예시: {glossary.examples}
-                      </p>
-                    )}
-                    {(glossary as any).glossary_links && (glossary as any).glossary_links.length > 0 && (
-                      <div className="mb-2">
-                        <div className="flex flex-col gap-1">
-                          {(glossary as any).glossary_links.map((link: any, index: number) => (
-                            <a
-                              key={index}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
-                              title={link.url}
-                            >
-                              <span>
-                                {link.url.includes('github.com') ? (
-                                  <img 
-                                    src="/images/github-mark.png" 
-                                    alt="GitHub" 
-                                    className="w-4 h-4"
-                                  />
-                                ) : (
-                                  '🔗'
-                                )}
-                              </span>
-                              <span className="break-all">
-                                {link.url.replace(/^https?:\/\/(www\.)?github\.com\//, '')}
-                              </span>
-                            </a>
-                          ))}
-                        </div>
-                    </div>
-                    )}
-                    <div className="mt-auto text-xs text-muted-foreground">
-                      {new Date(glossary.created_at).toLocaleDateString('ko-KR')}
-                  </div>
-                </CardContent>
-              </Card>
-              ))}
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 용어 추가 모달 */}
