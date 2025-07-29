@@ -1,68 +1,99 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-export async function POST(req: Request) {
-  // --- CORS --------------------------------------------------------------
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type",
-  };
+// CORS headers – update once here and reuse below
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
-  // Pre-flight ────────────────────────────────────────────────────────────
+Deno.serve(async (req: Request): Promise<Response> => {
+  // ──────────────────────────────────────────────────────────────────
+  // 1. Handle CORS pre-flight
+  // ------------------------------------------------------------------
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // --- Parse body --------------------------------------------------------
+  // Only POST is supported
+  if (req.method !== "POST") {
+    return new Response("Method Not Allowed", {
+      status: 405,
+      headers: corsHeaders,
+    });
+  }
+
+  // ──────────────────────────────────────────────────────────────────
+  // 2. Parse request body
+  // ------------------------------------------------------------------
   let body: { messages?: unknown };
   try {
     body = await req.json();
   } catch {
     return new Response(
       JSON.stringify({ error: "Invalid JSON body" }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
-  const { messages } = body as { messages?: Array<{ role: string; content: string }> };
+  const { messages } = body as {
+    messages?: Array<{ role: string; content: string }>;
+  };
   if (!Array.isArray(messages)) {
     return new Response(
       JSON.stringify({ error: "messages must be an array" }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
-  // --- Call OpenAI with streaming ---------------------------------------
-  const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
+  // ──────────────────────────────────────────────────────────────────
+  // 3. Call OpenAI (streaming)
+  // ------------------------------------------------------------------
+  const openaiRes = await fetch(
+    "https://api.openai.com/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 2048,
+        messages: [
+          {
+            role: "system",
+            content:
+              "당신은 프로젝트 PRD 작성 전문가입니다. 사용자와의 대화를 통해 명확하고 구체적인 PRD를 도출하세요.",
+          },
+          ...messages,
+        ],
+      }),
     },
-    body: JSON.stringify({
-      model: "gpt-4o-mini", // lightweight but good-enough
-      stream: true,
-      temperature: 0.7,
-      max_tokens: 2048,
-      messages: [
-        {
-          role: "system",
-          content:
-            "당신은 프로젝트 PRD 작성 전문가입니다. 사용자와의 대화를 통해 명확하고 구체적인 PRD를 도출하세요.",
-        },
-        ...messages,
-      ],
-    }),
-  });
+  );
 
   if (!openaiRes.ok || !openaiRes.body) {
     return new Response(
       JSON.stringify({ error: "Failed to call OpenAI" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
-  // --- Stream transform --------------------------------------------------
+  // ──────────────────────────────────────────────────────────────────
+  // 4. Transform OpenAI SSE → plain text stream
+  // ------------------------------------------------------------------
   const stream = new ReadableStream({
     async start(controller) {
       const decoder = new TextDecoder();
@@ -86,9 +117,9 @@ export async function POST(req: Request) {
               const payload = JSON.parse(json);
               const content = payload.choices?.[0]?.delta?.content;
               if (content) {
-                controller.enqueue(encoder.encode(content)); // ⚡ chunk push
+                controller.enqueue(encoder.encode(content));
               }
-            } catch (_) {
+            } catch {
               /* ignore malformed line */
             }
           }
@@ -102,13 +133,15 @@ export async function POST(req: Request) {
     },
   });
 
-  // --- Return streaming response ----------------------------------------
+  // ──────────────────────────────────────────────────────────────────
+  // 5. Return streaming response
+  // ------------------------------------------------------------------
   return new Response(stream, {
     headers: {
       ...corsHeaders,
-      "Content-Type": "text/plain; charset=utf-8",
+      "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
     },
   });
-} 
+}); 

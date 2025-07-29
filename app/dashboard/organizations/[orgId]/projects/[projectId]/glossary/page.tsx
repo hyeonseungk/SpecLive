@@ -345,7 +345,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   }
 
   // 필터링된 용어 목록
-  const filteredGlossaries = glossaries.filter(glossary => 
+  const filteredGlossaries = glossaries.filter(glossary =>
     glossary.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     glossary.definition.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (glossary.examples && glossary.examples.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -400,7 +400,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
               >
                 ☰
               </button>
-            </div>
+        </div>
             
             {/* 용어 개수 */}
             {glossaries.length > 0 && (
@@ -413,9 +413,9 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             <div className="flex-1 max-w-xs">
               <input
                 type="text"
-                placeholder="용어 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="용어 검색..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
@@ -452,7 +452,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             <p className="text-muted-foreground">용어를 불러오는 중...</p>
           </div>
         ) : sortedGlossaries.length === 0 ? (
-          <Card>
+            <Card>
             <CardContent className="pt-8 pb-8">
               <div className="text-center text-muted-foreground">
                 <p className="mb-4">
@@ -469,9 +469,9 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                   </Button>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        ) : (
+              </CardContent>
+            </Card>
+          ) : (
           <div className={
             glossaryViewMode === 'grid'
               ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'

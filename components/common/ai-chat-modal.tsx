@@ -28,7 +28,6 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isStreaming, setIsStreaming] = useState(false)
-  const abortRef = useRef<AbortController | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -53,12 +52,12 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
     setInputValue('')
     setIsLoading(true)
 
-    // 사용자 메시지 추가
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }])
-
-    // 이전 스트림 중단
-    abortRef.current?.abort()
-    abortRef.current = new AbortController()
+    // 사용자 메시지 + AI placeholder 한 번에 추가
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', content: userMessage },
+      { role: 'assistant', content: '' },
+    ])
 
     try {
       // 스트리밍 시작 표시
@@ -71,19 +70,25 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
             { role: 'user', content: userMessage }
           ]
         },
-        // @ts-ignore - noResolveJson is supported at runtime
-        noResolveJson: true,
-        signal: abortRef.current.signal
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
+        },
+        // // TS 타입에 아직 반영되지 않았을 수 있음
+        // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // // @ts-ignore
+        // noResolveJson: true,
+        // signal: abortRef.current.signal
       })
 
-      if (error || !(data instanceof Response)) {
-        throw error || new Error('Invalid response')
-      }
+      
+      
+      console.log('data: ', data);
+     
+      
 
-      const reader = data.body!.getReader()
+      const reader = data.body.getReader()
       const decoder = new TextDecoder()
       let assistantText = ''
-      let firstChunk = true
 
       while (true) {
         const { done, value } = await reader.read()
@@ -92,16 +97,9 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
         assistantText += decoder.decode(value, { stream: true })
 
         setMessages(prev => {
-          if (firstChunk) {
-            firstChunk = false
-            return [...prev, { role: 'assistant', content: assistantText }]
-          }
-          const newPrev = [...prev]
-          newPrev[newPrev.length - 1] = {
-            role: 'assistant',
-            content: assistantText
-          }
-          return newPrev
+          const updated = [...prev]
+          updated[updated.length - 1] = { role: 'assistant', content: assistantText }
+          return updated
         })
       }
     } catch (error) {
@@ -163,8 +161,8 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
               <div
                 className={`max-w-[70%] rounded-lg p-3 ${
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-muted text-muted-foreground'
                 }`}
               >
                 <div className="whitespace-pre-wrap">{message.content}</div>
