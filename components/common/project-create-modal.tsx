@@ -25,13 +25,15 @@ interface ProjectCreateModalProps {
   onClose: () => void
   onSuccess: () => void
   user: User
+  organizationId?: string // 조직이 미리 선택된 경우
 }
 
 export function ProjectCreateModal({ 
   isOpen, 
   onClose, 
   onSuccess, 
-  user 
+  user,
+  organizationId 
 }: ProjectCreateModalProps) {
   const [projectName, setProjectName] = useState('')
   const [selectedOrgId, setSelectedOrgId] = useState('')
@@ -41,12 +43,18 @@ export function ProjectCreateModal({
   const { showError } = useErrorStore()
   const { showSuccess } = useSuccessStore()
 
-  // 조직 목록 로드
+  // 조직 목록 로드 (organizationId가 없는 경우에만)
   useEffect(() => {
     if (isOpen) {
-      loadOrganizations()
+      if (organizationId) {
+        // 조직이 미리 선택된 경우
+        setSelectedOrgId(organizationId)
+      } else {
+        // 조직을 선택해야 하는 경우
+        loadOrganizations()
+      }
     }
-  }, [isOpen])
+  }, [isOpen, organizationId])
 
   const loadOrganizations = async () => {
     setIsLoadingOrgs(true)
@@ -78,7 +86,8 @@ export function ProjectCreateModal({
       return
     }
 
-    if (!selectedOrgId) {
+    const targetOrgId = organizationId || selectedOrgId
+    if (!targetOrgId) {
       showError('선택 오류', '조직을 선택해주세요.')
       return
     }
@@ -91,7 +100,7 @@ export function ProjectCreateModal({
         .from('projects')
         .insert({
           name: projectName.trim(),
-          organization_id: selectedOrgId
+          organization_id: targetOrgId
         })
         .select()
         .single()
@@ -109,10 +118,9 @@ export function ProjectCreateModal({
 
       if (membershipError) throw membershipError
 
-      const selectedOrg = organizations.find(org => org.id === selectedOrgId)
       showSuccess(
         '프로젝트 생성 완료',
-        `"${projectName}" 프로젝트가 "${selectedOrg?.name}" 조직에 성공적으로 생성되었습니다.`
+        `"${projectName}" 프로젝트가 성공적으로 생성되었습니다.`
       )
       
       setProjectName('')
@@ -149,33 +157,35 @@ export function ProjectCreateModal({
         </AlertDialogHeader>
         
         <div className="py-4 space-y-4">
-          <div>
-            <label htmlFor="organization-select" className="text-sm font-medium mb-2 block">
-              조직 선택
-            </label>
-            {isLoadingOrgs ? (
-              <div className="text-sm text-muted-foreground">조직 목록 로딩 중...</div>
-            ) : organizations.length === 0 ? (
-              <div className="text-sm text-muted-foreground">
-                사용 가능한 조직이 없습니다. 먼저 조직을 생성해주세요.
-              </div>
-            ) : (
-              <select
-                id="organization-select"
-                value={selectedOrgId}
-                onChange={(e) => setSelectedOrgId(e.target.value)}
-                disabled={isLoading}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">조직을 선택하세요</option>
-                {organizations.map((org) => (
-                  <option key={org.id} value={org.id}>
-                    {org.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
+          {!organizationId && (
+            <div>
+              <label htmlFor="organization-select" className="text-sm font-medium mb-2 block">
+                조직 선택
+              </label>
+              {isLoadingOrgs ? (
+                <div className="text-sm text-muted-foreground">조직 목록 로딩 중...</div>
+              ) : organizations.length === 0 ? (
+                <div className="text-sm text-muted-foreground">
+                  사용 가능한 조직이 없습니다. 먼저 조직을 생성해주세요.
+                </div>
+              ) : (
+                <select
+                  id="organization-select"
+                  value={selectedOrgId}
+                  onChange={(e) => setSelectedOrgId(e.target.value)}
+                  disabled={isLoading}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">조직을 선택하세요</option>
+                  {organizations.map((org) => (
+                    <option key={org.id} value={org.id}>
+                      {org.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
 
           <div>
             <label htmlFor="project-name" className="text-sm font-medium mb-2 block">
@@ -185,7 +195,7 @@ export function ProjectCreateModal({
               id="project-name"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              placeholder="예: 웹사이트 리뉴얼, 모바일 앱 개발"
+              placeholder="예: OOO 커머스, XXX 채팅 서비스 등"
               disabled={isLoading}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
             />
@@ -198,7 +208,7 @@ export function ProjectCreateModal({
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleSubmit}
-            disabled={isLoading || !projectName.trim() || !selectedOrgId || organizations.length === 0}
+            disabled={isLoading || !projectName.trim() || (!organizationId && (!selectedOrgId || organizations.length === 0))}
           >
             {isLoading ? '생성 중...' : '생성'}
           </AlertDialogAction>

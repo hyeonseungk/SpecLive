@@ -172,7 +172,7 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
             <div>
               <h2 className="text-3xl font-bold">{organization.name}</h2>
               <p className="text-muted-foreground">
-                조직의 프로젝트를 관리하세요. ({projects.length}개 프로젝트)
+                조직의 프로젝트를 관리하세요. ({projects.length}개의 프로젝트가 있습니다)
               </p>
             </div>
           </div>
@@ -189,9 +189,6 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
                 조직 설정
-              </Button>
-              <Button variant="outline" size="sm">
-                멤버 관리
               </Button>
             </div>
           )}
@@ -257,6 +254,7 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
           onClose={() => setShowProjectModal(false)}
           onSuccess={handleModalSuccess}
           user={user}
+          organizationId={params.orgId}
         />
       )}
     </div>

@@ -43,6 +43,7 @@ export default function Dashboard() {
 
   const loadUserOrganizations = async (userId: string) => {
     setLoading(true)
+    console.log('Loading organizations for userId:', userId)
     try {
       // 1. 사용자가 속한 조직들을 멤버십을 통해 가져오기
       const { data: userMemberships, error: membershipError } = await supabase
@@ -67,6 +68,11 @@ export default function Dashboard() {
         .eq('owner_id', userId)
 
       if (ownedError) throw ownedError
+
+      console.log('ownedOrgs', ownedOrgs);
+      console.log('userMemberships', userMemberships);
+      console.log('Expected owner_id in DB:', 'fe35b4f1-fa60-46b0-a460-9439ddb30598');
+      console.log('Current userId:', userId);
 
       // 조직별로 통계 계산
       const orgMap = new Map<string, OrganizationWithStats>()
@@ -189,7 +195,7 @@ export default function Dashboard() {
                 </Button>
                 <div className="text-sm text-muted-foreground">
                   <p className="mb-3 font-medium">조직을 만든 후에는:</p>
-                  <ul className="list-disc list-inside space-y-2">
+                  <ul className="list-disc list-inside space-y-2 text-left max-w-xs mx-auto">
                     <li>프로젝트를 생성할 수 있습니다</li>
                     <li>프로젝트 멤버를 초대할 수 있습니다</li>
                     <li>용어와 정책을 관리할 수 있습니다</li>
