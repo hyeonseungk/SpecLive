@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ErrorModal } from '@/components/common/error-modal'
-import { SuccessModal } from '@/components/common/success-modal'
 import { OrganizationSelector } from '@/components/common/organization-selector'
 import { OrganizationCreateModal } from '@/components/common/organization-create-modal'
 import { ProjectCreateModal } from '@/components/common/project-create-modal'
@@ -53,7 +51,7 @@ export default function Dashboard() {
   const loadUserProjects = async (userId: string) => {
     setLoading(true)
     try {
-      // 사용자가 속한 프로젝트들을 멤버십을 통해 가져오기
+      // 1. 사용자가 속한 프로젝트들을 멤버십을 통해 가져오기
       const { data: userProjects, error } = await supabase
         .from('memberships')
         .select(`
@@ -69,6 +67,14 @@ export default function Dashboard() {
 
       if (error) throw error
 
+      // 2. 사용자가 소유한 조직들도 별도로 가져오기 (프로젝트가 없는 조직 포함)
+      const { data: ownedOrgs, error: ownedError } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('owner_id', userId)
+
+      if (ownedError) throw ownedError
+
       // 조직별로 프로젝트들을 그룹화하고 추가 정보 계산
       const orgMap = new Map<string, OrganizationWithProjects>()
 
@@ -79,6 +85,13 @@ export default function Dashboard() {
           return project?.organizations?.id
         }).filter(Boolean) || []
       ))
+
+      // 소유한 조직들의 ID도 추가
+      ownedOrgs?.forEach(org => {
+        if (!organizationIds.includes(org.id)) {
+          organizationIds.push(org.id)
+        }
+      })
 
       // 각 조직의 총 멤버 수 계산
       const memberCounts = new Map<string, number>()
@@ -95,6 +108,7 @@ export default function Dashboard() {
         memberCounts.set(orgId, count || 0)
       }
 
+      // 멤버십을 통한 조직들 추가
       userProjects?.forEach((membership) => {
         const project = membership.projects as Project
         if (!project) return
@@ -115,6 +129,18 @@ export default function Dashboard() {
         }
 
         orgMap.get(org.id)!.projects.push(project)
+      })
+
+      // 소유한 조직들 중 아직 추가되지 않은 것들 (프로젝트가 없는 조직들) 추가
+      ownedOrgs?.forEach((org) => {
+        if (!orgMap.has(org.id)) {
+          orgMap.set(org.id, {
+            ...org,
+            projects: [],
+            memberCount: memberCounts.get(org.id) || 0,
+            isOwner: true
+          })
+        }
       })
 
       const groupedOrgs = Array.from(orgMap.values()).sort((a, b) => {
@@ -364,9 +390,6 @@ export default function Dashboard() {
           />
         </>
       )}
-      
-      <ErrorModal />
-      <SuccessModal />
     </div>
   )
 } 

@@ -94,6 +94,37 @@ Resend API
 
 ---
 
+## 5.1 전역 모달 시스템 (⚠️ 필수 준수)
+
+### 모달 구조
+- **ErrorModal**: `components/common/error-modal.tsx`
+- **SuccessModal**: `components/common/success-modal.tsx`
+- **전역 렌더링**: `app/layout.tsx`에서만 렌더링
+
+### 핵심 규칙
+1. **절대 중복 렌더링 금지**: 각 페이지에서 `<ErrorModal />`이나 `<SuccessModal />`을 추가로 렌더링하지 말 것
+2. **Store 함수 사용**: 모달 제어는 반드시 store 함수를 통해서만 수행
+3. **Import 규칙**: 모달 컴포넌트 자체는 import하지 말고, store 함수만 import
+
+### 사용 방법
+```typescript
+// ✅ 올바른 사용법
+import { showError, showSimpleError } from '@/lib/error-store'
+import { showSuccess } from '@/lib/success-store'
+
+// ❌ 잘못된 사용법 - 절대 금지
+import { ErrorModal } from '@/components/common/error-modal'
+// return <div>...<ErrorModal /></div>  // 이렇게 하면 안됨
+```
+
+### 위반 시 발생 문제
+- 메모리 누수
+- 중복 모달 표시
+- 성능 저하
+- 예측 불가능한 동작
+
+---
+
 ## 6. 프론트엔드 폴더 구조 예시
 
 ```

@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ErrorModal } from '@/components/common/error-modal'
-import { SuccessModal } from '@/components/common/success-modal'
 import { MemberInviteModal } from '@/components/common/member-invite-modal'
 import supabase from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
@@ -222,9 +220,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           project={project}
         />
       )}
-      
-      <ErrorModal />
-      <SuccessModal />
     </div>
   )
 } 

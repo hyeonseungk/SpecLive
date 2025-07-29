@@ -170,11 +170,19 @@ npm run dev
 
 브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 애플리케이션을 확인하세요.
 
-## 에러 모달 사용법
+## 개발 가이드라인
 
-프로젝트 전역에서 사용할 수 있는 에러 모달이 구현되어 있습니다.
+### 전역 모달 시스템
 
-### 기본 사용법
+프로젝트에는 **전역 에러 모달**과 **전역 성공 모달**이 구현되어 있습니다.
+
+#### ⚠️ **중요: 모달 중복 방지**
+
+- **ErrorModal과 SuccessModal은 `app/layout.tsx`에만 렌더링됩니다.**
+- **각 페이지에서 `<ErrorModal />`이나 `<SuccessModal />`을 추가로 렌더링하지 마세요.**
+- 대신 아래의 store 함수들을 사용하여 전역 모달을 제어하세요.
+
+#### 에러 모달 사용법
 
 ```typescript
 import { showError, showSimpleError } from '@/lib/error-store'
@@ -192,7 +200,21 @@ showError(
 )
 ```
 
-### 컴포넌트에서 훅 사용
+#### 성공 모달 사용법
+
+```typescript
+import { showSuccess } from '@/lib/success-store'
+
+showSuccess(
+  '저장 완료',
+  '데이터가 성공적으로 저장되었습니다.',
+  () => {
+    // 성공 후 콜백 (선택사항)
+  }
+)
+```
+
+#### 컴포넌트에서 훅 사용
 
 ```typescript
 import { useErrorHandler } from '@/lib/hooks/use-error-handler'
