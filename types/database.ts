@@ -49,6 +49,32 @@ export interface Database {
           created_at?: string
         }
       }
+      prds: {
+        Row: {
+          id: string
+          project_id: string
+          contents: string
+          author_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          contents?: string
+          author_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          contents?: string
+          author_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
       memberships: {
         Row: {
           id: string

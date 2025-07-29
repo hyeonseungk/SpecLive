@@ -9,9 +9,12 @@ import { FullScreenLoading } from '@/components/common/full-screen-loading'
 import supabase from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database'
+import { showSimpleSuccess } from '@/lib/success-store'
+import { showError, showSimpleError } from '@/lib/error-store'
 
 type Project = Tables<'projects'>
 type Membership = Tables<'memberships'>
+type Prd = Tables<'prds'>
 
 interface ProjectPageProps {
   params: {
@@ -26,7 +29,14 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const [membership, setMembership] = useState<Membership | null>(null)
   const [loading, setLoading] = useState(true)
   const [showInviteModal, setShowInviteModal] = useState(false)
-  const [activeTab, setActiveTab] = useState<'glossary' | 'policy' | 'management'>('glossary')
+  const [activeTab, setActiveTab] = useState<'prd' | 'glossary' | 'policy' | 'management'>('prd')
+  
+  // PRD 관련 상태
+  const [prd, setPrd] = useState<Prd | null>(null)
+  const [prdContent, setPrdContent] = useState('')
+  const [prdLoading, setPrdLoading] = useState(false)
+  const [prdSaving, setPrdSaving] = useState(false)
+  
   const router = useRouter()
 
   useEffect(() => {
@@ -66,6 +76,12 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       }
 
       setLoading(false)
+
+      // PRD 로딩 (프로젝트와 멤버십이 모두 로드된 후)
+      if (projectData && membershipData) {
+        // PRD 로딩을 별도로 처리 (로딩 상태를 분리하기 위해)
+        loadPrdForProject(projectData.id)
+      }
     }
 
     loadProjectData()
@@ -81,8 +97,142 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     // 현재는 별다른 업데이트가 필요하지 않음
   }
 
+  // PRD 로드 함수 (project ID를 직접 받는 버전)
+  const loadPrdForProject = async (projectId: string) => {
+    setPrdLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('prds')
+        .select('*')
+        .eq('project_id', projectId)
+        .maybeSingle()
+
+      if (error) throw error
+
+      if (data) {
+        setPrd(data)
+        setPrdContent(data.contents)
+      } else {
+        setPrd(null)
+        setPrdContent('')
+      }
+    } catch (error) {
+      console.error('Error loading PRD:', error)
+      showError('PRD 로드 실패', 'PRD를 불러오는 중 오류가 발생했습니다.')
+    } finally {
+      setPrdLoading(false)
+    }
+  }
+
+  // PRD 로드 함수
+  const loadPrd = async () => {
+    if (!project) return
+    await loadPrdForProject(project.id)
+  }
+
+  // PRD 저장 함수
+  const savePrd = async () => {
+    if (!project || !user) return
+
+    setPrdSaving(true)
+    try {
+      const prdData = {
+        project_id: project.id,
+        contents: prdContent.trim(),
+        author_id: user.id
+      }
+
+      const { data, error } = await supabase
+        .from('prds')
+        .upsert(prd ? { ...prdData, id: prd.id } : prdData)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setPrd(data)
+      showSimpleSuccess('PRD가 저장되었습니다.')
+    } catch (error) {
+      console.error('Error saving PRD:', error)
+      showError('PRD 저장 실패', 'PRD를 저장하는 중 오류가 발생했습니다.')
+    } finally {
+      setPrdSaving(false)
+    }
+  }
+
   const renderContent = () => {
     switch (activeTab) {
+      case 'prd':
+        const canEditPrd = membership?.role === 'admin'
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-3xl font-bold mb-2">프로젝트 PRD</h2>
+                <p className="text-muted-foreground">
+                  용어 및 정책 추천을 AI로부터 잘 받을 수 있도록 자세한 내용의 PRD를 넣어주세요.
+                </p>
+              </div>
+              {canEditPrd && (
+                <Button 
+                  onClick={savePrd}
+                  disabled={prdSaving}
+                  className="min-w-[100px]"
+                >
+                  {prdSaving ? '저장 중...' : '저장'}
+                </Button>
+              )}
+            </div>
+
+            <Card>
+              <CardContent className="pt-6">
+                {prdLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-muted-foreground">PRD를 불러오는 중...</p>
+                  </div>
+                ) : canEditPrd ? (
+                  <div>
+                    <textarea
+                      value={prdContent}
+                      onChange={(e) => setPrdContent(e.target.value)}
+                      placeholder="프로젝트 요구사항 정의서(PRD)를 작성하세요.&#10;&#10;예시:&#10;## 프로젝트 개요&#10;- 목적: &#10;- 목표: &#10;&#10;## 기능 요구사항&#10;1. 사용자 기능&#10;2. 관리자 기능&#10;&#10;## 비기능 요구사항&#10;- 성능: &#10;- 보안: "
+                      className="w-full min-h-[500px] p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      style={{ fontFamily: 'inherit' }}
+                    />
+                    <div className="mt-4 text-sm text-muted-foreground">
+                      {prd && (
+                        <p>
+                          마지막 수정: {new Date(prd.updated_at).toLocaleString('ko-KR')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {prdContent ? (
+                      <div className="whitespace-pre-wrap break-words min-h-[200px] p-4 bg-gray-50 rounded-md">
+                        {prdContent}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>아직 작성된 PRD가 없습니다.</p>
+                        <p className="text-sm mt-2">관리자가 PRD를 작성할 때까지 기다려주세요.</p>
+                      </div>
+                    )}
+                    {prd && (
+                      <div className="mt-4 text-sm text-muted-foreground">
+                        <p>
+                          마지막 수정: {new Date(prd.updated_at).toLocaleString('ko-KR')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )
       case 'glossary':
         return (
           <div>
@@ -234,6 +384,18 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         <div className="flex-1 p-4 flex flex-col">
           <div className="space-y-2 flex-1">
             {/* 상단 메뉴 */}
+            <button
+              onClick={() => setActiveTab('prd')}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
+                activeTab === 'prd' 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'hover:bg-accent'
+              }`}
+            >
+              <span className="text-lg">📄</span>
+              <span>프로젝트 PRD</span>
+            </button>
+            
             <button
               onClick={() => setActiveTab('glossary')}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
