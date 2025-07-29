@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -56,8 +57,8 @@ export default function Home() {
           setSubmitting(false)
           return
         }
-        if (password.length < 4) {
-          showError('비밀번호 길이 오류', '비밀번호는 4자 이상이어야 합니다.')
+        if (password.length < 8) {
+          showError('비밀번호 길이 오류', '비밀번호는 8자 이상이어야 합니다.')
           setSubmitting(false)
           return
         }
@@ -95,8 +96,21 @@ export default function Home() {
   }
 
   return (
-    <main className="flex items-center justify-center min-h-screen p-4">
-      <Card className="w-full max-w-md">
+    <main className="relative flex items-center justify-center min-h-screen p-4">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/images/main-background.png"
+          alt="Background"
+          fill
+          style={{ objectFit: 'cover' }}
+          className="opacity-20 blur-sm"
+          priority
+        />
+      </div>
+      
+      {/* Content */}
+      <Card className="relative z-10 w-full max-w-md backdrop-blur-sm bg-white/90">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">UbiLang</CardTitle>
           <CardDescription className="text-center">
