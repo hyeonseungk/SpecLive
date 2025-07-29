@@ -54,8 +54,8 @@ export default function Home() {
           setLoading(false)
           return
         }
-        if (password.length < 6) {
-          showError('비밀번호 길이 오류', '비밀번호는 6자 이상이어야 합니다.')
+        if (password.length < 4) {
+          showError('비밀번호 길이 오류', '비밀번호는 4자 이상이어야 합니다.')
           setLoading(false)
           return
         }
@@ -113,6 +113,11 @@ export default function Home() {
               />
             </div>
             <div className="space-y-2">
+              {password.length > 0 && password.length < 4 && (
+                <div className="text-sm font-medium text-red-600">
+                  최소 4자리 이상으로 입력하세요
+                </div>
+              )}
               <Input
                 type="password"
                 placeholder="비밀번호"
@@ -123,6 +128,18 @@ export default function Home() {
             </div>
             {isSignUp && (
               <div className="space-y-2">
+                {passwordConfirm && (
+                  <div className={`text-sm font-medium ${
+                    password === passwordConfirm 
+                      ? 'text-green-600' 
+                      : 'text-red-600'
+                  }`}>
+                    {password === passwordConfirm 
+                      ? '비밀번호가 일치합니다' 
+                      : '비밀번호가 일치하지 않습니다'
+                    }
+                  </div>
+                )}
                 <Input
                   type="password"
                   placeholder="비밀번호 확인"
