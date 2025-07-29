@@ -151,30 +151,6 @@ export function OrganizationSelector({
           </div>
 
           <div className="max-h-60 overflow-y-auto">
-            {/* 현재 선택된 조직 */}
-            {selectedOrg && (
-              <>
-                <div className="px-2 py-1">
-                  <div className="text-xs text-muted-foreground font-medium">현재 선택됨</div>
-                </div>
-                <DropdownMenuItem className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs">
-                      🏢
-                    </div>
-                    <div>
-                      <div className="font-medium">{selectedOrg.name}</div>
-                      {selectedOrg.owner_id === user.id && (
-                        <div className="text-xs text-muted-foreground">소유자</div>
-                      )}
-                    </div>
-                  </div>
-                  <Check className="w-4 h-4 text-blue-500" />
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-              </>
-            )}
-
             {/* 모든 조직 옵션 */}
             <DropdownMenuItem 
               onClick={() => {

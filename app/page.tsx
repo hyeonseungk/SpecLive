@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { FullScreenLoading } from '@/components/common/full-screen-loading'
 import supabase from '@/lib/supabase-browser'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSuccess } from '@/lib/success-store'
@@ -88,11 +89,7 @@ export default function Home() {
   }
 
   if (initialLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">로딩 중...</div>
-      </div>
-    )
+    return <FullScreenLoading />
   }
 
   return (

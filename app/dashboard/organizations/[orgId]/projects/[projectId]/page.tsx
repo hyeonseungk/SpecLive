@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MemberInviteModal } from '@/components/common/member-invite-modal'
+import { FullScreenLoading } from '@/components/common/full-screen-loading'
 import supabase from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database'
@@ -14,6 +15,7 @@ type Membership = Tables<'memberships'>
 
 interface ProjectPageProps {
   params: {
+    orgId: string
     projectId: string
   }
 }
@@ -79,11 +81,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">로딩 중...</div>
-      </div>
-    )
+    return <FullScreenLoading />
   }
 
   if (!project || !membership) {
@@ -113,9 +111,9 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           <div className="flex items-center gap-4">
             <Button 
               variant="ghost" 
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push(`/dashboard/organizations/${params.orgId}`)}
             >
-              ← 대시보드
+              ← 조직
             </Button>
             <div>
               <h1 className="text-2xl font-bold">{project.name}</h1>
@@ -146,7 +144,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         <div className="grid gap-6 md:grid-cols-2">
           <Card 
             className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => router.push(`/dashboard/${params.projectId}/glossary`)}
+            onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/glossary`)}
           >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -165,7 +163,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
           <Card 
             className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => router.push(`/dashboard/${params.projectId}/policy`)}
+            onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}/policy`)}
           >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

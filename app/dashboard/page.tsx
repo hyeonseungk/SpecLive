@@ -4,31 +4,24 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { OrganizationSelector } from '@/components/common/organization-selector'
+import { FullScreenLoading } from '@/components/common/full-screen-loading'
 import { OrganizationCreateModal } from '@/components/common/organization-create-modal'
-import { ProjectCreateModal } from '@/components/common/project-create-modal'
 import supabase from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database'
 
 type Organization = Tables<'organizations'>
-type Project = Tables<'projects'> & {
-  organizations: Organization
-  memberships: Tables<'memberships'>[]
-}
 
-interface OrganizationWithProjects extends Organization {
-  projects: Project[]
+interface OrganizationWithStats extends Organization {
+  projectCount: number
   memberCount: number
   isOwner: boolean
 }
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null)
-  const [organizationsWithProjects, setOrganizationsWithProjects] = useState<OrganizationWithProjects[]>([])
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
+  const [organizations, setOrganizations] = useState<OrganizationWithStats[]>([])
   const [loading, setLoading] = useState(true)
-  const [showProjectModal, setShowProjectModal] = useState(false)
   const [showOrgCreateModal, setShowOrgCreateModal] = useState(false)
   const router = useRouter()
 
@@ -42,17 +35,17 @@ export default function Dashboard() {
         return
       }
 
-      await loadUserProjects(session.user.id)
+      await loadUserOrganizations(session.user.id)
     }
 
     getSession()
   }, [router])
 
-  const loadUserProjects = async (userId: string) => {
+  const loadUserOrganizations = async (userId: string) => {
     setLoading(true)
     try {
-      // 1. 사용자가 속한 프로젝트들을 멤버십을 통해 가져오기
-      const { data: userProjects, error } = await supabase
+      // 1. 사용자가 속한 조직들을 멤버십을 통해 가져오기
+      const { data: userMemberships, error: membershipError } = await supabase
         .from('memberships')
         .select(`
           *,
@@ -65,9 +58,9 @@ export default function Dashboard() {
         `)
         .eq('user_id', userId)
 
-      if (error) throw error
+      if (membershipError) throw membershipError
 
-      // 2. 사용자가 소유한 조직들도 별도로 가져오기 (프로젝트가 없는 조직 포함)
+      // 2. 사용자가 소유한 조직들도 별도로 가져오기
       const { data: ownedOrgs, error: ownedError } = await supabase
         .from('organizations')
         .select('*')
@@ -75,84 +68,64 @@ export default function Dashboard() {
 
       if (ownedError) throw ownedError
 
-      // 조직별로 프로젝트들을 그룹화하고 추가 정보 계산
-      const orgMap = new Map<string, OrganizationWithProjects>()
+      // 조직별로 통계 계산
+      const orgMap = new Map<string, OrganizationWithStats>()
 
-      // 각 조직의 멤버 수를 계산하기 위한 쿼리
-      const organizationIds = Array.from(new Set(
-        userProjects?.map(membership => {
-          const project = membership.projects as Project
-          return project?.organizations?.id
-        }).filter(Boolean) || []
-      ))
-
-      // 소유한 조직들의 ID도 추가
-      ownedOrgs?.forEach(org => {
-        if (!organizationIds.includes(org.id)) {
-          organizationIds.push(org.id)
-        }
-      })
-
-      // 각 조직의 총 멤버 수 계산
-      const memberCounts = new Map<string, number>()
-      for (const orgId of organizationIds) {
-        const { count } = await supabase
-          .from('memberships')
-          .select('*', { count: 'exact', head: true })
-          .in('project_id', 
-            userProjects
-              ?.filter(m => (m.projects as Project)?.organizations?.id === orgId)
-              .map(m => m.project_id) || []
-          )
-        
-        memberCounts.set(orgId, count || 0)
-      }
-
-      // 멤버십을 통한 조직들 추가
-      userProjects?.forEach((membership) => {
-        const project = membership.projects as Project
-        if (!project) return
+      // 멤버십을 통한 조직들 처리
+      userMemberships?.forEach((membership) => {
+        const project = membership.projects as any
+        if (!project?.organizations) return
 
         const org = project.organizations
-        if (!org) return
-
-        // 프로젝트에 멤버십 정보 추가
-        project.memberships = [membership]
-
         if (!orgMap.has(org.id)) {
           orgMap.set(org.id, {
             ...org,
-            projects: [],
-            memberCount: memberCounts.get(org.id) || 0,
+            projectCount: 0,
+            memberCount: 0,
             isOwner: org.owner_id === userId
           })
         }
 
-        orgMap.get(org.id)!.projects.push(project)
+        orgMap.get(org.id)!.projectCount++
       })
 
-      // 소유한 조직들 중 아직 추가되지 않은 것들 (프로젝트가 없는 조직들) 추가
+      // 소유한 조직들 중 아직 추가되지 않은 것들 추가
       ownedOrgs?.forEach((org) => {
         if (!orgMap.has(org.id)) {
           orgMap.set(org.id, {
             ...org,
-            projects: [],
-            memberCount: memberCounts.get(org.id) || 0,
+            projectCount: 0,
+            memberCount: 0,
             isOwner: true
           })
         }
       })
 
-      const groupedOrgs = Array.from(orgMap.values()).sort((a, b) => {
+      // 각 조직의 멤버 수 계산
+      for (const [orgId, orgData] of Array.from(orgMap.entries())) {
+        // 해당 조직의 모든 프로젝트의 멤버 수 계산
+        const { count } = await supabase
+          .from('memberships')
+          .select('*', { count: 'exact', head: true })
+          .in('project_id', 
+            userMemberships
+              ?.filter(m => (m.projects as any)?.organizations?.id === orgId)
+              .map(m => m.project_id) || []
+          )
+        
+        orgData.memberCount = count || 0
+      }
+
+      const orgList = Array.from(orgMap.values()).sort((a, b) => {
         // 소유자인 조직을 먼저 정렬, 그 다음은 생성일 순
         if (a.isOwner && !b.isOwner) return -1
         if (!a.isOwner && b.isOwner) return 1
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       })
 
-      setOrganizationsWithProjects(groupedOrgs)
+      setOrganizations(orgList)
     } catch (error) {
-      console.error('Error loading user projects:', error)
+      console.error('Error loading user organizations:', error)
     } finally {
       setLoading(false)
     }
@@ -165,53 +138,12 @@ export default function Dashboard() {
 
   const handleModalSuccess = () => {
     if (user) {
-      loadUserProjects(user.id)
+      loadUserOrganizations(user.id)
     }
   }
-
-  // 선택된 조직에 따라 프로젝트 필터링
-  const getFilteredProjects = () => {
-    if (selectedOrgId === null) {
-      // 모든 조직의 프로젝트 표시
-      return organizationsWithProjects.reduce((allProjects: Project[], org) => {
-        return allProjects.concat(org.projects)
-      }, [])
-    } else {
-      // 선택된 조직의 프로젝트만 표시
-      const selectedOrg = organizationsWithProjects.find(org => org.id === selectedOrgId)
-      return selectedOrg ? selectedOrg.projects : []
-    }
-  }
-
-  const getSelectedOrgInfo = () => {
-    if (selectedOrgId === null) {
-      return {
-        name: '모든 조직',
-        memberCount: organizationsWithProjects.reduce((sum, org) => sum + org.memberCount, 0),
-        projectCount: organizationsWithProjects.reduce((sum, org) => sum + org.projects.length, 0),
-        isOwner: false
-      }
-    } else {
-      const org = organizationsWithProjects.find(org => org.id === selectedOrgId)
-      if (!org) return null
-      return {
-        name: org.name,
-        memberCount: org.memberCount,
-        projectCount: org.projects.length,
-        isOwner: org.isOwner
-      }
-    }
-  }
-
-  const filteredProjects = getFilteredProjects()
-  const selectedOrgInfo = getSelectedOrgInfo()
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">로딩 중...</div>
-      </div>
-    )
+    return <FullScreenLoading />
   }
 
   return (
@@ -220,14 +152,6 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold">UbiLang</h1>
-            {user && organizationsWithProjects.length > 0 && (
-              <OrganizationSelector
-                user={user}
-                selectedOrgId={selectedOrgId}
-                onOrgChange={setSelectedOrgId}
-                onOrgCreated={handleModalSuccess}
-              />
-            )}
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
@@ -241,8 +165,8 @@ export default function Dashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {organizationsWithProjects.length === 0 ? (
-          // 조직이 없는 경우 - 조직 생성을 유도하는 UI
+        {organizations.length === 0 ? (
+          // 조직이 없는 경우 - 조직 생성을 유도하는 UI  
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
             <div className="mb-8">
               <h2 className="text-3xl font-bold mb-4">환영합니다!</h2>
@@ -255,140 +179,87 @@ export default function Dashboard() {
             </div>
             
             <Card className="w-full max-w-md">
-              <CardHeader>
-                <CardTitle>시작하기</CardTitle>
-                <CardDescription>
-                  첫 번째 조직을 생성하여 UbiLang을 시작해보세요
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+              <CardContent className="pt-8 pb-8">
                 <Button 
                   onClick={() => setShowOrgCreateModal(true)}
-                  className="w-full"
+                  className="w-full mb-6"
                   size="lg"
                 >
                   새 조직 만들기
                 </Button>
+                <div className="text-sm text-muted-foreground">
+                  <p className="mb-3 font-medium">조직을 만든 후에는:</p>
+                  <ul className="list-disc list-inside space-y-2">
+                    <li>프로젝트를 생성할 수 있습니다</li>
+                    <li>프로젝트 멤버를 초대할 수 있습니다</li>
+                    <li>용어와 정책을 관리할 수 있습니다</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </div>
         ) : (
-          // 조직이 있는 경우 - 기존 UI
+          // 조직이 있는 경우 - 조직 목록 표시
           <>
             <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2">대시보드</h2>
+              <h2 className="text-3xl font-bold mb-2">조직 선택</h2>
               <p className="text-muted-foreground">
-                {selectedOrgInfo ? 
-                  `${selectedOrgInfo.name}의 프로젝트를 관리하세요. (${selectedOrgInfo.projectCount}개 프로젝트, ${selectedOrgInfo.memberCount}명 멤버)` :
-                  '조직과 프로젝트를 생성하고 용어와 정책을 관리하세요.'
-                }
+                관리하고 싶은 조직을 선택하세요. ({organizations.length}개 조직)
               </p>
             </div>
 
-            <div className="mb-6 flex gap-4">
-              <Button 
-                onClick={() => setShowProjectModal(true)}
-                disabled={organizationsWithProjects.length === 0}
-              >
-                새 프로젝트 생성
+            <div className="mb-6">
+              <Button onClick={() => setShowOrgCreateModal(true)}>
+                새 조직 만들기
               </Button>
-              
-              {selectedOrgInfo?.isOwner && (
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    조직 설정
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    멤버 관리
-                  </Button>
-                </div>
-              )}
             </div>
 
-            {filteredProjects.length === 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {selectedOrgId === null ? '프로젝트가 없습니다' : `${selectedOrgInfo?.name}에 프로젝트가 없습니다`}
-                  </CardTitle>
-                  <CardDescription>
-                    {selectedOrgId === null ? 
-                      '아직 참여 중인 프로젝트가 없습니다. 조직을 생성하고 프로젝트를 만들어보세요.' :
-                      '이 조직에 프로젝트를 생성하여 용어와 정책을 관리하세요.'
-                    }
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {selectedOrgId === null && (
-                    <p className="text-sm text-muted-foreground mb-4">
-                      1. 먼저 조직을 생성하세요 (회사, 팀 등)<br/>
-                      2. 조직 내에서 프로젝트를 생성하세요<br/>
-                      3. 프로젝트에서 용어와 정책을 관리하세요
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredProjects.map((project) => {
-                  const membership = project.memberships[0]
-                  return (
-                    <Card 
-                      key={project.id}
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => router.push(`/dashboard/${project.id}`)}
-                    >
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          {project.name}
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            membership.role === 'admin' 
-                              ? 'bg-blue-100 text-blue-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {membership.role === 'admin' ? '관리자' : '멤버'}
-                          </span>
-                        </CardTitle>
-                        <CardDescription>
-                          {selectedOrgId === null && (
-                            <div className="text-blue-600 text-xs mb-1">
-                              {project.organizations.name}
-                            </div>
-                          )}
-                          {new Date(project.created_at).toLocaleDateString()}에 생성됨
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-sm text-muted-foreground">
-                          클릭하여 용어와 정책을 관리하세요
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {organizations.map((org) => (
+                <Card 
+                  key={org.id}
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => router.push(`/dashboard/organizations/${org.id}`)}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm">
+                          🏢
                         </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
-            )}
+                        {org.name}
+                      </div>
+                      {org.isOwner && (
+                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                          소유자
+                        </span>
+                      )}
+                    </CardTitle>
+                    <CardDescription>
+                      {new Date(org.created_at).toLocaleDateString()}에 생성됨
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>프로젝트: {org.projectCount}개</span>
+                      <span>멤버: {org.memberCount}명</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </>
         )}
       </main>
 
-      {/* 모달들 */}
+      {/* 조직 생성 모달 */}
       {user && (
-        <>
-          <ProjectCreateModal
-            isOpen={showProjectModal}
-            onClose={() => setShowProjectModal(false)}
-            onSuccess={handleModalSuccess}
-            user={user}
-          />
-          
-          <OrganizationCreateModal
-            isOpen={showOrgCreateModal}
-            onClose={() => setShowOrgCreateModal(false)}
-            onSuccess={handleModalSuccess}
-            user={user}
-          />
-        </>
+        <OrganizationCreateModal
+          isOpen={showOrgCreateModal}
+          onClose={() => setShowOrgCreateModal(false)}
+          onSuccess={handleModalSuccess}
+          user={user}
+        />
       )}
     </div>
   )

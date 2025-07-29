@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { FullScreenLoading } from '@/components/common/full-screen-loading'
 import supabase from '@/lib/supabase-browser'
 import { showSimpleError } from '@/lib/error-store'
 import type { User } from '@supabase/supabase-js'
@@ -15,6 +16,7 @@ type Membership = Tables<'memberships'>
 
 interface PolicyPageProps {
   params: {
+    orgId: string
     projectId: string
   }
 }
@@ -131,11 +133,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   })
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">로딩 중...</div>
-      </div>
-    )
+    return <FullScreenLoading />
   }
 
   const isAdmin = membership?.role === 'admin'
@@ -147,7 +145,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
           <div className="flex items-center gap-4">
             <Button 
               variant="ghost" 
-              onClick={() => router.push(`/dashboard/${params.projectId}`)}
+              onClick={() => router.push(`/dashboard/organizations/${params.orgId}/projects/${params.projectId}`)}
             >
               ← 프로젝트
             </Button>
