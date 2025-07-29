@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { ErrorModal } from '@/components/common/error-modal'
 import { SuccessModal } from '@/components/common/success-modal'
+import { OrganizationSelector } from '@/components/common/organization-selector'
 import { OrganizationCreateModal } from '@/components/common/organization-create-modal'
 import { ProjectCreateModal } from '@/components/common/project-create-modal'
 import supabase from '@/lib/supabase-browser'
@@ -27,9 +28,10 @@ interface OrganizationWithProjects extends Organization {
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null)
   const [organizationsWithProjects, setOrganizationsWithProjects] = useState<OrganizationWithProjects[]>([])
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [showOrgModal, setShowOrgModal] = useState(false)
   const [showProjectModal, setShowProjectModal] = useState(false)
+  const [showOrgCreateModal, setShowOrgCreateModal] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -141,7 +143,42 @@ export default function Dashboard() {
     }
   }
 
-  const totalProjects = organizationsWithProjects.reduce((sum, org) => sum + org.projects.length, 0)
+  // 선택된 조직에 따라 프로젝트 필터링
+  const getFilteredProjects = () => {
+    if (selectedOrgId === null) {
+      // 모든 조직의 프로젝트 표시
+      return organizationsWithProjects.reduce((allProjects: Project[], org) => {
+        return allProjects.concat(org.projects)
+      }, [])
+    } else {
+      // 선택된 조직의 프로젝트만 표시
+      const selectedOrg = organizationsWithProjects.find(org => org.id === selectedOrgId)
+      return selectedOrg ? selectedOrg.projects : []
+    }
+  }
+
+  const getSelectedOrgInfo = () => {
+    if (selectedOrgId === null) {
+      return {
+        name: '모든 조직',
+        memberCount: organizationsWithProjects.reduce((sum, org) => sum + org.memberCount, 0),
+        projectCount: organizationsWithProjects.reduce((sum, org) => sum + org.projects.length, 0),
+        isOwner: false
+      }
+    } else {
+      const org = organizationsWithProjects.find(org => org.id === selectedOrgId)
+      if (!org) return null
+      return {
+        name: org.name,
+        memberCount: org.memberCount,
+        projectCount: org.projects.length,
+        isOwner: org.isOwner
+      }
+    }
+  }
+
+  const filteredProjects = getFilteredProjects()
+  const selectedOrgInfo = getSelectedOrgInfo()
 
   if (loading) {
     return (
@@ -155,7 +192,17 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">UbiLang</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">UbiLang</h1>
+            {user && organizationsWithProjects.length > 0 && (
+              <OrganizationSelector
+                user={user}
+                selectedOrgId={selectedOrgId}
+                onOrgChange={setSelectedOrgId}
+                onOrgCreated={handleModalSuccess}
+              />
+            )}
+          </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
               {user?.email}
@@ -168,122 +215,150 @@ export default function Dashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">대시보드</h2>
-          <p className="text-muted-foreground">
-            조직과 프로젝트를 생성하고 용어와 정책을 관리하세요.
-          </p>
-        </div>
-
-        <div className="mb-6 flex gap-4">
-          <Button onClick={() => setShowOrgModal(true)}>
-            새 조직 생성
-          </Button>
-          <Button 
-            onClick={() => setShowProjectModal(true)}
-            variant="outline"
-            disabled={organizationsWithProjects.length === 0}
-          >
-            새 프로젝트 생성
-          </Button>
-        </div>
-
-        {totalProjects === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>프로젝트가 없습니다</CardTitle>
-              <CardDescription>
-                아직 참여 중인 프로젝트가 없습니다. 조직을 생성하고 프로젝트를 만들어보세요.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                1. 먼저 조직을 생성하세요 (회사, 팀 등)<br/>
-                2. 조직 내에서 프로젝트를 생성하세요<br/>
-                3. 프로젝트에서 용어와 정책을 관리하세요
+        {organizationsWithProjects.length === 0 ? (
+          // 조직이 없는 경우 - 조직 생성을 유도하는 UI
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold mb-4">환영합니다!</h2>
+              <p className="text-lg text-muted-foreground mb-2">
+                UbiLang을 시작하려면 먼저 조직을 만들어주세요.
               </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-8">
-            {organizationsWithProjects.map((org) => (
-              <div key={org.id}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold flex items-center gap-2">
-                    🏢 {org.name}
-                    {org.isOwner && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
-                        소유자
-                      </span>
-                    )}
-                    <span className="text-sm text-muted-foreground">
-                      ({org.projects.length}개 프로젝트, {org.memberCount}명 멤버)
-                    </span>
-                  </h3>
-                  
-                  {org.isOwner && (
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        조직 설정
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        멤버 관리
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {org.projects.map((project) => {
-                    const membership = project.memberships[0]
-                    return (
-                      <Card 
-                        key={project.id}
-                        className="cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => router.push(`/dashboard/${project.id}`)}
-                      >
-                        <CardHeader>
-                          <CardTitle className="flex items-center justify-between">
-                            {project.name}
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              membership.role === 'admin' 
-                                ? 'bg-blue-100 text-blue-800' 
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {membership.role === 'admin' ? '관리자' : '멤버'}
-                            </span>
-                          </CardTitle>
-                          <CardDescription>
-                            {new Date(project.created_at).toLocaleDateString()}에 생성됨
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-sm text-muted-foreground">
-                            클릭하여 용어와 정책을 관리하세요
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
+              <p className="text-muted-foreground">
+                조직 안에서 여러 프로젝트를 생성하고<br></br>프로젝트 별로 용어와 정책을 관리할 수 있습니다.
+              </p>
+            </div>
+            
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle>시작하기</CardTitle>
+                <CardDescription>
+                  첫 번째 조직을 생성하여 UbiLang을 시작해보세요
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={() => setShowOrgCreateModal(true)}
+                  className="w-full"
+                  size="lg"
+                >
+                  새 조직 만들기
+                </Button>
+              </CardContent>
+            </Card>
           </div>
+        ) : (
+          // 조직이 있는 경우 - 기존 UI
+          <>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold mb-2">대시보드</h2>
+              <p className="text-muted-foreground">
+                {selectedOrgInfo ? 
+                  `${selectedOrgInfo.name}의 프로젝트를 관리하세요. (${selectedOrgInfo.projectCount}개 프로젝트, ${selectedOrgInfo.memberCount}명 멤버)` :
+                  '조직과 프로젝트를 생성하고 용어와 정책을 관리하세요.'
+                }
+              </p>
+            </div>
+
+            <div className="mb-6 flex gap-4">
+              <Button 
+                onClick={() => setShowProjectModal(true)}
+                disabled={organizationsWithProjects.length === 0}
+              >
+                새 프로젝트 생성
+              </Button>
+              
+              {selectedOrgInfo?.isOwner && (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    조직 설정
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    멤버 관리
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {filteredProjects.length === 0 ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {selectedOrgId === null ? '프로젝트가 없습니다' : `${selectedOrgInfo?.name}에 프로젝트가 없습니다`}
+                  </CardTitle>
+                  <CardDescription>
+                    {selectedOrgId === null ? 
+                      '아직 참여 중인 프로젝트가 없습니다. 조직을 생성하고 프로젝트를 만들어보세요.' :
+                      '이 조직에 프로젝트를 생성하여 용어와 정책을 관리하세요.'
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {selectedOrgId === null && (
+                    <p className="text-sm text-muted-foreground mb-4">
+                      1. 먼저 조직을 생성하세요 (회사, 팀 등)<br/>
+                      2. 조직 내에서 프로젝트를 생성하세요<br/>
+                      3. 프로젝트에서 용어와 정책을 관리하세요
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredProjects.map((project) => {
+                  const membership = project.memberships[0]
+                  return (
+                    <Card 
+                      key={project.id}
+                      className="cursor-pointer hover:shadow-md transition-shadow"
+                      onClick={() => router.push(`/dashboard/${project.id}`)}
+                    >
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          {project.name}
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            membership.role === 'admin' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {membership.role === 'admin' ? '관리자' : '멤버'}
+                          </span>
+                        </CardTitle>
+                        <CardDescription>
+                          {selectedOrgId === null && (
+                            <div className="text-blue-600 text-xs mb-1">
+                              {project.organizations.name}
+                            </div>
+                          )}
+                          {new Date(project.created_at).toLocaleDateString()}에 생성됨
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-sm text-muted-foreground">
+                          클릭하여 용어와 정책을 관리하세요
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            )}
+          </>
         )}
       </main>
 
       {/* 모달들 */}
       {user && (
         <>
-          <OrganizationCreateModal
-            isOpen={showOrgModal}
-            onClose={() => setShowOrgModal(false)}
-            onSuccess={handleModalSuccess}
-            user={user}
-          />
           <ProjectCreateModal
             isOpen={showProjectModal}
             onClose={() => setShowProjectModal(false)}
+            onSuccess={handleModalSuccess}
+            user={user}
+          />
+          
+          <OrganizationCreateModal
+            isOpen={showOrgCreateModal}
+            onClose={() => setShowOrgCreateModal(false)}
             onSuccess={handleModalSuccess}
             user={user}
           />
