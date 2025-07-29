@@ -211,12 +211,20 @@ export default function PrdPage({ params }: PrdPageProps) {
               <div className="flex items-center justify-between">
                 <CardTitle>프로젝트 요구사항 문서</CardTitle>
                 {canEditPrd && (
-                  <Button 
-                    onClick={savePrd}
-                    disabled={prdSaving}
-                  >
-                    {prdSaving ? '저장 중...' : '저장'}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      disabled
+                    >
+                      🤖 AI와의 대화를 통해 작성
+                    </Button>
+                    <Button 
+                      onClick={savePrd}
+                      disabled={prdSaving}
+                    >
+                      {prdSaving ? '저장 중...' : '저장'}
+                    </Button>
+                  </div>
                 )}
               </div>
             </CardHeader>
