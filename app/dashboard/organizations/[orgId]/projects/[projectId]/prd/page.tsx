@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
+import AiChatModal from '@/components/common/ai-chat-modal'
 
 type User = {
   id: string
@@ -36,6 +37,9 @@ export default function PrdPage({ params }: PrdPageProps) {
   const [prdContent, setPrdContent] = useState('')
   const [prdLoading, setPrdLoading] = useState(false)
   const [prdSaving, setPrdSaving] = useState(false)
+  
+  // AI 채팅 모달 상태
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false)
   
   const router = useRouter()
 
@@ -167,6 +171,11 @@ export default function PrdPage({ params }: PrdPageProps) {
     }
   }
 
+  const handleSavePrdFromAi = (content: string) => {
+    setPrdContent(content)
+    showSimpleSuccess('AI와의 대화 내용이 PRD에 적용되었습니다.')
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -214,7 +223,7 @@ export default function PrdPage({ params }: PrdPageProps) {
                   <div className="flex gap-2">
                     <Button 
                       variant="outline"
-                      disabled
+                      onClick={() => setIsAiChatOpen(true)}
                     >
                       🤖 AI와의 대화를 통해 작성
                     </Button>
@@ -260,6 +269,13 @@ export default function PrdPage({ params }: PrdPageProps) {
             </CardContent>
           </Card>
         </div>
-    </div>
-  )
-} 
+
+        {/* AI 채팅 모달 */}
+        <AiChatModal
+          isOpen={isAiChatOpen}
+          onClose={() => setIsAiChatOpen(false)}
+          onSavePrd={handleSavePrdFromAi}
+        />
+      </div>
+    )
+  } 
