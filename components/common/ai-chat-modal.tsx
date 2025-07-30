@@ -104,7 +104,7 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
       let assistantText = ''
 
       // 메시지 업데이트 간격(ms)
-      const updateInterval = 80
+      const updateInterval = 300
       let lastEmit = Date.now()
 
       while (true) {
