@@ -35,7 +35,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   // 용어 관련 상태
   const [glossaries, setGlossaries] = useState<Tables<'glossaries'>[]>([])
   const [glossariesLoading, setGlossariesLoading] = useState(false)
-  const [glossaryViewMode, setGlossaryViewMode] = useState<'grid' | 'list'>('grid')
+
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'name' | 'updated_at' | 'updated_at_old' | 'sequence'>('updated_at')
   
@@ -418,33 +418,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
         {/* 뷰 선택, 개수 표시, 검색, 정렬 */}
         <div className="flex items-center justify-between mb-4">
-          {/* 좌측: 뷰 모드 선택과 개수 표시 */}
+                    {/* 좌측: 개수 표시 */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setGlossaryViewMode('grid')}
-                className={`p-2 rounded-md transition-colors ${
-                  glossaryViewMode === 'grid'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent'
-                }`}
-                title={t('glossary.grid_view')}
-              >
-                ⊞
-              </button>
-              <button
-                onClick={() => setGlossaryViewMode('list')}
-                className={`p-2 rounded-md transition-colors ${
-                  glossaryViewMode === 'list'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent'
-                }`}
-                title={t('glossary.list_view')}
-              >
-                ☰
-              </button>
-        </div>
-            
             {/* 용어 개수 */}
             {glossaries.length > 0 && (
               <p className="text-sm text-muted-foreground">
@@ -508,11 +483,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
               </CardContent>
             </Card>
           ) : (
-          <div className={
-            glossaryViewMode === 'grid'
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
-              : 'space-y-4'
-          }>
+          <div className="space-y-4">
             {sortedGlossaries.map((glossary) => (
               <Card 
                 key={glossary.id}
