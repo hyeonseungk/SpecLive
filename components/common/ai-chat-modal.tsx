@@ -104,27 +104,77 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
       const reader = data.body.getReader()
       const decoder = new TextDecoder()
       let assistantText = ''
+      let lastActivity = Date.now()
 
-      // 메시지 업데이트 간격(ms)
-      const updateInterval = 500
-      let lastEmit = Date.now()
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        if (isCancelledRef.current) break
-
-        assistantText += decoder.decode(value, { stream: true })
-
-        const now = Date.now()
-        if (now - lastEmit >= updateInterval) {
-          setMessages(prev => {
-            const updated = [...prev]
-            updated[updated.length - 1] = { role: 'assistant', content: assistantText }
-            return updated
+      // 실시간 업데이트 (부드러운 스트리밍)
+      let isUpdateScheduled = false
+      
+      const scheduleUpdate = () => {
+        if (!isUpdateScheduled) {
+          isUpdateScheduled = true
+          requestAnimationFrame(() => {
+            setMessages(prev => {
+              const updated = [...prev]
+              updated[updated.length - 1] = { role: 'assistant', content: assistantText }
+              return updated
+            })
+            isUpdateScheduled = false
           })
-          lastEmit = now
         }
+      }
+
+      // 연결 상태 모니터링
+      const connectionMonitor = setInterval(() => {
+        const now = Date.now()
+        const timeSinceLastActivity = now - lastActivity
+        
+        // 60초 동안 활동이 없으면 경고 로그
+        if (timeSinceLastActivity > 60000) {
+          console.warn('Stream seems inactive for', Math.floor(timeSinceLastActivity / 1000), 'seconds')
+        }
+      }, 10000) // 10초마다 체크
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) {
+            console.log('Stream completed normally')
+            break
+          }
+          if (isCancelledRef.current) {
+            console.log('Stream cancelled by user')
+            break
+          }
+
+          lastActivity = Date.now()
+          const chunk = decoder.decode(value, { stream: true })
+          
+          // 스트림 종료 마커 감지
+          if (chunk.includes('__STREAM_END__')) {
+            console.log('Received stream end marker, completing normally')
+            // 마커 제거하고 최종 텍스트만 보관
+            assistantText += chunk.replace('__STREAM_END__', '').replace(/\n/g, '')
+            scheduleUpdate()
+            // 클라이언트가 스스로 연결을 끊음
+            reader.cancel()
+            break
+          }
+          
+          // 연결 중단 메시지 감지
+          if (chunk.includes('[Connection interrupted]')) {
+            console.warn('Received connection interrupted message')
+            showError(t('ai.error_title'), '연결이 중단되었습니다. 다시 시도해주세요.')
+            break
+          }
+          
+          assistantText += chunk
+          scheduleUpdate()
+        }
+      } catch (streamError) {
+        console.error('Stream reading error:', streamError)
+        throw new Error('스트리밍 중 연결이 끊어졌습니다.')
+      } finally {
+        clearInterval(connectionMonitor)
       }
 
       // 루프 종료 후(취소되지 않았다면) 최종 내용 반영
