@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { LanguageSelector } from '@/components/common/language-selector'
 import { OrganizationSelector } from '@/components/common/organization-selector'
 import { supabase } from '@/lib/supabase-browser'
 import { Tables } from '@/types/database'
@@ -89,9 +90,7 @@ export default function OrganizationLayout({
             <span className="text-sm text-muted-foreground">
               {user?.email}
             </span>
-            <Button variant="outline" onClick={handleSignOut}>
-              로그아웃
-            </Button>
+            <LanguageSelector />
           </div>
         </div>
       </header>
