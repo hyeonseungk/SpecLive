@@ -10,6 +10,141 @@ import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
 import { useT } from '@/lib/i18n'
 import { useLangStore } from '@/lib/i18n-store'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import {
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+// 드래그 가능한 용어 카드 컴포넌트
+interface SortableGlossaryCardProps {
+  glossary: Tables<'glossaries'> & { glossary_links?: any[] }
+  onEdit: (glossary: Tables<'glossaries'>) => void
+  showSequence: boolean
+  t: any
+  locale: string
+}
+
+function SortableGlossaryCard({ glossary, onEdit, showSequence, t, locale }: SortableGlossaryCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: glossary.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className={isDragging ? 'opacity-50' : ''}>
+      <Card className="cursor-pointer hover:shadow-md transition-shadow relative">
+        {/* 드래그 핸들 (시퀀스 정렬일 때만) */}
+        {showSequence && (
+          <div
+            {...attributes}
+            {...listeners}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col gap-0.5">
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+            </div>
+          </div>
+        )}
+
+        {/* 시퀀스 번호 표시 (시퀀스 정렬일 때만) */}
+        {showSequence && glossary.sequence && (
+          <div className="absolute top-3 right-3 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+            {glossary.sequence}
+          </div>
+        )}
+
+        <div onClick={() => onEdit(glossary)} className={showSequence ? 'ml-8' : ''}>
+          <CardHeader>
+            <CardTitle className="text-3xl">{glossary.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p 
+              className="text-base text-muted-foreground overflow-hidden mb-2" 
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                maxHeight: '3rem'
+              } as React.CSSProperties}
+            >
+              {glossary.definition}
+            </p>
+            {glossary.examples && (
+              <p className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 truncate">
+                {t('glossary.example_prefix')}: {glossary.examples}
+              </p>
+            )}
+            {(glossary as any).glossary_links && (glossary as any).glossary_links.length > 0 && (
+              <div className="mb-2">
+                <div className="flex flex-col gap-1">
+                  {(glossary as any).glossary_links.map((link: any, index: number) => (
+                    <a
+                      key={index}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
+                      title={link.url}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span>
+                        {link.url.includes('github.com') ? (
+                          <img 
+                            src="/images/github-mark.png" 
+                            alt="GitHub" 
+                            className="w-4 h-4"
+                          />
+                        ) : (
+                          '🔗'
+                        )}
+                      </span>
+                      <span className="break-all">
+                        {link.url.trim().replace(/^https?:\/\/(?:www\.)?github\.com\/[^^\/]+\//, '')}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="mt-auto text-xs text-muted-foreground text-right">
+              {new Date(glossary.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </CardContent>
+        </div>
+      </Card>
+    </div>
+  )
+}
 
 type User = {
   id: string
@@ -62,6 +197,14 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const { locale } = useLangStore()
 
   const router = useRouter()
+
+  // 드래그 앤 드롭 센서
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   useEffect(() => {
     const loadProjectData = async () => {
@@ -362,6 +505,51 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     }
   }
 
+  // 드래그 엔드 핸들러
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (active.id !== over?.id) {
+      const oldIndex = glossaries.findIndex((item) => item.id === active.id)
+      const newIndex = glossaries.findIndex((item) => item.id === over?.id)
+
+      // 로컬 상태 업데이트
+      const newGlossaries = arrayMove(glossaries, oldIndex, newIndex)
+      setGlossaries(newGlossaries)
+
+      // 시퀀스 업데이트를 위한 배치 업데이트
+      try {
+        const updates = newGlossaries.map((glossary, index) => ({
+          id: glossary.id,
+          sequence: index + 1
+        }))
+
+        // Supabase에 시퀀스 업데이트
+        for (const update of updates) {
+          const { error } = await supabase
+            .from('glossaries')
+            .update({ sequence: update.sequence })
+            .eq('id', update.id)
+
+          if (error) throw error
+        }
+
+        // 로컬 상태도 시퀀스 반영
+        setGlossaries(prev => prev.map((glossary, index) => ({
+          ...glossary,
+          sequence: index + 1
+        })))
+
+        showSimpleSuccess(t('glossary.sequence_updated'))
+      } catch (error) {
+        console.error('Error updating sequence:', error)
+        showError(t('glossary.sequence_error_title'), t('glossary.sequence_error_desc'))
+        // 에러 발생 시 원래 상태로 복원
+        loadGlossariesForProject(params.projectId)
+      }
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -483,77 +671,29 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
               </CardContent>
             </Card>
           ) : (
-          <div className="space-y-4">
-            {sortedGlossaries.map((glossary) => (
-              <Card 
-                key={glossary.id}
-                className="cursor-pointer hover:shadow-md transition-shadow relative"
-                onClick={() => handleEditGlossary(glossary)}
-              >
-                {/* 시퀀스 번호 표시 (시퀀스 정렬일 때만) */}
-                {sortBy === 'sequence' && glossary.sequence && (
-                  <div className="absolute top-3 right-3 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
-                    {glossary.sequence}
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="text-3xl">{glossary.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p 
-                    className="text-base text-muted-foreground overflow-hidden mb-2" 
-                    style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      maxHeight: '3rem'
-                    } as React.CSSProperties}
-                  >
-                    {glossary.definition}
-                  </p>
-                  {glossary.examples && (
-                    <p className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 truncate">
-                      {t('glossary.example_prefix')}: {glossary.examples}
-                    </p>
-                  )}
-                  {(glossary as any).glossary_links && (glossary as any).glossary_links.length > 0 && (
-                    <div className="mb-2">
-                      <div className="flex flex-col gap-1">
-                        {(glossary as any).glossary_links.map((link: any, index: number) => (
-                          <a
-                            key={index}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
-                            title={link.url}
-                          >
-                            <span>
-                              {link.url.includes('github.com') ? (
-                                <img 
-                                  src="/images/github-mark.png" 
-                                  alt="GitHub" 
-                                  className="w-4 h-4"
-                                />
-                              ) : (
-                                '🔗'
-                              )}
-                            </span>
-                            <span className="break-all">
-                              {link.url.trim().replace(/^https?:\/\/(?:www\.)?github\.com\/[^^\/]+\//, '')}
-                            </span>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <div className="mt-auto text-xs text-muted-foreground text-right">
-                    {new Date(glossary.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={sortedGlossaries.map(g => g.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-4">
+                {sortedGlossaries.map((glossary) => (
+                  <SortableGlossaryCard
+                    key={glossary.id}
+                    glossary={glossary}
+                    onEdit={handleEditGlossary}
+                    showSequence={sortBy === 'sequence'}
+                    t={t}
+                    locale={locale}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 

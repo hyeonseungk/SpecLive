@@ -73,7 +73,10 @@
     "delete_confirm_desc": "Do you really want to delete this term?",
     "delete_success": "Term deleted successfully.",
     "delete_error_title": "Term Deletion Error",
-    "delete_error_desc": "An error occurred while deleting the term."
+    "delete_error_desc": "An error occurred while deleting the term.",
+    "sequence_updated": "Term sequence updated successfully.",
+    "sequence_error_title": "Sequence Update Error",
+    "sequence_error_desc": "An error occurred while updating the term sequence."
   },
   "management": {
     "header": "Project Management",
