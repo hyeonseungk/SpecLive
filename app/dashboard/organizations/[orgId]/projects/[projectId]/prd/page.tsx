@@ -228,7 +228,7 @@ export default function PrdPage({ params }: PrdPageProps) {
                       🤖 AI와의 대화를 통해 작성
                     </Button>
                     <Button 
-                      onClick={savePrd}
+                      onClick={() => savePrd()}
                       disabled={prdSaving}
                     >
                       {prdSaving ? '저장 중...' : '저장'}
