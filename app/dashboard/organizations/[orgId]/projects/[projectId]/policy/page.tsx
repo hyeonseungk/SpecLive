@@ -103,7 +103,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         .from('policies')
         .select('*')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
+        .order('updated_at', { ascending: false })
 
       if (error) throw error
 
@@ -226,7 +226,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                             {policy.category}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(policy.created_at).toLocaleDateString(locale)}
+                            {new Date(policy.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                       </div>

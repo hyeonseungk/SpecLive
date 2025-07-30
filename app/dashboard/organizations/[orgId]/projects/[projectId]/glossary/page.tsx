@@ -37,7 +37,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const [glossariesLoading, setGlossariesLoading] = useState(false)
   const [glossaryViewMode, setGlossaryViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState<'name' | 'created_at' | 'created_at_old'>('created_at')
+  const [sortBy, setSortBy] = useState<'name' | 'updated_at' | 'updated_at_old'>('updated_at')
   
   // 용어 추가 모달 상태
   const [showGlossaryModal, setShowGlossaryModal] = useState(false)
@@ -125,7 +125,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
           )
         `)
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
+        .order('updated_at', { ascending: false })
 
       if (error) throw error
 
@@ -396,10 +396,10 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const sortedGlossaries = [...filteredGlossaries].sort((a, b) => {
     if (sortBy === 'name') {
       return a.name.localeCompare(b.name)
-    } else if (sortBy === 'created_at') {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    } else if (sortBy === 'updated_at') {
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     } else {
-      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
     }
   })
 
@@ -463,11 +463,11 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             <div className="w-32">
                               <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'name' | 'created_at' | 'created_at_old')}
+                  onChange={(e) => setSortBy(e.target.value as 'name' | 'updated_at' | 'updated_at_old')}
                   className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  <option value="created_at">{t('glossary.sort_newest')}</option>
-                  <option value="created_at_old">{t('glossary.sort_oldest')}</option>
+                  <option value="updated_at">{t('glossary.sort_newest')}</option>
+                  <option value="updated_at_old">{t('glossary.sort_oldest')}</option>
                   <option value="name">{t('glossary.sort_name')}</option>
                 </select>
             </div>
@@ -565,8 +565,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                       </div>
                     </div>
                   )}
-                  <div className="mt-auto text-xs text-muted-foreground">
-                    {new Date(glossary.created_at).toLocaleDateString(locale)}
+                  <div className="mt-auto text-xs text-muted-foreground text-right">
+                    {new Date(glossary.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </CardContent>
               </Card>
