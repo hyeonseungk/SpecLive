@@ -513,34 +513,25 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       const oldIndex = glossaries.findIndex((item) => item.id === active.id)
       const newIndex = glossaries.findIndex((item) => item.id === over?.id)
 
-      // 로컬 상태 업데이트
-      const newGlossaries = arrayMove(glossaries, oldIndex, newIndex)
+      // 로컬 상태를 시퀀스와 함께 한 번에 업데이트
+      const newGlossaries = arrayMove(glossaries, oldIndex, newIndex).map((glossary, index) => ({
+        ...glossary,
+        sequence: index + 1
+      }))
+      
       setGlossaries(newGlossaries)
 
-      // 시퀀스 업데이트를 위한 배치 업데이트
+      // 백그라운드에서 Supabase 업데이트 (UI 블로킹 없이)
       try {
-        const updates = newGlossaries.map((glossary, index) => ({
-          id: glossary.id,
-          sequence: index + 1
-        }))
-
-        // Supabase에 시퀀스 업데이트
-        for (const update of updates) {
-          const { error } = await supabase
+        // 배치 업데이트를 위한 Promise 배열
+        const updatePromises = newGlossaries.map((glossary, index) => 
+          supabase
             .from('glossaries')
-            .update({ sequence: update.sequence })
-            .eq('id', update.id)
+            .update({ sequence: index + 1 })
+            .eq('id', glossary.id)
+        )
 
-          if (error) throw error
-        }
-
-        // 로컬 상태도 시퀀스 반영
-        setGlossaries(prev => prev.map((glossary, index) => ({
-          ...glossary,
-          sequence: index + 1
-        })))
-
-        showSimpleSuccess(t('glossary.sequence_updated'))
+        await Promise.all(updatePromises)
       } catch (error) {
         console.error('Error updating sequence:', error)
         showError(t('glossary.sequence_error_title'), t('glossary.sequence_error_desc'))
