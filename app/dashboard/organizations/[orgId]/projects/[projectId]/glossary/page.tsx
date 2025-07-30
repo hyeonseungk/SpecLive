@@ -487,9 +487,15 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             {sortedGlossaries.map((glossary) => (
               <Card 
                 key={glossary.id}
-                className="cursor-pointer hover:shadow-md transition-shadow"
+                className="cursor-pointer hover:shadow-md transition-shadow relative"
                 onClick={() => handleEditGlossary(glossary)}
               >
+                {/* 시퀀스 번호 표시 (시퀀스 정렬일 때만) */}
+                {sortBy === 'sequence' && glossary.sequence && (
+                  <div className="absolute top-3 right-3 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                    {glossary.sequence}
+                  </div>
+                )}
                 <CardHeader>
                   <CardTitle className="text-3xl">{glossary.name}</CardTitle>
                 </CardHeader>
