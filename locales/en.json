@@ -59,6 +59,7 @@
     "ai_add_selected": "Add Selected Terms",
     "ai_retry": "Retry",
     "ai_terms_added": " terms have been added.",
+    "ai_remaining_terms": "Continue reviewing remaining recommendations or get new suggestions.",
     "add_term_button": "+ Add Term",
     "first_term_sub": "Create your team's glossary by adding the first term.",
     "first_term_button": "Add First Term",

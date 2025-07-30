@@ -12,7 +12,6 @@ const corsHeaders = {
 interface GlossaryRecommendation {
   name: string;
   definition: string;
-  examples?: string;
 }
 
 interface RequestBody {
@@ -164,7 +163,6 @@ Recommendation Criteria:
 Each term should have:
 - name: Term name (primarily in English, but can include commonly used Korean terms in parentheses if necessary)
 - definition: Clear and easy-to-understand definition in English (1-2 sentences)
-- examples: Specific usage examples or situations in English (optional)
 
 Please recommend practical terms in English that can be used immediately in actual projects.`;
       } else {
@@ -186,7 +184,6 @@ Please recommend practical terms in English that can be used immediately in actu
 각 용어는:
 - name: 용어명 (주로 한국어, 필요시 영어 병기 가능)
 - definition: 명확하고 이해하기 쉬운 한국어 정의 (1-2문장)
-- examples: 구체적인 한국어 사용 예시나 상황 (선택적)
 
 실제 프로젝트에서 바로 사용할 수 있는 실용적인 한국어 용어들을 추천해주세요.`;
       }
@@ -208,7 +205,7 @@ Please recommend practical terms in English that can be used immediately in actu
         body: JSON.stringify({
           model: "gpt-4o-mini",
           temperature: 0.7,
-          max_tokens: 4000,
+          max_tokens: 6000,
           messages: [
             {
               role: "system",
@@ -240,10 +237,6 @@ Please recommend practical terms in English that can be used immediately in actu
                         definition: {
                           type: "string",
                           description: "용어 정의"
-                        },
-                        examples: {
-                          type: "string",
-                          description: "사용 예시"
                         }
                       },
                       required: ["name", "definition"],

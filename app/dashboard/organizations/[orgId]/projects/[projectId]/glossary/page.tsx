@@ -390,6 +390,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const handleAiRecommendation = async () => {
     if (!project) return
 
+    // 기존 추천 결과 초기화
+    setAiRecommendations([])
     setAiLoading(true)
     setAiError(null)
 
@@ -447,8 +449,21 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
     setAiLoading(true)
     try {
+      // 1. 현재 프로젝트의 최대 sequence 값 조회
+      const { data: maxSequenceData, error: maxSequenceError } = await supabase
+        .from('glossaries')
+        .select('sequence')
+        .eq('project_id', project.id)
+        .order('sequence', { ascending: false })
+        .limit(1)
+
+      if (maxSequenceError) throw maxSequenceError
+
+      // 다음 sequence 값 계산 (최대값 + 1부터 시작)
+      let nextSequence = (maxSequenceData?.[0]?.sequence || 0) + 1
+
       for (const term of selectedTerms) {
-        // 1. 용어 추가
+        // 2. 용어 추가 (sequence 값 포함)
         const { data: glossary, error: glossaryError } = await supabase
           .from('glossaries')
           .insert({
@@ -456,23 +471,38 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             name: term.name,
             definition: term.definition,
             examples: term.examples || null,
-            author_id: user.id
+            author_id: user.id,
+            sequence: nextSequence
           })
           .select()
           .single()
 
         if (glossaryError) throw glossaryError
 
-        // 2. 목록에 새 용어 추가
+        // 3. 목록에 새 용어 추가
         const glossaryWithLinks = {
           ...glossary,
           glossary_links: []
         }
         setGlossaries(prev => [glossaryWithLinks, ...prev])
+
+        // 다음 용어를 위해 sequence 증가
+        nextSequence++
       }
 
-      handleCloseAiModal()
+      // 3. 남은 추천 개수 계산 (상태 업데이트 전에)
+      const remainingCount = aiRecommendations.filter(rec => !rec.selected).length
+
+      // 4. 추가된 용어들을 추천 리스트에서 제거
+      setAiRecommendations(prev => prev.filter(rec => !rec.selected))
+
+      // 5. 성공 메시지
       showSimpleSuccess(`${selectedTerms.length}${t('glossary.ai_terms_added')}`)
+
+      // 6. 남은 추천이 없으면 모달 닫기
+      if (remainingCount === 0) {
+        handleCloseAiModal()
+      }
     } catch (error) {
       console.error('Error adding recommended terms:', error)
       showError(t('glossary.add_error_title'), t('glossary.add_error_desc'))
@@ -1106,7 +1136,11 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             {/* 추천 결과 상태 */}
             {aiRecommendations.length > 0 && !aiError && (
               <>
-                <p className="text-muted-foreground mb-4">{t('glossary.ai_select_terms')}</p>
+                <p className="text-muted-foreground mb-4">
+                  {t('glossary.ai_select_terms')}
+                  {aiRecommendations.some(rec => rec.selected) && 
+                    ` (${aiRecommendations.filter(rec => rec.selected).length}개 선택됨)`}
+                </p>
                 
                 <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
                   {aiRecommendations.map((recommendation, index) => (
@@ -1120,13 +1154,26 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                       onClick={() => toggleRecommendationSelection(index)}
                     >
                       <div className="flex items-start gap-3">
-                        <input
-                          type="checkbox"
-                          checked={recommendation.selected}
-                          onChange={() => toggleRecommendationSelection(index)}
-                          className="mt-1 rounded"
-                        />
-                        <div className="flex-1">
+                        <div
+                          className={`
+                            mt-1 w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-colors
+                            ${recommendation.selected 
+                              ? 'bg-primary border-primary text-white' 
+                              : 'border-gray-300 hover:border-gray-400'
+                            }
+                          `}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleRecommendationSelection(index)
+                          }}
+                        >
+                          {recommendation.selected && (
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="flex-1" onClick={() => toggleRecommendationSelection(index)}>
                           <h4 className="font-semibold text-base mb-1">{recommendation.name}</h4>
                           <p className="text-sm text-muted-foreground mb-2">{recommendation.definition}</p>
                           {recommendation.examples && (
