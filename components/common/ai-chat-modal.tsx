@@ -41,6 +41,8 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
   const [isStreaming, setIsStreaming] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  // 전송 중 취소 플래그
+  const isCancelledRef = useRef(false)
 
   // 메시지가 추가될 때마다 스크롤을 맨 아래로
   useEffect(() => {
@@ -61,6 +63,8 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
 
     const userMessage = inputValue.trim()
     setInputValue('')
+    // 취소 플래그 초기화
+    isCancelledRef.current = false
     setIsLoading(true)
 
     // 사용자 메시지 + AI placeholder 한 번에 추가
@@ -99,12 +103,30 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
       const decoder = new TextDecoder()
       let assistantText = ''
 
+      // 메시지 업데이트 간격(ms)
+      const updateInterval = 80
+      let lastEmit = Date.now()
+
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
+        if (isCancelledRef.current) break
 
         assistantText += decoder.decode(value, { stream: true })
 
+        const now = Date.now()
+        if (now - lastEmit >= updateInterval) {
+          setMessages(prev => {
+            const updated = [...prev]
+            updated[updated.length - 1] = { role: 'assistant', content: assistantText }
+            return updated
+          })
+          lastEmit = now
+        }
+      }
+
+      // 루프 종료 후(취소되지 않았다면) 최종 내용 반영
+      if (!isCancelledRef.current) {
         setMessages(prev => {
           const updated = [...prev]
           updated[updated.length - 1] = { role: 'assistant', content: assistantText }
@@ -129,6 +151,17 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
       e.preventDefault()
       handleSendMessage()
     }
+  }
+
+  // 전송 중단 (AI 응답 무시)
+  const handleCancel = () => {
+    if (!isLoading) return
+    // 취소 플래그 설정
+    isCancelledRef.current = true
+    // 마지막 assistant placeholder 제거
+    setMessages(prev => prev.slice(0, -1))
+    setIsLoading(false)
+    setIsStreaming(false)
   }
 
   const handleSavePrd = () => {
@@ -254,6 +287,12 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
             >
               {isLoading ? '전송 중...' : '전송'}
             </Button>
+
+            {isLoading && (
+              <Button variant="outline" onClick={handleCancel}>
+                중단하기
+              </Button>
+            )}
           </div>
         </div>
       </div>
