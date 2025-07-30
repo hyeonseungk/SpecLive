@@ -134,11 +134,11 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
   }
 
   const handleSavePrd = () => {
-    // 마지막 AI 메시지를 PRD로 저장
-    const aiMessages = messages.filter(msg => msg.role === 'assistant')
-    const lastAssistantMsg = aiMessages[aiMessages.length - 1]?.content ?? ''
-    if (!lastAssistantMsg.trim()) return
-    onSavePrd(lastAssistantMsg)
+    // 마지막 AI 메시지(말풍선)만 PRD로 저장
+    const lastAssistant = [...messages].reverse().find(msg => msg.role === 'assistant')
+    if (!lastAssistant) return
+    const prdContent = lastAssistant.content
+    onSavePrd(prdContent)
     onClose()
   }
 
@@ -162,7 +162,7 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
               <AlertDialogTrigger asChild>
                 <Button
                   variant="outline"
-                  disabled={messages.filter(msg => msg.role === 'assistant').length === 0}
+                  disabled={messages.length <= 1}
                 >
                   최종 답변을 PRD로 저장
                 </Button>
@@ -175,9 +175,12 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
                     AI가 준 마지막 말풍선의 내용이 PRD로 저장됩니다, 진행할까요?
                   </AlertDialogDescription>
                 </AlertDialogHeader>
+
                 <AlertDialogFooter>
                   <AlertDialogCancel>취소</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSavePrd}>PRD로 저장</AlertDialogAction>
+                  <AlertDialogAction onClick={handleSavePrd}>
+                    PRD로 저장
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
