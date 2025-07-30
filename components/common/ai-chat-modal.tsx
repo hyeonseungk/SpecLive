@@ -240,6 +240,16 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
     onClose()
   }
 
+  // 대화 초기화: 메시지를 기본 상태로 되돌림
+  const handleResetConversation = () => {
+    setMessages([{ role: 'assistant', content: t('ai.initial_message') }]) // 인사 메시지만 유지
+    setInputValue('') // 입력창도 초기화
+    // 입력창에 포커스
+    setTimeout(() => {
+      inputRef.current?.focus()
+    }, 100)
+  }
+
   if (!isOpen) return null
 
   return (
@@ -272,6 +282,34 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
                   <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
                   <AlertDialogAction onClick={handleSavePrd}>
                     {t('ai.save_to_prd')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            {/* 대화 초기화 확인 모달 */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  disabled={messages.length <= 1}
+                >
+                  대화 초기화
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>대화 초기화</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    이때까지의 대화를 초기화하시겠어요?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleResetConversation}>
+                    초기화
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
