@@ -17,6 +17,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { useT } from '@/lib/i18n'
+import { useLangStore } from '@/lib/i18n-store'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -31,6 +32,7 @@ interface AiChatModalProps {
 
 export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalProps) {
   const t = useT()
+  const { locale } = useLangStore()
   // 최초 안내 메시지를 현재 언어로 설정
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: t('ai.initial_message') },
@@ -82,7 +84,8 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
           messages: [
             ...messages,
             { role: 'user', content: userMessage }
-          ]
+          ],
+          language: locale
         },
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
@@ -103,7 +106,7 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
       let assistantText = ''
 
       // 메시지 업데이트 간격(ms)
-      const updateInterval = 300
+      const updateInterval = 500
       let lastEmit = Date.now()
 
       while (true) {
