@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { supabase } from '@/lib/supabase-browser'
 import { showError } from '@/lib/error-store'
 import { 
@@ -41,7 +40,7 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
   const [isLoading, setIsLoading] = useState(false)
   const [isStreaming, setIsStreaming] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // 메시지가 추가될 때마다 스크롤을 맨 아래로
   useEffect(() => {
@@ -94,10 +93,6 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
 
       
       
-      console.log('data: ', data);
-     
-      
-
       const reader = data.body.getReader()
       const decoder = new TextDecoder()
       let assistantText = ''
@@ -126,7 +121,8 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // Shift+Enter는 개행, Enter만 누르면 전송
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage()
@@ -241,14 +237,14 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
         {/* 입력 영역 */}
         <div className="p-4 border-t">
           <div className="flex gap-2">
-            <Input
+            <textarea
               ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="메시지를 입력하세요..."
               disabled={isLoading}
-              className="flex-1"
+              className="flex-1 h-20 resize-none border rounded-md p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
             <Button
               onClick={handleSendMessage}
