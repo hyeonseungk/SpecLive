@@ -112,7 +112,7 @@ export default function PrdPage({ params }: PrdPageProps) {
 
       if (data) {
         setPrd(data)
-        setPrdContent(data.content || '')
+        setPrdContent(data.contents || '')
       } else {
         setPrdContent('')
       }
@@ -124,23 +124,22 @@ export default function PrdPage({ params }: PrdPageProps) {
     }
   }
 
-  // PRD 로드 함수
-  const loadPrd = async () => {
-    if (!project) return
-    await loadPrdForProject(project.id)
-  }
-
-  const savePrd = async () => {
+  /**
+   * PRD 저장 함수
+   * @param contentOverride  저장할 내용을 명시적으로 전달(옵션). 전달하지 않으면 현재 prdContent state 사용
+   */
+  const savePrd = async (contentOverride?: string) => {
     if (!project || !user) return
 
     setPrdSaving(true)
     try {
+      const contentToSave = contentOverride ?? prdContent
       if (prd) {
         // 기존 PRD 업데이트
         const { error } = await supabase
           .from('prds')
           .update({
-            content: prdContent,
+            contents: contentToSave,
             updated_at: new Date().toISOString()
           })
           .eq('id', prd.id)
@@ -152,7 +151,7 @@ export default function PrdPage({ params }: PrdPageProps) {
           .from('prds')
           .insert({
             project_id: project.id,
-            content: prdContent,
+            contents: contentToSave,
             author_id: user.id
           })
           .select()
@@ -171,9 +170,10 @@ export default function PrdPage({ params }: PrdPageProps) {
     }
   }
 
-  const handleSavePrdFromAi = (content: string) => {
+  // AI 모달에서 호출: 내용 반영 후 즉시 Supabase에 저장
+  const handleSavePrdFromAi = async (content: string) => {
     setPrdContent(content)
-    showSimpleSuccess('AI와의 대화 내용이 PRD에 적용되었습니다.')
+    await savePrd(content)
   }
 
   if (loading) {
@@ -218,7 +218,7 @@ export default function PrdPage({ params }: PrdPageProps) {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>프로젝트 요구사항 문서</CardTitle>
+                <CardTitle>제품 요구사항 문서</CardTitle>
                 {canEditPrd && (
                   <div className="flex gap-2">
                     <Button 

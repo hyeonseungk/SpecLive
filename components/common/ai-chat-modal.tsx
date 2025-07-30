@@ -134,10 +134,11 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
   }
 
   const handleSavePrd = () => {
-    // AI 메시지들을 하나로 합쳐서 PRD로 저장
+    // 마지막 AI 메시지를 PRD로 저장
     const aiMessages = messages.filter(msg => msg.role === 'assistant')
-    const prdContent = aiMessages.map(msg => msg.content).join('\n\n')
-    onSavePrd(prdContent)
+    const lastAssistantMsg = aiMessages[aiMessages.length - 1]?.content ?? ''
+    if (!lastAssistantMsg.trim()) return
+    onSavePrd(lastAssistantMsg)
     onClose()
   }
 
@@ -156,13 +157,30 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
         <div className="flex items-center justify-between p-4 border-b">
           <CardTitle className="text-xl">🤖 AI와의 대화로 PRD 작성</CardTitle>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleSavePrd}
-              disabled={messages.length <= 1}
-            >
-              최종 답변을 PRD로 저장
-            </Button>
+            {/* PRD 저장 확인 모달 */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  disabled={messages.filter(msg => msg.role === 'assistant').length === 0}
+                >
+                  최종 답변을 PRD로 저장
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>PRD로 저장하시겠어요?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    AI가 준 마지막 말풍선의 내용이 PRD로 저장됩니다, 진행할까요?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSavePrd}>PRD로 저장</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
             {/* 확인 모달 */}
             <AlertDialog>
