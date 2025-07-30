@@ -67,7 +67,12 @@
     "add": "Add",
     "edit_modal_title": "Edit Term",
     "updating": "Updating...",
-    "update": "Update"
+    "update": "Update",
+    "delete_confirm_title": "Delete Term",
+    "delete_confirm_desc": "Do you really want to delete this term?",
+    "delete_success": "Term deleted successfully.",
+    "delete_error_title": "Term Deletion Error",
+    "delete_error_desc": "An error occurred while deleting the term."
   },
   "management": {
     "header": "Project Management",
@@ -117,7 +122,8 @@
     "cancel": "Cancel",
     "send": "Send",
     "back": "Back to Dashboard",
-    "ok": "OK"
+    "ok": "OK",
+    "delete": "Delete"
   },
   "ai": {
     "modal_title": "Write PRD via Chat with AI",

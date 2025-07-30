@@ -55,7 +55,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const [editExamples, setEditExamples] = useState('')
   const [editGithubUrls, setEditGithubUrls] = useState<string[]>([''])
   const [editSaving, setEditSaving] = useState(false)
-  
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
   // 추가: 다국어 지원 훅
   const t = useT()
   const { locale } = useLangStore()
@@ -322,6 +323,42 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       showError(t('glossary.update_error_title'), t('glossary.update_error_desc'))
     } finally {
       setEditSaving(false)
+    }
+  }
+
+  // 용어 삭제 함수
+  const deleteGlossary = async () => {
+    if (!editingGlossary || !user) return
+
+    setEditSaving(true) // 삭제 중에는 편집 모달 버튼 비활성화
+    try {
+      // 1. 용어 링크 삭제
+      const { error: deleteLinksError } = await supabase
+        .from('glossary_links')
+        .delete()
+        .eq('glossary_id', editingGlossary.id)
+
+      if (deleteLinksError) throw deleteLinksError
+
+      // 2. 용어 자체 삭제
+      const { error: deleteGlossaryError } = await supabase
+        .from('glossaries')
+        .delete()
+        .eq('id', editingGlossary.id)
+
+      if (deleteGlossaryError) throw deleteGlossaryError
+
+      // 3. 목록에서 제거
+      setGlossaries(prev => prev.filter(g => g.id !== editingGlossary.id))
+
+      handleCloseEditModal()
+      showSimpleSuccess(t('glossary.delete_success'))
+    } catch (error) {
+      console.error('Error deleting glossary:', error)
+      showError(t('glossary.delete_error_title'), t('glossary.delete_error_desc'))
+    } finally {
+      setEditSaving(false)
+      setShowDeleteConfirm(false) // 삭제 확인 모달 닫기
     }
   }
 
@@ -721,19 +758,52 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 mt-6">
+            <div className="flex justify-between mt-6">
+              <Button 
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={editSaving}
+              >
+                {t('buttons.delete')}
+              </Button>
+              <div className="flex justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handleCloseEditModal}
+                  disabled={editSaving}
+                >
+                  {t('buttons.cancel')}
+                </Button>
+                <Button 
+                  onClick={updateGlossary}
+                  disabled={editSaving || !editName.trim() || !editDefinition.trim()}
+                >
+                  {editSaving ? t('glossary.updating') : t('glossary.update')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 삭제 확인 모달 */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+            <h3 className="text-lg font-semibold mb-4">{t('glossary.delete_confirm_title')}</h3>
+            <p className="text-muted-foreground mb-6">{t('glossary.delete_confirm_desc')}</p>
+            <div className="flex justify-end gap-2">
               <Button 
                 variant="outline" 
-                onClick={handleCloseEditModal}
-                disabled={editSaving}
+                onClick={() => setShowDeleteConfirm(false)}
               >
                 {t('buttons.cancel')}
               </Button>
               <Button 
-                onClick={updateGlossary}
-                disabled={editSaving || !editName.trim() || !editDefinition.trim()}
+                variant="destructive"
+                onClick={deleteGlossary}
               >
-                {editSaving ? t('glossary.updating') : t('glossary.update')}
+                {t('buttons.delete')}
               </Button>
             </div>
           </div>
