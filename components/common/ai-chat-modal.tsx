@@ -6,10 +6,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { supabase } from '@/lib/supabase-browser'
 import { showError } from '@/lib/error-store'
+import { 
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
+}
+
+// 최초 안내 메시지 정의
+const initialAssistantMessage: Message = {
+  role: 'assistant',
+  content: '어떤 프로젝트인지 간단히 설명해주시면 저와 질의응답을 통해 PRD를 만들 수 있어요',
 }
 
 interface AiChatModalProps {
@@ -19,12 +36,7 @@ interface AiChatModalProps {
 }
 
 export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: '어떤 프로젝트인지 간단히 설명해주시면 저와 질의응답을 통해 PRD를 만들 수 있어요'
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>([initialAssistantMessage])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isStreaming, setIsStreaming] = useState(false)
@@ -129,6 +141,12 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
     onClose()
   }
 
+  // “그래도 닫기” 클릭 시: 메시지를 초기화하고 모달을 닫음
+  const handleConfirmClose = () => {
+    setMessages([initialAssistantMessage]) // 인사 메시지만 유지
+    onClose()
+  }
+
   if (!isOpen) return null
 
   return (
@@ -145,9 +163,33 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
             >
               최종 답변을 PRD로 저장
             </Button>
-            <Button variant="outline" onClick={onClose}>
-              닫기
-            </Button>
+
+            {/* 확인 모달 */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline">
+                  닫기
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    대화를 닫으시겠어요?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    대화를 닫으면 이때까지의 대화가 모두 사라져요, 그래도 닫으시겠어요?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleConfirmClose}>
+                    그래도 닫기
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
