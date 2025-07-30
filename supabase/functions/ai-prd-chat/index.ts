@@ -67,8 +67,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         stream: true,
-        temperature: 0.7,
-        max_tokens: 2048,
+        temperature: 0.8,
+        max_tokens: 10240,
         messages: [
           {
             role: "system",
