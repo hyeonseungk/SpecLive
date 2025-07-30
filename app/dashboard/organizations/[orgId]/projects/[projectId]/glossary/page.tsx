@@ -558,7 +558,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                               )}
                             </span>
                             <span className="break-all">
-                              {link.url.replace(/^https?:\/\/(www\.)?github\.com\//, '')}
+                              {link.url.trim().replace(/^https?:\/\/(?:www\.)?github\.com\/[^^\/]+\//, '')}
                             </span>
                           </a>
                         ))}
