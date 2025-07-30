@@ -91,7 +91,9 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
         // signal: abortRef.current.signal
       })
 
-      
+      if (!data?.body) {
+        throw new Error('AI 응답이 올바르지 않습니다.')
+      }
       
       const reader = data.body.getReader()
       const decoder = new TextDecoder()
