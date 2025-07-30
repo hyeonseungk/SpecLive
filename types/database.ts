@@ -111,6 +111,7 @@ export interface Database {
           author_id: string
           updated_at: string
           created_at: string
+          sequence: number
         }
         Insert: {
           id?: string
@@ -121,6 +122,7 @@ export interface Database {
           author_id: string
           updated_at?: string
           created_at?: string
+          sequence?: number
         }
         Update: {
           id?: string
@@ -131,6 +133,7 @@ export interface Database {
           author_id?: string
           updated_at?: string
           created_at?: string
+          sequence?: number
         }
       }
       policies: {
