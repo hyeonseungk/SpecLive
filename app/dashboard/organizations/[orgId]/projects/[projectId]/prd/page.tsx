@@ -123,7 +123,7 @@ export default function PrdPage({ params }: PrdPageProps) {
       }
     } catch (error) {
       console.error('Error loading PRD:', error)
-      showError('PRD 로드 실패', 'PRD를 불러오는 중 오류가 발생했습니다.')
+      showError(t('prd.load_error_title'), t('prd.load_error_desc'))
     } finally {
       setPrdLoading(false)
     }
@@ -166,10 +166,10 @@ export default function PrdPage({ params }: PrdPageProps) {
         setPrd(newPrd)
       }
 
-      showSimpleSuccess('PRD가 저장되었습니다.')
+      showSimpleSuccess(t('prd.save_success'))
     } catch (error) {
       console.error('Error saving PRD:', error)
-      showError('PRD 저장 실패', 'PRD를 저장하는 중 오류가 발생했습니다.')
+      showError(t('prd.save_error_title'), t('prd.save_error_desc'))
     } finally {
       setPrdSaving(false)
     }
@@ -194,7 +194,7 @@ export default function PrdPage({ params }: PrdPageProps) {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>접근 권한이 없습니다</CardTitle>
+            <CardTitle>{t('common.no_access')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Button onClick={() => router.push('/dashboard')}>
@@ -223,7 +223,7 @@ export default function PrdPage({ params }: PrdPageProps) {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>제품 요구사항 문서</CardTitle>
+                <CardTitle>{t('prd.doc_title')}</CardTitle>
                 {canEditPrd && (
                   <div className="flex gap-2">
                     <Button 

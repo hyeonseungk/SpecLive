@@ -11,21 +11,23 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useLangStore, LangCode } from '@/lib/i18n-store'
 import { ChevronDown, Check } from 'lucide-react'
+import { useT } from '@/lib/i18n'
 
-const LANGUAGES: { label: string; lang: LangCode; locale: string }[] = [
-  { label: 'English', lang: 'en', locale: 'en-US' },
-  { label: '한국어', lang: 'ko', locale: 'ko-KR' },
+const LANGUAGES: { labelKey: string; lang: LangCode; locale: string }[] = [
+  { labelKey: 'lang.english', lang: 'en', locale: 'en-US' },
+  { labelKey: 'lang.korean',  lang: 'ko', locale: 'ko-KR' },
 ]
 
 export function LanguageSelector() {
   const { lang, setLanguage } = useLangStore()
+  const t = useT()
   const current = LANGUAGES.find((l) => l.lang === lang) ?? LANGUAGES[0]
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="w-32 flex items-center justify-between">
-          <span>{current.label}</span>
+          <span>{t(current.labelKey)}</span>
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -41,7 +43,7 @@ export function LanguageSelector() {
               onSelect={() => setLanguage(l.lang)}
               className="flex items-center justify-between cursor-pointer"
             >
-              <span>{l.label}</span>
+              <span>{t(l.labelKey)}</span>
               {lang === l.lang && <Check className="h-4 w-4" />}
             </DropdownMenuItem>
           ))}

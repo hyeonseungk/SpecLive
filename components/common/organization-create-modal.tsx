@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { useErrorStore } from '@/lib/error-store'
 import { useSuccessStore } from '@/lib/success-store'
+import { useT } from '@/lib/i18n'
 import supabase from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
 
@@ -34,10 +35,11 @@ export function OrganizationCreateModal({
   const [isLoading, setIsLoading] = useState(false)
   const { showError } = useErrorStore()
   const { showSuccess } = useSuccessStore()
+  const t = useT()
 
   const handleSubmit = async () => {
     if (!organizationName.trim()) {
-      showError('입력 오류', '조직 이름을 입력해주세요.')
+      showError(t('orgCreate.input_error_title'), t('orgCreate.input_name_required'))
       return
     }
 
@@ -59,8 +61,9 @@ export function OrganizationCreateModal({
       }
 
       showSuccess(
-        '조직 생성 완료',
-        `"${organizationName}" 조직이 성공적으로 생성되었습니다.\n당신이 조직의 소유자가 되었습니다.`
+        t('orgCreate.success_title'),
+        t('orgCreate.success_message')
+          .replace('{org}', organizationName)
       )
       
       setOrganizationName('')
@@ -69,8 +72,8 @@ export function OrganizationCreateModal({
     } catch (error) {
       console.error('Organization creation error:', error)
       showError(
-        '조직 생성 실패',
-        '조직 생성 중 오류가 발생했습니다. 다시 시도해주세요.'
+        t('orgCreate.failure_title'),
+        t('orgCreate.failure_message')
       )
     } finally {
       setIsLoading(false)
@@ -88,21 +91,19 @@ export function OrganizationCreateModal({
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>새 조직 생성</AlertDialogTitle>
-          <AlertDialogDescription>
-            새로운 조직을 생성하고 프로젝트들을 관리하세요. 당신이 조직의 소유자가 됩니다.
-          </AlertDialogDescription>
+          <AlertDialogTitle>{t('orgCreate.title')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('orgCreate.description')}</AlertDialogDescription>
         </AlertDialogHeader>
         
         <div className="py-4">
           <label htmlFor="organization-name" className="text-sm font-medium mb-2 block">
-            조직 이름
+            {t('orgCreate.name_label')}
           </label>
           <Input
             id="organization-name"
             value={organizationName}
             onChange={(e) => setOrganizationName(e.target.value)}
-            placeholder="예: 우리회사, ABC팀"
+            placeholder={t('orgCreate.name_placeholder')}
             disabled={isLoading}
             onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           />
@@ -110,13 +111,13 @@ export function OrganizationCreateModal({
 
         <AlertDialogFooter>
           <AlertDialogCancel onClick={handleClose} disabled={isLoading}>
-            취소
+            {t('buttons.cancel')}
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleSubmit}
             disabled={isLoading || !organizationName.trim()}
           >
-            {isLoading ? '생성 중...' : '생성'}
+            {isLoading ? t('orgCreate.creating') : t('orgCreate.create')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

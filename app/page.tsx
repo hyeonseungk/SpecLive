@@ -6,6 +6,8 @@ import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useT } from '@/lib/i18n'
+import { useLangStore } from '@/lib/i18n-store'
 import { FullScreenLoading } from '@/components/common/full-screen-loading'
 import supabase from '@/lib/supabase-browser'
 import { showError, showSimpleError } from '@/lib/error-store'
@@ -21,6 +23,8 @@ export default function Home() {
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const router = useRouter()
+  const t = useT()
+  const { locale } = useLangStore()
 
   useEffect(() => {
     const getSession = async () => {
@@ -54,12 +58,12 @@ export default function Home() {
     try {
       if (isSignUp) {
         if (password !== passwordConfirm) {
-          showError('비밀번호 확인 오류', '비밀번호가 일치하지 않습니다.')
+          showError(t('auth.password_confirm_error_title'), t('auth.password_mismatch'))
           setSubmitting(false)
           return
         }
         if (password.length < 8) {
-          showError('비밀번호 길이 오류', '비밀번호는 8자 이상이어야 합니다.')
+          showError(t('auth.password_min_error_title'), t('auth.password_min'))
           setSubmitting(false)
           return
         }
@@ -68,7 +72,7 @@ export default function Home() {
           password,
         })
         if (error) throw error
-        showSuccess('회원가입 완료', '회원가입이 완료되었습니다.\n이메일을 확인해서 인증을 완료해주세요', () => {
+        showSuccess(t('auth.signup_complete_title'), t('auth.signup_complete_desc'), () => {
           setEmail('')
           setPassword('')
           setPasswordConfirm('')
@@ -82,14 +86,14 @@ export default function Home() {
         if (error) throw error
       }
     } catch (error) {
-      showSimpleError(error instanceof Error ? error.message : '오류가 발생했습니다.')
+      showSimpleError(error instanceof Error ? error.message : t('common.error_generic'))
     } finally {
       setSubmitting(false)
     }
   }
 
   if (initialLoading) {
-    return <FullScreenLoading />
+    return <FullScreenLoading message={t('common.loading')} />
   }
 
   return (
@@ -109,17 +113,15 @@ export default function Home() {
       {/* Content */}
       <Card className="relative z-10 w-full max-w-md backdrop-blur-sm bg-white/90">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">UbiLang</CardTitle>
-          <CardDescription className="text-center">
-            전사 용어·정책 관리 플랫폼
-          </CardDescription>
+          <CardTitle className="text-2xl text-center">{t('common.brand')}</CardTitle>
+          <CardDescription className="text-center">{t('home.tagline')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
             <div className="space-y-2">
               <Input
                 type="email"
-                placeholder="이메일"
+                placeholder={t('auth.email_placeholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -128,12 +130,12 @@ export default function Home() {
             <div className="space-y-2">
               {password.length > 0 && password.length < 4 && (
                 <div className="text-sm font-medium text-red-600">
-                  최소 4자리 이상으로 입력하세요
+                  {t('auth.password_min_short')}
                 </div>
               )}
               <Input
                 type="password"
-                placeholder="비밀번호"
+                placeholder={t('auth.password_placeholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -147,15 +149,12 @@ export default function Home() {
                       ? 'text-green-600' 
                       : 'text-red-600'
                   }`}>
-                    {password === passwordConfirm 
-                      ? '비밀번호가 일치합니다' 
-                      : '비밀번호가 일치하지 않습니다'
-                    }
+                    {password === passwordConfirm ? t('auth.password_match') : t('auth.password_mismatch')}
                   </div>
                 )}
                 <Input
                   type="password"
-                  placeholder="비밀번호 확인"
+                  placeholder={t('auth.password_confirm_placeholder')}
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
                   required
@@ -163,7 +162,7 @@ export default function Home() {
               </div>
             )}
             <Button type="submit" className="w-full" disabled={submitting}>
-              {isSignUp ? '회원가입' : '로그인'}
+              {isSignUp ? t('auth.sign_up') : t('auth.sign_in')}
             </Button>
           </form>
           <div className="mt-4 text-center">
@@ -176,7 +175,7 @@ export default function Home() {
               }}
               className="text-sm"
             >
-              {isSignUp ? '이미 계정이 있으신가요?' : '계정이 없으신가요?'}
+              {isSignUp ? t('auth.have_account') : t('auth.no_account')}
             </Button>
           </div>
         </CardContent>
@@ -188,7 +187,7 @@ export default function Home() {
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center space-x-3">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-              <span className="text-lg font-medium">처리 중...</span>
+              <span className="text-lg font-medium">{t('common.processing')}</span>
             </div>
           </div>
         </div>

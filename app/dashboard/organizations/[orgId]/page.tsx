@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
+import { useLangStore } from '@/lib/i18n-store'
 import { FullScreenLoading } from '@/components/common/full-screen-loading'
 import { ProjectCreateModal } from '@/components/common/project-create-modal'
 import { OrganizationSelector } from '@/components/common/organization-selector'
@@ -29,6 +31,8 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
   const [userMembership, setUserMembership] = useState<Tables<'memberships'> | null>(null)
   const [loading, setLoading] = useState(true)
   const [showProjectModal, setShowProjectModal] = useState(false)
+  const t = useT()
+  const { locale } = useLangStore()
   const router = useRouter()
 
   useEffect(() => {
@@ -127,11 +131,11 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
   }
 
   if (loading) {
-    return <FullScreenLoading />
+    return <FullScreenLoading message={t('common.loading')} />
   }
 
   if (!organization) {
-    return <FullScreenLoading message="조직을 찾을 수 없습니다..." />
+    return <FullScreenLoading message={t('org.not_found')} />
   }
 
   const isOwner = organization.owner_id === user?.id
@@ -146,9 +150,7 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
             </div>
             <div>
               <h2 className="text-3xl font-bold">{organization.name}</h2>
-              <p className="text-muted-foreground">
-                조직의 프로젝트를 관리하세요.
-              </p>
+              <p className="text-muted-foreground">{t('org.tagline')}</p>
             </div>
           </div>
         </div>
@@ -157,14 +159,14 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
           <div className="flex gap-4 mb-2">
             {canCreateProjects && (
               <Button onClick={() => setShowProjectModal(true)}>
-                새 프로젝트 생성
+                {t('org.create_project')}
               </Button>
             )}
             
             {isOwner && (
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
-                  조직 설정
+                  {t('org.settings')}
                 </Button>
               </div>
             )}
@@ -172,7 +174,7 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
           
           {projects.length > 0 && (
             <p className="text-sm text-muted-foreground">
-              총 {projects.length}개의 프로젝트
+              {t('org.total_prefix')}{projects.length}{t('org.total_suffix')}
             </p>
           )}
         </div>
@@ -180,15 +182,13 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
         {projects.length === 0 ? (
           <Card>
             <CardHeader>
-              <CardTitle>프로젝트가 없습니다</CardTitle>
-              <CardDescription>
-                이 조직에 프로젝트를 생성하여 용어와 정책을 관리하세요.
-              </CardDescription>
+              <CardTitle>{t('org.no_projects_title')}</CardTitle>
+              <CardDescription>{t('org.no_projects_desc')}</CardDescription>
             </CardHeader>
             <CardContent>
               {canCreateProjects && (
                 <Button onClick={() => setShowProjectModal(true)}>
-                  첫 번째 프로젝트 만들기
+                  {t('org.first_project_button')}
                 </Button>
               )}
             </CardContent>
@@ -211,17 +211,15 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
                           ? 'bg-blue-100 text-blue-800' 
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {membership.role === 'admin' ? '관리자' : '멤버'}
+                        {membership.role === 'admin' ? t('org.admin_role') : t('org.member_role')}
                       </span>
                     </CardTitle>
                     <CardDescription>
-                      {new Date(project.created_at).toLocaleDateString()}에 생성됨
+                      {new Date(project.created_at).toLocaleDateString(locale)} {t('org.created_suffix')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-sm text-muted-foreground">
-                      클릭하여 용어와 정책을 관리하세요
-                    </div>
+                    <div className="text-sm text-muted-foreground">{t('org.card_hint')}</div>
                   </CardContent>
                 </Card>
               )

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import { LanguageSelector } from '@/components/common/language-selector'
 import { OrganizationSelector } from '@/components/common/organization-selector'
 import { supabase } from '@/lib/supabase-browser'
@@ -18,6 +19,7 @@ export default function OrganizationLayout({
 }) {
   const [user, setUser] = useState<User | null>(null)
   const [organization, setOrganization] = useState<Organization | null>(null)
+  const t = useT()
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const params = useParams()
@@ -76,7 +78,7 @@ export default function OrganizationLayout({
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">UbiLang</h1>
+            <h1 className="text-2xl font-bold">{t('common.brand')}</h1>
             {user && (
               <OrganizationSelector
                 user={user}

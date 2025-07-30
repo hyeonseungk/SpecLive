@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { useErrorStore } from '@/lib/error-store'
 import { useSuccessStore } from '@/lib/success-store'
+import { useT } from '@/lib/i18n'
 import supabase from '@/lib/supabase-browser'
 import type { Tables } from '@/types/database'
 
@@ -37,6 +38,7 @@ export function MemberInviteModal({
   const [isLoading, setIsLoading] = useState(false)
   const { showError } = useErrorStore()
   const { showSuccess } = useSuccessStore()
+  const t = useT()
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -45,12 +47,12 @@ export function MemberInviteModal({
 
   const handleSubmit = async () => {
     if (!email.trim()) {
-      showError('입력 오류', '이메일을 입력해주세요.')
+      showError(t('invite.input_error_title'), t('invite.input_email_required'))
       return
     }
 
     if (!validateEmail(email.trim())) {
-      showError('입력 오류', '올바른 이메일 형식을 입력해주세요.')
+      showError(t('invite.input_error_title'), t('invite.input_email_invalid'))
       return
     }
 
@@ -67,8 +69,10 @@ export function MemberInviteModal({
       
       // 현재는 시연용으로 간단하게 구현
       showSuccess(
-        '초대 완료',
-        `${email}에게 "${project.name}" 프로젝트 초대 이메일이 발송되었습니다.\n(실제 구현에서는 Supabase Admin API를 사용해 초대 이메일을 발송합니다.)`
+        t('invite.success_title'),
+        t('invite.success_message')
+          .replace('{email}', email)
+          .replace('{project}', project.name)
       )
       
       setEmail('')
@@ -78,8 +82,8 @@ export function MemberInviteModal({
     } catch (error) {
       console.error('Member invitation error:', error)
       showError(
-        '초대 실패',
-        '멤버 초대 중 오류가 발생했습니다. 다시 시도해주세요.'
+        t('invite.failure_title'),
+        t('invite.failure_message')
       )
     } finally {
       setIsLoading(false)
@@ -98,23 +102,23 @@ export function MemberInviteModal({
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>멤버 초대</AlertDialogTitle>
+          <AlertDialogTitle>{t('invite.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            "{project.name}" 프로젝트에 새로운 멤버를 초대합니다.
+            {t('invite.description_prefix').replace('{project}', project.name)}
           </AlertDialogDescription>
         </AlertDialogHeader>
         
         <div className="py-4 space-y-4">
           <div>
             <label htmlFor="member-email" className="text-sm font-medium mb-2 block">
-              이메일 주소
+              {t('invite.email_label')}
             </label>
             <Input
               id="member-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="예: member@company.com"
+              placeholder={t('invite.email_placeholder')}
               disabled={isLoading}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
             />
@@ -122,7 +126,7 @@ export function MemberInviteModal({
 
           <div>
             <label htmlFor="member-role" className="text-sm font-medium mb-2 block">
-              역할
+              {t('invite.role_label')}
             </label>
             <select
               id="member-role"
@@ -131,21 +135,21 @@ export function MemberInviteModal({
               disabled={isLoading}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="member">멤버 - 용어/정책 제안 가능</option>
-              <option value="admin">관리자 - 모든 권한</option>
+              <option value="member">{t('invite.role_member')}</option>
+              <option value="admin">{t('invite.role_admin')}</option>
             </select>
           </div>
         </div>
 
         <AlertDialogFooter>
           <AlertDialogCancel onClick={handleClose} disabled={isLoading}>
-            취소
+            {t('buttons.cancel')}
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleSubmit}
             disabled={isLoading || !email.trim() || !validateEmail(email.trim())}
           >
-            {isLoading ? '초대 중...' : '초대 보내기'}
+            {isLoading ? t('invite.inviting') : t('invite.send')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

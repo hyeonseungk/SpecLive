@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { useErrorStore } from '@/lib/error-store'
 import { useSuccessStore } from '@/lib/success-store'
+import { useT } from '@/lib/i18n'
 import supabase from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database'
@@ -42,6 +43,7 @@ export function ProjectCreateModal({
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(false)
   const { showError } = useErrorStore()
   const { showSuccess } = useSuccessStore()
+  const t = useT()
 
   // 조직 목록 로드 (organizationId가 없는 경우에만)
   useEffect(() => {
@@ -74,7 +76,7 @@ export function ProjectCreateModal({
       }
     } catch (error) {
       console.error('Organizations loading error:', error)
-      showError('조직 목록 로드 실패', '조직 목록을 불러오는 중 오류가 발생했습니다.')
+      showError(t('projectCreate.org_load_error_title'), t('projectCreate.org_load_error_message'))
     } finally {
       setIsLoadingOrgs(false)
     }
@@ -82,13 +84,13 @@ export function ProjectCreateModal({
 
   const handleSubmit = async () => {
     if (!projectName.trim()) {
-      showError('입력 오류', '프로젝트 이름을 입력해주세요.')
+      showError(t('projectCreate.input_error_title'), t('projectCreate.input_name_required'))
       return
     }
 
     const targetOrgId = organizationId || selectedOrgId
     if (!targetOrgId) {
-      showError('선택 오류', '조직을 선택해주세요.')
+      showError(t('projectCreate.select_error_title'), t('projectCreate.select_org_required'))
       return
     }
 
@@ -119,8 +121,8 @@ export function ProjectCreateModal({
       if (membershipError) throw membershipError
 
       showSuccess(
-        '프로젝트 생성 완료',
-        `"${projectName}" 프로젝트가 성공적으로 생성되었습니다.`
+        t('projectCreate.success_title'),
+        t('projectCreate.success_message').replace('{project}', projectName)
       )
       
       setProjectName('')
@@ -130,8 +132,8 @@ export function ProjectCreateModal({
     } catch (error) {
       console.error('Project creation error:', error)
       showError(
-        '프로젝트 생성 실패',
-        '프로젝트 생성 중 오류가 발생했습니다. 다시 시도해주세요.'
+        t('projectCreate.failure_title'),
+        t('projectCreate.failure_message')
       )
     } finally {
       setIsLoading(false)
@@ -150,24 +152,20 @@ export function ProjectCreateModal({
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>새 프로젝트 생성</AlertDialogTitle>
-          <AlertDialogDescription>
-            조직 내에서 새로운 프로젝트를 생성합니다. 당신은 자동으로 프로젝트 관리자가 됩니다.
-          </AlertDialogDescription>
+          <AlertDialogTitle>{t('projectCreate.title')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('projectCreate.description')}</AlertDialogDescription>
         </AlertDialogHeader>
         
         <div className="py-4 space-y-4">
           {!organizationId && (
             <div>
               <label htmlFor="organization-select" className="text-sm font-medium mb-2 block">
-                조직 선택
+                {t('projectCreate.org_select_label')}
               </label>
               {isLoadingOrgs ? (
-                <div className="text-sm text-muted-foreground">조직 목록 로딩 중...</div>
+                <div className="text-sm text-muted-foreground">{t('projectCreate.org_select_loading')}</div>
               ) : organizations.length === 0 ? (
-                <div className="text-sm text-muted-foreground">
-                  사용 가능한 조직이 없습니다. 먼저 조직을 생성해주세요.
-                </div>
+                <div className="text-sm text-muted-foreground">{t('projectCreate.org_select_no_orgs')}</div>
               ) : (
                 <select
                   id="organization-select"
@@ -176,7 +174,7 @@ export function ProjectCreateModal({
                   disabled={isLoading}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option value="">조직을 선택하세요</option>
+                  <option value="">{t('projectCreate.org_select_placeholder')}</option>
                   {organizations.map((org) => (
                     <option key={org.id} value={org.id}>
                       {org.name}
@@ -189,13 +187,13 @@ export function ProjectCreateModal({
 
           <div>
             <label htmlFor="project-name" className="text-sm font-medium mb-2 block">
-              프로젝트 이름
+              {t('projectCreate.name_label')}
             </label>
             <Input
               id="project-name"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              placeholder="예: OOO 커머스, XXX 채팅 서비스 등"
+              placeholder={t('projectCreate.name_placeholder')}
               disabled={isLoading}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
             />
@@ -204,13 +202,13 @@ export function ProjectCreateModal({
 
         <AlertDialogFooter>
           <AlertDialogCancel onClick={handleClose} disabled={isLoading}>
-            취소
+            {t('buttons.cancel')}
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleSubmit}
             disabled={isLoading || !projectName.trim() || (!organizationId && (!selectedOrgId || organizations.length === 0))}
           >
-            {isLoading ? '생성 중...' : '생성'}
+            {isLoading ? t('projectCreate.creating') : t('projectCreate.create')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

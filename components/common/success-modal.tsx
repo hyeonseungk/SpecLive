@@ -10,9 +10,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useSuccessStore } from '@/lib/success-store'
+import { useT } from '@/lib/i18n'
 
 export function SuccessModal() {
   const { isOpen, title, message, onConfirm, hideSuccess } = useSuccessStore()
+  const t = useT()
 
   const handleConfirm = () => {
     if (onConfirm) {
@@ -35,7 +37,7 @@ export function SuccessModal() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction onClick={handleConfirm} className="bg-green-600 hover:bg-green-700">
-            확인
+            {t('buttons.ok')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

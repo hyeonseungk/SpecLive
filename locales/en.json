@@ -1,8 +1,27 @@
 {
   "common": {
+    "brand": "UbiLang",
     "logout": "Logout",
     "language": "Language",
-    "no_access": "No access rights"
+    "no_access": "No access rights",
+    "loading": "Loading...",
+    "processing": "Processing...",
+    "error_generic": "An error occurred."
+  },
+  "org": {
+    "not_found": "Organization not found...",
+    "tagline": "Manage your organization's projects.",
+    "create_project": "Create New Project",
+    "settings": "Organization Settings",
+    "total_prefix": "Total ",
+    "total_suffix": " projects",
+    "no_projects_title": "No projects",
+    "no_projects_desc": "Create a project to manage terms and policies in this organization.",
+    "first_project_button": "Create First Project",
+    "admin_role": "Admin",
+    "member_role": "Member",
+    "created_suffix": "created",
+    "card_hint": "Click to manage terms and policies."
   },
   "glossary": {
     "header": "Glossary Management",
@@ -43,6 +62,22 @@
     "load_error_title": "Failed to load policies",
     "load_error_desc": "An error occurred while loading policies."
   },
+  "prd": {
+    "doc_title": "Product Requirements Document",
+    "save_success": "PRD saved.",
+    "load_error_title": "Failed to load PRD",
+    "load_error_desc": "An error occurred while loading PRD.",
+    "save_error_title": "Failed to save PRD",
+    "save_error_desc": "An error occurred while saving PRD."
+  },
+  "sidebar": {
+    "project": "Project",
+    "prd": "Project PRD",
+    "glossary": "Glossary",
+    "policy": "Policy",
+    "management": "Project Management",
+    "dashboard": "Dashboard"
+  },
   "project": {
     "prd_header": "Project PRD",
     "prd_sub": "Define the project's requirements and goals."
@@ -53,7 +88,8 @@
     "edit_with_ai": "Write with AI",
     "cancel": "Cancel",
     "send": "Send",
-    "back": "Back to Dashboard"
+    "back": "Back to Dashboard",
+    "ok": "OK"
   },
   "ai": {
     "modal_title": "Write PRD via Chat with AI",
@@ -65,11 +101,125 @@
     "save_confirm_desc": "The last AI message will be saved to PRD. Continue?",
     "abort": "Abort",
     "sending": "Sending...",
-    "input_placeholder": "Type a message..."
+    "input_placeholder": "Type a message...",
+    "initial_message": "Tell me briefly about your project, then we can craft a PRD together via Q&A.",
+    "invalid_response": "Invalid AI response.",
+    "error_title": "Error during chat with AI"
   },
   "prd": {
     "loading": "Loading PRD...",
     "empty": "No PRD written yet.",
     "last_updated": "Last updated"
+  },
+  "dashboard": {
+    "welcome": "Welcome!",
+    "intro_line1": "To get started with UbiLang, please create an organization first.",
+    "intro_line2": "Inside an organization you can create multiple projects and manage terms & policies per project.",
+    "create_org_button": "Create Organization",
+    "after_title": "After creating an organization:",
+    "after_list": {
+      "project": "You can create projects",
+      "invite": "Invite project members",
+      "manage": "Manage terms and policies"
+    },
+    "choose_org_title": "Choose Organization",
+    "choose_org_sub_prefix": "Select the organization you want to manage (",
+    "choose_org_sub_suffix": " organizations)",
+    "owner_badge": "Owner",
+    "created_suffix": "created",
+    "project_label": "Projects",
+    "member_label": "Members",
+    "count_unit": "",
+    "member_unit": ""
+  },
+  "home": {
+    "tagline": "Enterprise Term & Policy Management Platform"
+  },
+  "auth": {
+    "email_placeholder": "Email",
+    "password_placeholder": "Password",
+    "password_confirm_placeholder": "Confirm password",
+    "password_min_short": "Enter at least 4 characters",
+    "password_confirm_error_title": "Password confirmation error",
+    "password_min_error_title": "Password length error",
+    "password_min": "Password must be at least 8 characters.",
+    "password_mismatch": "Passwords do not match.",
+    "password_match": "Passwords match.",
+    "sign_up": "Sign Up",
+    "sign_in": "Log In",
+    "have_account": "Already have an account?",
+    "no_account": "Don't have an account?",
+    "signup_complete_title": "Sign up completed",
+    "signup_complete_desc": "Sign up completed.\nPlease check your email to verify."
+  },
+  "lang": {
+    "english": "English",
+    "korean": "Korean"
+  },
+  "invite": {
+    "title": "Invite Member",
+    "description_prefix": "Invite a new member to project \"{project}\".",
+    "email_label": "Email address",
+    "email_placeholder": "e.g. member@company.com",
+    "role_label": "Role",
+    "role_member": "Member - can propose terms/policies",
+    "role_admin": "Admin - full permissions",
+    "input_error_title": "Input Error",
+    "input_email_required": "Please enter an email.",
+    "input_email_invalid": "Please enter a valid email format.",
+    "inviting": "Inviting...",
+    "send": "Send Invite",
+    "success_title": "Invitation sent",
+    "success_message": "Invitation email has been sent to {email} for project \"{project}\".\n(Actual implementation will use Supabase Admin API to send invites.)",
+    "failure_title": "Invitation failed",
+    "failure_message": "Failed to invite member. Please try again.",
+    "api_unreachable": "Cannot connect to API server."
+  },
+  "orgCreate": {
+    "title": "Create Organization",
+    "description": "Create a new organization to manage projects. You will become the owner.",
+    "name_label": "Organization name",
+    "name_placeholder": "e.g. MyCompany, ABC Team",
+    "input_error_title": "Input Error",
+    "input_name_required": "Please enter organization name.",
+    "creating": "Creating...",
+    "create": "Create",
+    "success_title": "Organization created",
+    "success_message": "\"{org}\" organization has been created and you are now its owner.",
+    "failure_title": "Creation failed",
+    "failure_message": "Error occurred while creating organization. Please try again."
+  },
+  "orgSelector": {
+    "loading": "Loading...",
+    "all_orgs": "All organizations",
+    "select_org": "Select organization",
+    "search_placeholder": "Search organizations...",
+    "list_header": "Organizations",
+    "no_results": "No results found",
+    "no_orgs": "No organizations found",
+    "owner_badge": "Owner",
+    "create_org": "Create new organization"
+  },
+  "projectCreate": {
+    "org_load_error_title": "Failed to load organizations",
+    "org_load_error_message": "An error occurred while loading organizations.",
+    "input_error_title": "Input Error",
+    "input_name_required": "Please enter project name.",
+    "select_error_title": "Select Error",
+    "select_org_required": "Please select organization.",
+    "success_title": "Project created",
+    "success_message": "Project \"{project}\" has been created successfully.",
+    "failure_title": "Creation failed",
+    "failure_message": "Error occurred while creating project. Please try again.",
+    "title": "Create Project",
+    "description": "Create a new project in the organization. You will automatically become its admin.",
+    "org_select_label": "Select organization",
+    "org_select_loading": "Loading organizations...",
+    "org_select_no_orgs": "No organizations available. Please create one first.",
+    "org_select_placeholder": "Select organization",
+    "name_label": "Project name",
+    "name_placeholder": "e.g. E-commerce, Chat service",
+    "creating": "Creating...",
+    "create": "Create"
   }
 } 

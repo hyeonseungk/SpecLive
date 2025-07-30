@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase-browser'
 import { Tables } from '@/types/database'
 
@@ -23,6 +24,7 @@ export default function ProjectLayout({
   const [project, setProject] = useState<Project | null>(null)
   const [membership, setMembership] = useState<Membership | null>(null)
   const [loading, setLoading] = useState(true)
+  const t = useT()
   const router = useRouter()
   const params = useParams()
   const pathname = usePathname()
@@ -85,9 +87,9 @@ export default function ProjectLayout({
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">접근 권한이 없습니다</p>
+          <p className="text-muted-foreground mb-4">{t('common.no_access')}</p>
           <Button onClick={() => router.push('/dashboard')}>
-            대시보드로 돌아가기
+            {t('buttons.back')}
           </Button>
         </div>
       </div>
@@ -108,7 +110,7 @@ export default function ProjectLayout({
             >
               ←
             </Button>
-            <span className="text-sm text-muted-foreground">프로젝트</span>
+            <span className="text-sm text-muted-foreground">{t('sidebar.project')}</span>
           </div>
           <h1 className="text-xl font-bold">{project.name}</h1>
         </div>
@@ -124,7 +126,7 @@ export default function ProjectLayout({
               }`}
             >
               <span className="text-lg">📄</span>
-              <span>프로젝트 PRD</span>
+              <span>{t('sidebar.prd')}</span>
             </button>
             
             <button
@@ -134,7 +136,7 @@ export default function ProjectLayout({
               }`}
             >
               <span className="text-lg">📚</span>
-              <span>용어 관리</span>
+              <span>{t('sidebar.glossary')}</span>
             </button>
             
             <button
@@ -144,7 +146,7 @@ export default function ProjectLayout({
               }`}
             >
               <span className="text-lg">📋</span>
-              <span>정책 관리</span>
+              <span>{t('sidebar.policy')}</span>
             </button>
             
             <button
@@ -154,7 +156,7 @@ export default function ProjectLayout({
               }`}
             >
               <span className="text-lg">⚙️</span>
-              <span>프로젝트 관리</span>
+              <span>{t('sidebar.management')}</span>
             </button>
           </div>
 
@@ -165,7 +167,7 @@ export default function ProjectLayout({
               className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
             >
               <span className="text-lg">🏠</span>
-              <span>대시보드</span>
+              <span>{t('sidebar.dashboard')}</span>
             </button>
           </div>
         </div>

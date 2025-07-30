@@ -1,10 +1,14 @@
 'use client'
 
+import { useT } from '@/lib/i18n'
+
 interface FullScreenLoadingProps {
   message?: string
 }
 
-export function FullScreenLoading({ message = '로딩 중...' }: FullScreenLoadingProps) {
+export function FullScreenLoading({ message }: FullScreenLoadingProps) {
+  const t = useT()
+  const displayMessage = message ?? t('common.loading')
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="flex flex-col items-center gap-4">
@@ -13,7 +17,7 @@ export function FullScreenLoading({ message = '로딩 중...' }: FullScreenLoadi
         
         {/* 로딩 메시지 */}
         <div className="text-lg font-medium text-foreground">
-          {message}
+          {displayMessage}
         </div>
       </div>
     </div>

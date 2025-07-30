@@ -23,12 +23,6 @@ interface Message {
   content: string
 }
 
-// 최초 안내 메시지 정의
-const initialAssistantMessage: Message = {
-  role: 'assistant',
-  content: '어떤 프로젝트인지 간단히 설명해주시면 저와 질의응답을 통해 PRD를 만들 수 있어요',
-}
-
 interface AiChatModalProps {
   isOpen: boolean
   onClose: () => void
@@ -36,7 +30,11 @@ interface AiChatModalProps {
 }
 
 export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalProps) {
-  const [messages, setMessages] = useState<Message[]>([initialAssistantMessage])
+  const t = useT()
+  // 최초 안내 메시지를 현재 언어로 설정
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'assistant', content: t('ai.initial_message') },
+  ])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isStreaming, setIsStreaming] = useState(false)
@@ -44,8 +42,6 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
   const inputRef = useRef<HTMLTextAreaElement>(null)
   // 전송 중 취소 플래그
   const isCancelledRef = useRef(false)
-
-  const t = useT()
 
   // 메시지가 추가될 때마다 스크롤을 맨 아래로
   useEffect(() => {
@@ -99,7 +95,7 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
       })
 
       if (!data?.body) {
-        throw new Error('AI 응답이 올바르지 않습니다.')
+        throw new Error(t('ai.invalid_response'))
       }
       
       const reader = data.body.getReader()
@@ -138,8 +134,8 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
       }
     } catch (error) {
       console.error('AI 채팅 오류:', error)
-      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.'
-      showError('AI와의 대화 중 오류가 발생했습니다.', errorMessage)
+      const errorMessage = error instanceof Error ? error.message : t('common.error_generic')
+      showError(t('ai.error_title'), errorMessage)
       // 오류 발생 시 빈 AI 메시지 제거
       setMessages(prev => prev.slice(0, -1))
     } finally {
@@ -178,7 +174,7 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
 
   // “그래도 닫기” 클릭 시: 메시지를 초기화하고 모달을 닫음
   const handleConfirmClose = () => {
-    setMessages([initialAssistantMessage]) // 인사 메시지만 유지
+    setMessages([{ role: 'assistant', content: t('ai.initial_message') }]) // 인사 메시지만 유지
     onClose()
   }
 

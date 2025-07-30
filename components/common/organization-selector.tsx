@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ChevronDown, Search, Plus, Check } from 'lucide-react'
+import { useT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -36,6 +37,7 @@ export function OrganizationSelector({
   const [isOpen, setIsOpen] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [loading, setLoading] = useState(true)
+  const t = useT()
 
   useEffect(() => {
     loadOrganizations()
@@ -127,9 +129,9 @@ export function OrganizationSelector({
                 🏢
               </div>
               <span>
-                {loading ? '로딩...' : (
-                  selectedOrgId === null ? '모든 조직' : 
-                  selectedOrg ? selectedOrg.name : '조직 선택'
+                {loading ? t('orgSelector.loading') : (
+                  selectedOrgId === null ? t('orgSelector.all_orgs') : 
+                  selectedOrg ? selectedOrg.name : t('orgSelector.select_org')
                 )}
               </span>
             </div>
@@ -142,7 +144,7 @@ export function OrganizationSelector({
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="조직 검색..."
+                placeholder={t('orgSelector.search_placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -163,7 +165,7 @@ export function OrganizationSelector({
                 <div className="w-6 h-6 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs">
                   📋
                 </div>
-                <span>모든 조직</span>
+                <span>{t('orgSelector.all_orgs')}</span>
               </div>
               {selectedOrgId === null && <Check className="w-4 h-4 text-blue-500" />}
             </DropdownMenuItem>
@@ -172,12 +174,12 @@ export function OrganizationSelector({
 
             {/* 조직 목록 */}
             <div className="px-2 py-1">
-              <div className="text-xs text-muted-foreground font-medium">조직 목록</div>
+              <div className="text-xs text-muted-foreground font-medium">{t('orgSelector.list_header')}</div>
             </div>
             
             {filteredOrganizations.length === 0 ? (
               <div className="px-4 py-2 text-sm text-muted-foreground">
-                {searchQuery ? '검색 결과가 없습니다' : '참여 중인 조직이 없습니다'}
+                {searchQuery ? t('orgSelector.no_results') : t('orgSelector.no_orgs')}
               </div>
             ) : (
               filteredOrganizations.map((org) => (
@@ -196,7 +198,7 @@ export function OrganizationSelector({
                     <div>
                       <div className="font-medium">{org.name}</div>
                       {org.owner_id === user.id && (
-                        <div className="text-xs text-muted-foreground">소유자</div>
+                        <div className="text-xs text-muted-foreground">{t('orgSelector.owner_badge')}</div>
                       )}
                     </div>
                   </div>
@@ -216,7 +218,7 @@ export function OrganizationSelector({
               className="flex items-center gap-2 text-blue-600"
             >
               <Plus className="w-4 h-4" />
-              <span>새 조직 생성</span>
+              <span>{t('orgSelector.create_org')}</span>
             </DropdownMenuItem>
           </div>
         </DropdownMenuContent>

@@ -4,24 +4,29 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { useErrorHandler } from '@/lib/hooks/use-error-handler'
+import { useT } from '@/lib/i18n'
+import { useLangStore } from '@/lib/i18n-store'
 
 export function ErrorDemo() {
   const { handleError, handleAsyncError } = useErrorHandler()
+  const t = useT()
+  const { locale } = useLangStore()
 
   const simulateApiError = async () => {
-    throw new Error('API 서버에 연결할 수 없습니다.')
+    throw new Error(t('errorDemo.api_unreachable'))
   }
 
   const handleSimpleError = () => {
-    showSimpleError('간단한 오류 메시지입니다.')
+    showSimpleError(t('errorDemo.simple_message'))
   }
 
   const handleDetailedError = () => {
+    const detailedMsg = t('errorDemo.detailed_message').replace('{time}', new Date().toLocaleString(locale))
     showError(
-      '상세 오류 정보',
-      '이것은 상세한 오류 메시지입니다.\n여러 줄로 표시될 수 있습니다.\n\n추가 정보:\n- 오류 코드: E001\n- 발생 시간: ' + new Date().toLocaleString(),
+      t('errorDemo.detailed_title'),
+      detailedMsg,
       () => {
-        console.log('에러 모달 확인 버튼이 클릭되었습니다.')
+        console.log('Error modal confirmed')
       }
     )
   }
@@ -29,29 +34,27 @@ export function ErrorDemo() {
   const handleAsyncErrorDemo = async () => {
     const result = await handleAsyncError(
       simulateApiError,
-      'API 호출 중 오류 발생'
+      t('errorDemo.async_error_toast')
     )
     
     if (result === null) {
-      console.log('에러가 발생하여 null이 반환되었습니다.')
+      console.log('Async error occurred, returned null')
     }
   }
 
   const handleManualError = () => {
     try {
-      throw new Error('수동으로 발생시킨 오류입니다.')
+      throw new Error(t('errorDemo.manual_error_thrown'))
     } catch (error) {
-      handleError(error, '수동 오류 처리')
+      handleError(error, t('errorDemo.manual_error_title'))
     }
   }
 
   return (
     <Card className="w-full max-w-2xl mx-auto mt-8">
       <CardHeader>
-        <CardTitle>🧪 에러 모달 데모</CardTitle>
-        <CardDescription>
-          다양한 방식으로 에러 모달을 테스트해볼 수 있습니다.
-        </CardDescription>
+        <CardTitle>{t('errorDemo.card_title')}</CardTitle>
+        <CardDescription>{t('errorDemo.card_desc')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -60,9 +63,9 @@ export function ErrorDemo() {
             onClick={handleSimpleError}
             className="h-auto p-4 flex flex-col items-start"
           >
-            <span className="font-semibold">간단한 에러</span>
+            <span className="font-semibold">{t('errorDemo.simple_btn_title')}</span>
             <span className="text-sm text-muted-foreground mt-1">
-              showSimpleError() 사용
+              {t('errorDemo.simple_btn_sub')}
             </span>
           </Button>
 
