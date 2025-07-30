@@ -192,6 +192,17 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const [editSaving, setEditSaving] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
+  // AI 추천 모달 상태
+  const [showAiRecommendationModal, setShowAiRecommendationModal] = useState(false)
+  const [aiRecommendations, setAiRecommendations] = useState<Array<{
+    name: string
+    definition: string
+    examples?: string
+    selected: boolean
+  }>>([])
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+
   // 추가: 다국어 지원 훅
   const t = useT()
   const { locale } = useLangStore()
@@ -361,6 +372,113 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     setGlossaryDefinition('')
     setGlossaryExamples('')
     setGlossaryGithubUrls([''])
+  }
+
+  // AI 추천 모달 핸들러
+  const handleOpenAiModal = () => {
+    setShowAiRecommendationModal(true)
+  }
+
+  const handleCloseAiModal = () => {
+    setShowAiRecommendationModal(false)
+    setAiRecommendations([])
+    setAiLoading(false)
+    setAiError(null)
+  }
+
+  // AI 추천 요청 함수
+  const handleAiRecommendation = async () => {
+    if (!project) return
+
+    setAiLoading(true)
+    setAiError(null)
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/ai-glossary-recommendation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          projectId: project.id,
+          count: 5,
+          language: locale
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+
+      if (result.success && result.data?.recommendations) {
+        setAiRecommendations(result.data.recommendations.map((rec: any) => ({
+          ...rec,
+          selected: false
+        })))
+      } else {
+        throw new Error(result.error || t('glossary.ai_error'))
+      }
+    } catch (error) {
+      console.error('AI recommendation error:', error)
+      setAiError(error instanceof Error ? error.message : t('glossary.ai_error'))
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  // 추천 항목 선택 토글
+  const toggleRecommendationSelection = (index: number) => {
+    setAiRecommendations(prev => 
+      prev.map((rec, i) => 
+        i === index ? { ...rec, selected: !rec.selected } : rec
+      )
+    )
+  }
+
+  // 선택한 추천 용어들을 실제 용어집에 추가
+  const addSelectedRecommendations = async () => {
+    if (!project || !user) return
+    
+    const selectedTerms = aiRecommendations.filter(rec => rec.selected)
+    if (selectedTerms.length === 0) return
+
+    setAiLoading(true)
+    try {
+      for (const term of selectedTerms) {
+        // 1. 용어 추가
+        const { data: glossary, error: glossaryError } = await supabase
+          .from('glossaries')
+          .insert({
+            project_id: project.id,
+            name: term.name,
+            definition: term.definition,
+            examples: term.examples || null,
+            author_id: user.id
+          })
+          .select()
+          .single()
+
+        if (glossaryError) throw glossaryError
+
+        // 2. 목록에 새 용어 추가
+        const glossaryWithLinks = {
+          ...glossary,
+          glossary_links: []
+        }
+        setGlossaries(prev => [glossaryWithLinks, ...prev])
+      }
+
+      handleCloseAiModal()
+      showSimpleSuccess(`${selectedTerms.length}${t('glossary.ai_terms_added')}`)
+    } catch (error) {
+      console.error('Error adding recommended terms:', error)
+      showError(t('glossary.add_error_title'), t('glossary.add_error_desc'))
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   // 편집 모달 열기
@@ -634,7 +752,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
           {/* 우측: 버튼들 */}
           <div className="flex gap-2">
-            <Button variant="outline" disabled>{t('glossary.ai_recommendation')}</Button>
+            <Button variant="outline" onClick={handleOpenAiModal}>{t('glossary.ai_recommendation')}</Button>
             <Button onClick={() => setShowGlossaryModal(true)}>{t('glossary.add_term_button')}</Button>
           </div>
         </div>
@@ -919,6 +1037,136 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                 {t('buttons.delete')}
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI 추천 모달 */}
+      {showAiRecommendationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4">{t('glossary.ai_modal_title')}</h3>
+            
+            {/* 초기 상태 또는 로딩 상태 */}
+            {aiRecommendations.length === 0 && !aiError && (
+              <>
+                {!aiLoading && (
+                  <p className="text-muted-foreground mb-6">{t('glossary.ai_modal_desc')}</p>
+                )}
+                
+                {aiLoading && (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">{t('glossary.ai_loading')}</p>
+                  </div>
+                )}
+                
+                {!aiLoading && (
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleCloseAiModal}
+                    >
+                      {t('buttons.cancel')}
+                    </Button>
+                    <Button 
+                      onClick={handleAiRecommendation}
+                      disabled={aiLoading}
+                    >
+                      {t('glossary.ai_get_recommendations')}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* 에러 상태 */}
+            {aiError && (
+              <>
+                <div className="text-center py-8">
+                  <p className="text-red-600 mb-4">{aiError}</p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCloseAiModal}
+                  >
+                    {t('buttons.cancel')}
+                  </Button>
+                  <Button 
+                    onClick={handleAiRecommendation}
+                    disabled={aiLoading}
+                  >
+                    {t('glossary.ai_retry')}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* 추천 결과 상태 */}
+            {aiRecommendations.length > 0 && !aiError && (
+              <>
+                <p className="text-muted-foreground mb-4">{t('glossary.ai_select_terms')}</p>
+                
+                <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
+                  {aiRecommendations.map((recommendation, index) => (
+                    <div 
+                      key={index}
+                      className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                        recommendation.selected 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => toggleRecommendationSelection(index)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={recommendation.selected}
+                          onChange={() => toggleRecommendationSelection(index)}
+                          className="mt-1 rounded"
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-base mb-1">{recommendation.name}</h4>
+                          <p className="text-sm text-muted-foreground mb-2">{recommendation.definition}</p>
+                          {recommendation.examples && (
+                            <p className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                              {t('glossary.example_prefix')}: {recommendation.examples}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-between">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCloseAiModal}
+                    disabled={aiLoading}
+                  >
+                    {t('buttons.cancel')}
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={handleAiRecommendation}
+                      disabled={aiLoading}
+                    >
+                      {t('glossary.ai_retry')}
+                    </Button>
+                    <Button 
+                      onClick={addSelectedRecommendations}
+                      disabled={aiLoading || aiRecommendations.filter(r => r.selected).length === 0}
+                    >
+                      {aiLoading ? t('common.processing') : 
+                        `${t('glossary.ai_add_selected')} (${aiRecommendations.filter(r => r.selected).length})`}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

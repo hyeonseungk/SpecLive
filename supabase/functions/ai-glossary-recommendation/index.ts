@@ -80,7 +80,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // 프로젝트 정보 조회
     const { data: project, error: projectError } = await supabase
       .from('projects')
-      .select('id, name, prd')
+      .select('id, name')
       .eq('id', projectId)
       .single();
 
@@ -96,6 +96,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
         },
       );
     }
+
+    // PRD 정보 조회 (별도 테이블)
+    const { data: prd, error: prdError } = await supabase
+      .from('prds')
+      .select('contents')
+      .eq('project_id', projectId)
+      .single();
+
+    // PRD가 없는 경우는 에러가 아님 (옵션)
+    const prdContents = prd?.contents || '';
 
     // 기존 용어들 조회
     const { data: existingGlossaries, error: glossariesError } = await supabase
@@ -119,7 +129,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     const projectName = project.name || "프로젝트";
-    const projectDescription = project.prd || "";
     const existingTerms = existingGlossaries || [];
 
     // ──────────────────────────────────────────────────────────────────
@@ -131,13 +140,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
         ).join('\n')}`
       : '';
 
-    const prdText = projectDescription 
-      ? `\n\nPRD (Product Requirements Document):\n${projectDescription}`
+    const prdText = prdContents 
+      ? `\n\nPRD (Product Requirements Document):\n${prdContents}`
       : '';
 
     // 언어별 시스템 프롬프트
     const getLanguagePrompt = (lang: string) => {
-      if (lang === 'en') {
+      if (lang.includes('en')) {
         return `You are an expert in IT project glossary management.
 
 Please recommend ${count} useful terms in ENGLISH based on the given project information. All term names and definitions should be primarily in English.
@@ -207,7 +216,7 @@ Please recommend practical terms in English that can be used immediately in actu
             },
             {
               role: "user",
-              content: language === 'en' 
+              content: language.includes('en') 
                 ? "Please recommend terms suitable for the above project in English."
                 : "위 프로젝트에 적합한 용어들을 한국어로 추천해주세요.",
             },
