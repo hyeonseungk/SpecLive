@@ -157,6 +157,10 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
             scheduleUpdate()
             // 클라이언트가 스스로 연결을 끊음
             reader.cancel()
+            // 스트림 종료 후 입력창에 포커스
+            setTimeout(() => {
+              inputRef.current?.focus()
+            }, 100)
             break
           }
           
@@ -184,6 +188,11 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
           updated[updated.length - 1] = { role: 'assistant', content: assistantText }
           return updated
         })
+        
+        // AI 답변 완료 후 입력창에 포커스
+        setTimeout(() => {
+          inputRef.current?.focus()
+        }, 100)
       }
     } catch (error) {
       console.error('AI 채팅 오류:', error)
