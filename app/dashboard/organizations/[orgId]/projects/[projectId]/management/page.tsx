@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
+import { useT } from '@/lib/i18n'
 import { MemberInviteModal } from '@/components/common/member-invite-modal'
 
 type User = {
@@ -31,6 +32,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const [membership, setMembership] = useState<Membership | null>(null)
   const [loading, setLoading] = useState(true)
   const [showInviteModal, setShowInviteModal] = useState(false)
+  const t = useT()
   
   const router = useRouter()
 
@@ -86,7 +88,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
 
   const handleInviteSuccess = () => {
     setShowInviteModal(false)
-    showSimpleSuccess('초대가 성공적으로 전송되었습니다.')
+    showSimpleSuccess(t('management.invite_success'))
   }
 
   if (loading) {
@@ -102,11 +104,11 @@ export default function ManagementPage({ params }: ManagementPageProps) {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>접근 권한이 없습니다</CardTitle>
+            <CardTitle>{t('common.no_access')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Button onClick={() => router.push('/dashboard')}>
-              대시보드로 돌아가기
+              {t('buttons.back')}
             </Button>
           </CardContent>
         </Card>
@@ -121,10 +123,8 @@ export default function ManagementPage({ params }: ManagementPageProps) {
         <div>
           {/* 헤더 영역 */}
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">프로젝트 관리</h2>
-            <p className="text-muted-foreground">
-              프로젝트 설정과 멤버를 관리합니다.
-            </p>
+            <h2 className="text-3xl font-bold mb-2">{t('management.header')}</h2>
+            <p className="text-muted-foreground">{t('management.sub')}</p>
           </div>
 
           {/* 관리자 전용 기능 */}
@@ -132,42 +132,36 @@ export default function ManagementPage({ params }: ManagementPageProps) {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardHeader>
-                  <CardTitle>멤버 초대</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    프로젝트에 새로운 멤버를 초대합니다.
-                  </p>
+                  <CardTitle>{t('management.invite_title')}</CardTitle>
+                  <p className="text-sm text-muted-foreground">{t('management.invite_sub')}</p>
                 </CardHeader>
                 <CardContent>
                   <Button onClick={() => setShowInviteModal(true)}>
-                    멤버 초대
+                    {t('management.invite_button')}
                   </Button>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>프로젝트 설정</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    프로젝트 이름이나 설정을 변경합니다.
-                  </p>
+                  <CardTitle>{t('management.settings_title')}</CardTitle>
+                  <p className="text-sm text-muted-foreground">{t('management.settings_sub')}</p>
                 </CardHeader>
                 <CardContent>
                   <Button variant="outline" disabled>
-                    설정 (준비중)
+                    {t('management.settings_button')}
                   </Button>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>알림 설정</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    프로젝트 알림을 관리합니다.
-                  </p>
+                  <CardTitle>{t('management.notifications_title')}</CardTitle>
+                  <p className="text-sm text-muted-foreground">{t('management.notifications_sub')}</p>
                 </CardHeader>
                 <CardContent>
                   <Button variant="outline" disabled>
-                    알림 설정 (준비중)
+                    {t('management.notifications_button')}
                   </Button>
                 </CardContent>
               </Card>
@@ -176,7 +170,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
             <Card>
               <CardContent className="pt-6">
                 <p className="text-muted-foreground text-center">
-                  프로젝트 관리 기능은 관리자만 사용할 수 있습니다.
+                  {t('management.admin_only_note')}
                 </p>
               </CardContent>
             </Card>

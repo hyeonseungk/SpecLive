@@ -1,0 +1,75 @@
+{
+  "common": {
+    "logout": "로그아웃",
+    "language": "언어",
+    "no_access": "접근 권한이 없습니다"
+  },
+  "glossary": {
+    "header": "용어 관리",
+    "sub": "프로젝트에서 사용하는 용어들을 정의하고 관리합니다.",
+    "grid_view": "그리드 뷰",
+    "list_view": "리스트 뷰",
+    "search_placeholder": "용어 검색...",
+    "loading": "용어를 불러오는 중...",
+    "no_results": "검색 결과가 없습니다.",
+    "no_terms": "아직 등록된 용어가 없습니다."
+  },
+  "management": {
+    "header": "프로젝트 관리",
+    "sub": "프로젝트 설정과 멤버를 관리합니다.",
+    "invite_title": "멤버 초대",
+    "invite_sub": "프로젝트에 새로운 멤버를 초대합니다.",
+    "invite_button": "멤버 초대",
+    "invite_success": "초대가 성공적으로 전송되었습니다.",
+    "settings_title": "프로젝트 설정",
+    "settings_sub": "프로젝트 이름이나 설정을 변경합니다.",
+    "settings_button": "설정 (준비중)",
+    "notifications_title": "알림 설정",
+    "notifications_sub": "프로젝트 알림을 관리합니다.",
+    "notifications_button": "알림 설정 (준비중)",
+    "admin_only_note": "프로젝트 관리 기능은 관리자만 사용할 수 있습니다."
+  },
+  "policy": {
+    "header": "정책 관리",
+    "sub": "프로젝트 정책과 가이드라인을 작성하고 관리합니다.",
+    "search_placeholder": "정책 검색...",
+    "all_categories": "모든 카테고리",
+    "add_button": "정책 추가",
+    "loading": "정책을 불러오는 중...",
+    "no_results": "검색 결과가 없습니다.",
+    "no_policies": "아직 등록된 정책이 없습니다.",
+    "first_policy_sub": "첫 번째 정책을 추가하여 팀의 가이드라인을 만들어보세요.",
+    "first_policy_button": "첫 번째 정책 추가하기",
+    "load_error_title": "정책 로드 실패",
+    "load_error_desc": "정책을 불러오는 중 오류가 발생했습니다."
+  },
+  "project": {
+    "prd_header": "프로젝트 PRD",
+    "prd_sub": "프로젝트의 요구사항과 목표를 정의합니다."
+  },
+  "buttons": {
+    "save": "저장",
+    "saving": "저장 중...",
+    "edit_with_ai": "🤖 AI와의 대화를 통해 작성",
+    "cancel": "취소",
+    "send": "전송",
+    "back": "대시보드로 돌아가기"
+  },
+  "ai": {
+    "modal_title": "🤖 AI와의 대화로 PRD 작성",
+    "save_to_prd": "최종 답변을 PRD로 저장",
+    "close": "닫기",
+    "close_confirm_title": "대화를 닫으시겠어요?",
+    "close_confirm_desc": "대화를 닫으면 이때까지의 대화가 모두 사라져요, 그래도 닫으시겠어요?",
+    "save_confirm_title": "PRD로 저장하시겠어요?",
+    "save_confirm_desc": "AI가 준 마지막 말풍선의 내용이 PRD로 저장됩니다, 진행할까요?",
+    "abort": "중단하기",
+    "sending": "전송 중...",
+    "input_placeholder": "메시지를 입력하세요..."
+  },
+  "prd": {
+    "loading": "PRD를 불러오는 중...",
+    "empty": "아직 작성된 PRD가 없습니다.",
+    "last_updated": "최종 수정"
+  }
+} 

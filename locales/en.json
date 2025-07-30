@@ -1,0 +1,75 @@
+{
+  "common": {
+    "logout": "Logout",
+    "language": "Language",
+    "no_access": "No access rights"
+  },
+  "glossary": {
+    "header": "Glossary Management",
+    "sub": "Define and manage terms used in the project.",
+    "grid_view": "Grid View",
+    "list_view": "List View",
+    "search_placeholder": "Search terms...",
+    "loading": "Loading terms...",
+    "no_results": "No results found.",
+    "no_terms": "No terms added yet."
+  },
+  "management": {
+    "header": "Project Management",
+    "sub": "Manage project settings and members.",
+    "invite_title": "Invite Member",
+    "invite_sub": "Invite new members to the project.",
+    "invite_button": "Invite Member",
+    "invite_success": "Invitation sent successfully.",
+    "settings_title": "Project Settings",
+    "settings_sub": "Change project name or settings.",
+    "settings_button": "Settings (Coming Soon)",
+    "notifications_title": "Notification Settings",
+    "notifications_sub": "Manage project notifications.",
+    "notifications_button": "Notification Settings (Coming Soon)",
+    "admin_only_note": "Project management features are available only to admins."
+  },
+  "policy": {
+    "header": "Policy Management",
+    "sub": "Create and manage project policies and guidelines.",
+    "search_placeholder": "Search policies...",
+    "all_categories": "All categories",
+    "add_button": "Add Policy",
+    "loading": "Loading policies...",
+    "no_results": "No results found.",
+    "no_policies": "No policies added yet.",
+    "first_policy_sub": "Add your first policy to create your team's guidelines.",
+    "first_policy_button": "Add First Policy",
+    "load_error_title": "Failed to load policies",
+    "load_error_desc": "An error occurred while loading policies."
+  },
+  "project": {
+    "prd_header": "Project PRD",
+    "prd_sub": "Define the project's requirements and goals."
+  },
+  "buttons": {
+    "save": "Save",
+    "saving": "Saving...",
+    "edit_with_ai": "Write with AI",
+    "cancel": "Cancel",
+    "send": "Send",
+    "back": "Back to Dashboard"
+  },
+  "ai": {
+    "modal_title": "Write PRD via Chat with AI",
+    "save_to_prd": "Save Final Answer to PRD",
+    "close": "Close",
+    "close_confirm_title": "Close dialog?",
+    "close_confirm_desc": "If you close, the conversation will be lost. Continue?",
+    "save_confirm_title": "Save to PRD?",
+    "save_confirm_desc": "The last AI message will be saved to PRD. Continue?",
+    "abort": "Abort",
+    "sending": "Sending...",
+    "input_placeholder": "Type a message..."
+  },
+  "prd": {
+    "loading": "Loading PRD...",
+    "empty": "No PRD written yet.",
+    "last_updated": "Last updated"
+  }
+} 

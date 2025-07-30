@@ -16,6 +16,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
+import { useT } from '@/lib/i18n'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -43,6 +44,8 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
   const inputRef = useRef<HTMLTextAreaElement>(null)
   // 전송 중 취소 플래그
   const isCancelledRef = useRef(false)
+
+  const t = useT()
 
   // 메시지가 추가될 때마다 스크롤을 맨 아래로
   useEffect(() => {
@@ -186,7 +189,7 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
       <div className="bg-white rounded-lg w-full max-w-4xl h-[80vh] flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between p-4 border-b">
-          <CardTitle className="text-xl">🤖 AI와의 대화로 PRD 작성</CardTitle>
+          <CardTitle className="text-xl">{t('ai.modal_title')}</CardTitle>
           <div className="flex gap-2">
             {/* PRD 저장 확인 모달 */}
             <AlertDialog>
@@ -195,22 +198,22 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
                   variant="outline"
                   disabled={messages.length <= 1}
                 >
-                  최종 답변을 PRD로 저장
+                  {t('ai.save_to_prd')}
                 </Button>
               </AlertDialogTrigger>
 
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>PRD로 저장하시겠어요?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('ai.save_confirm_title')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    AI가 준 마지막 말풍선의 내용이 PRD로 저장됩니다, 진행할까요?
+                    {t('ai.save_confirm_desc')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
 
                 <AlertDialogFooter>
-                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
                   <AlertDialogAction onClick={handleSavePrd}>
-                    PRD로 저장
+                    {t('ai.save_to_prd')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -220,24 +223,22 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline">
-                  닫기
+                  {t('ai.close')}
                 </Button>
               </AlertDialogTrigger>
 
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    대화를 닫으시겠어요?
-                  </AlertDialogTitle>
+                  <AlertDialogTitle>{t('ai.close_confirm_title')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    대화를 닫으면 이때까지의 대화가 모두 사라져요, 그래도 닫으시겠어요?
+                    {t('ai.close_confirm_desc')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
 
                 <AlertDialogFooter>
-                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
                   <AlertDialogAction onClick={handleConfirmClose}>
-                    그래도 닫기
+                    {t('ai.close')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -277,7 +278,7 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="메시지를 입력하세요..."
+              placeholder={t('ai.input_placeholder')}
               disabled={isLoading}
               className="flex-1 h-20 resize-none border rounded-md p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
@@ -285,12 +286,12 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isLoading}
             >
-              {isLoading ? '전송 중...' : '전송'}
+              {isLoading ? t('ai.sending') : t('buttons.send')}
             </Button>
 
             {isLoading && (
               <Button variant="outline" onClick={handleCancel}>
-                중단하기
+                {t('ai.abort')}
               </Button>
             )}
           </div>

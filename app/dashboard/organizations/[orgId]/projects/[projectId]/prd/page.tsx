@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-browser'
 import { Tables } from '@/types/database'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
+import { useLangStore } from '@/lib/i18n-store'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
@@ -37,6 +39,9 @@ export default function PrdPage({ params }: PrdPageProps) {
   const [prdContent, setPrdContent] = useState('')
   const [prdLoading, setPrdLoading] = useState(false)
   const [prdSaving, setPrdSaving] = useState(false)
+
+  const t = useT()
+  const { locale } = useLangStore()
   
   // AI 채팅 모달 상태
   const [isAiChatOpen, setIsAiChatOpen] = useState(false)
@@ -193,7 +198,7 @@ export default function PrdPage({ params }: PrdPageProps) {
           </CardHeader>
           <CardContent>
             <Button onClick={() => router.push('/dashboard')}>
-              대시보드로 돌아가기
+              {t('buttons.back') ?? 'Back to Dashboard'}
             </Button>
           </CardContent>
         </Card>
@@ -208,9 +213,9 @@ export default function PrdPage({ params }: PrdPageProps) {
         <div>
           {/* 헤더 영역 */}
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">프로젝트 PRD</h2>
+            <h2 className="text-3xl font-bold mb-2">{t('project.prd_header')}</h2>
             <p className="text-muted-foreground">
-              프로젝트의 요구사항과 목표를 정의합니다.
+              {t('project.prd_sub')}
             </p>
           </div>
 
@@ -225,13 +230,13 @@ export default function PrdPage({ params }: PrdPageProps) {
                       variant="outline"
                       onClick={() => setIsAiChatOpen(true)}
                     >
-                      🤖 AI와의 대화를 통해 작성
+                      {t('buttons.edit_with_ai')}
                     </Button>
                     <Button 
                       onClick={() => savePrd()}
                       disabled={prdSaving}
                     >
-                      {prdSaving ? '저장 중...' : '저장'}
+                      {prdSaving ? t('buttons.saving') : t('buttons.save')}
                     </Button>
                   </div>
                 )}
@@ -241,7 +246,7 @@ export default function PrdPage({ params }: PrdPageProps) {
               {prdLoading ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                  <p className="text-muted-foreground">PRD를 불러오는 중...</p>
+                  <p className="text-muted-foreground">{t('prd.loading')}</p>
                 </div>
               ) : (
                 <div>
@@ -249,19 +254,19 @@ export default function PrdPage({ params }: PrdPageProps) {
                     <textarea
                       value={prdContent}
                       onChange={(e) => setPrdContent(e.target.value)}
-                      placeholder="프로젝트의 요구사항과 목표를 작성해주세요..."
+                      placeholder={t('project.prd_sub')}
                       className="w-full h-96 p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                       disabled={prdSaving}
                     />
                   ) : (
                     <div className="w-full h-96 p-4 border rounded-md bg-muted/50 overflow-y-auto whitespace-pre-wrap">
-                      {prdContent || '아직 작성된 PRD가 없습니다.'}
+                      {prdContent || t('prd.empty')}
                     </div>
                   )}
                   
                   {prd && (
                     <div className="mt-4 text-sm text-muted-foreground">
-                      최종 수정: {new Date(prd.updated_at).toLocaleDateString('ko-KR')}
+                      {t('prd.last_updated')}: {new Date(prd.updated_at).toLocaleDateString(locale)}
                     </div>
                   )}
                 </div>

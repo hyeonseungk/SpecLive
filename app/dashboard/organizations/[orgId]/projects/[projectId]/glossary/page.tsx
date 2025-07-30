@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
+import { useT } from '@/lib/i18n'
+import { useLangStore } from '@/lib/i18n-store'
 
 type User = {
   id: string
@@ -54,6 +56,10 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const [editGithubUrls, setEditGithubUrls] = useState<string[]>([''])
   const [editSaving, setEditSaving] = useState(false)
   
+  // 추가: 다국어 지원 훅
+  const t = useT()
+  const { locale } = useLangStore()
+
   const router = useRouter()
 
   useEffect(() => {
@@ -332,7 +338,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>접근 권한이 없습니다</CardTitle>
+            <CardTitle>{t('common.no_access')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Button onClick={() => router.push('/dashboard')}>
@@ -367,10 +373,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       <div>
         {/* 헤더 영역 */}
         <div className="mb-6">
-          <h2 className="text-3xl font-bold mb-2">용어 관리</h2>
-          <p className="text-muted-foreground">
-            프로젝트에서 사용하는 용어들을 정의하고 관리합니다.
-          </p>
+          <h2 className="text-3xl font-bold mb-2">{t('glossary.header')}</h2>
+          <p className="text-muted-foreground">{t('glossary.sub')}</p>
         </div>
 
         {/* 뷰 선택, 개수 표시, 검색, 정렬 */}
@@ -385,7 +389,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-accent'
                 }`}
-                title="그리드 뷰"
+                title={t('glossary.grid_view')}
               >
                 ⊞
               </button>
@@ -396,7 +400,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-accent'
                 }`}
-                title="리스트 뷰"
+                title={t('glossary.list_view')}
               >
                 ☰
               </button>
@@ -413,7 +417,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             <div className="flex-1 max-w-xs">
               <input
                 type="text"
-            placeholder="용어 검색..."
+            placeholder={t('glossary.search_placeholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -449,14 +453,14 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
         {glossariesLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-            <p className="text-muted-foreground">용어를 불러오는 중...</p>
+            <p className="text-muted-foreground">{t('glossary.loading')}</p>
           </div>
         ) : sortedGlossaries.length === 0 ? (
             <Card>
             <CardContent className="pt-8 pb-8">
               <div className="text-center text-muted-foreground">
                 <p className="mb-4">
-                  {searchTerm ? '검색 결과가 없습니다.' : '아직 등록된 용어가 없습니다.'}
+                  {searchTerm ? t('glossary.no_results') : t('glossary.no_terms')}
                 </p>
                 {!searchTerm && (
                   <p className="text-sm mb-6">
@@ -535,7 +539,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                     </div>
                   )}
                   <div className="mt-auto text-xs text-muted-foreground">
-                    {new Date(glossary.created_at).toLocaleDateString('ko-KR')}
+                    {new Date(glossary.created_at).toLocaleDateString(locale)}
                   </div>
                 </CardContent>
               </Card>
