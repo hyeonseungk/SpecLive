@@ -131,7 +131,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       setGlossaries(data || [])
     } catch (error) {
       console.error('Error loading glossaries:', error)
-      showError('용어 로드 실패', '용어를 불러오는 중 오류가 발생했습니다.')
+      showError(t('glossary.load_error_title'), t('glossary.load_error_desc'))
     } finally {
       setGlossariesLoading(false)
     }
@@ -154,7 +154,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const addGlossary = async () => {
     if (!project || !user) return
     if (!glossaryName.trim() || !glossaryDefinition.trim()) {
-      showError('입력 오류', '용어 이름과 정의를 모두 입력해주세요.')
+      showError(t('glossary.input_error_title'), t('glossary.input_error_desc'))
       return
     }
 
@@ -201,10 +201,10 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       // 모달 닫기 및 폼 리셋
       handleCloseGlossaryModal()
       
-      showSimpleSuccess('용어가 추가되었습니다.')
+      showSimpleSuccess(t('glossary.add_success'))
     } catch (error) {
       console.error('Error adding glossary:', error)
-      showError('용어 추가 실패', '용어를 추가하는 중 오류가 발생했습니다.')
+      showError(t('glossary.add_error_title'), t('glossary.add_error_desc'))
     } finally {
       setGlossarySaving(false)
     }
@@ -261,7 +261,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const updateGlossary = async () => {
     if (!editingGlossary || !user) return
     if (!editName.trim() || !editDefinition.trim()) {
-      showError('입력 오류', '용어 이름과 정의를 모두 입력해주세요.')
+      showError(t('glossary.input_error_title'), t('glossary.input_error_desc'))
       return
     }
 
@@ -316,10 +316,10 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       ))
 
       handleCloseEditModal()
-      showSimpleSuccess('용어가 수정되었습니다.')
+      showSimpleSuccess(t('glossary.update_success'))
     } catch (error) {
       console.error('Error updating glossary:', error)
-      showError('용어 수정 실패', '용어를 수정하는 중 오류가 발생했습니다.')
+      showError(t('glossary.update_error_title'), t('glossary.update_error_desc'))
     } finally {
       setEditSaving(false)
     }
@@ -341,9 +341,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             <CardTitle>{t('common.no_access')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => router.push('/dashboard')}>
-              대시보드로 돌아가기
-            </Button>
+            <Button onClick={() => router.push('/dashboard')}>{t('buttons.back')}</Button>
           </CardContent>
         </Card>
       </div>
@@ -409,7 +407,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             {/* 용어 개수 */}
             {glossaries.length > 0 && (
               <p className="text-sm text-muted-foreground">
-                총 {glossaries.length}개의 용어
+                {t('glossary.total_prefix')}{glossaries.length}{t('glossary.total_suffix')}
               </p>
             )}
 
@@ -431,21 +429,17 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                   onChange={(e) => setSortBy(e.target.value as 'name' | 'created_at' | 'created_at_old')}
                   className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  <option value="created_at">최신순</option>
-                  <option value="created_at_old">오래된순</option>
-                  <option value="name">이름순</option>
+                  <option value="created_at">{t('glossary.sort_newest')}</option>
+                  <option value="created_at_old">{t('glossary.sort_oldest')}</option>
+                  <option value="name">{t('glossary.sort_name')}</option>
                 </select>
             </div>
           </div>
 
           {/* 우측: 버튼들 */}
           <div className="flex gap-2">
-            <Button variant="outline" disabled>
-              🤖 AI에게 용어 추천받기
-            </Button>
-            <Button onClick={() => setShowGlossaryModal(true)}>
-              ➕ 용어 추가
-            </Button>
+            <Button variant="outline" disabled>{t('glossary.ai_recommendation')}</Button>
+            <Button onClick={() => setShowGlossaryModal(true)}>{t('glossary.add_term_button')}</Button>
           </div>
         </div>
 
@@ -463,14 +457,10 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                   {searchTerm ? t('glossary.no_results') : t('glossary.no_terms')}
                 </p>
                 {!searchTerm && (
-                  <p className="text-sm mb-6">
-                    첫 번째 용어를 추가하여 팀의 용어집을 만들어보세요.
-                  </p>
+                  <p className="text-sm mb-6">{t('glossary.first_term_sub')}</p>
                 )}
                 {!searchTerm && (
-                  <Button onClick={() => setShowGlossaryModal(true)}>
-                    첫 번째 용어 추가하기
-                  </Button>
+                  <Button onClick={() => setShowGlossaryModal(true)}>{t('glossary.first_term_button')}</Button>
                 )}
               </div>
               </CardContent>
@@ -504,7 +494,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                   </p>
                   {glossary.examples && (
                     <p className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 truncate">
-                      예시: {glossary.examples}
+                      {t('glossary.example_prefix')}: {glossary.examples}
                     </p>
                   )}
                   {(glossary as any).glossary_links && (glossary as any).glossary_links.length > 0 && (
@@ -552,45 +542,39 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       {showGlossaryModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold mb-4">새 용어 추가</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('glossary.add_modal_title')}</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  용어 이름 *
-                </label>
+                <label className="block text-sm font-medium mb-1">{t('glossary.name_label')}</label>
                 <input
                   type="text"
                   value={glossaryName}
                   onChange={(e) => setGlossaryName(e.target.value)}
-                  placeholder="예: 유저, 상품, 주문, .."
+                  placeholder={t('glossary.name_placeholder')}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   disabled={glossarySaving}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  정의 *
-                </label>
+                <label className="block text-sm font-medium mb-1">{t('glossary.definition_label')}</label>
                 <textarea
                   value={glossaryDefinition}
                   onChange={(e) => setGlossaryDefinition(e.target.value)}
-                  placeholder="용어의 의미를 작성해주세요."
+                  placeholder={t('glossary.definition_placeholder')}
                   className="w-full p-2 border rounded-md h-24 resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   disabled={glossarySaving}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  예시 문구
-                </label>
+                <label className="block text-sm font-medium mb-1">{t('glossary.examples_label')}</label>
                 <input
                   type="text"
                   value={glossaryExamples}
                   onChange={(e) => setGlossaryExamples(e.target.value)}
-                  placeholder="예: 홍길동, 김철수, 이영희"
+                  placeholder={t('glossary.examples_placeholder')}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   disabled={glossarySaving}
                 />
@@ -598,16 +582,14 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium">
-                    GitHub URL
-                  </label>
+                  <label className="block text-sm font-medium">{t('glossary.github_label')}</label>
                   <button
                     type="button"
                     onClick={addGithubUrl}
                     disabled={glossarySaving}
                     className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-400"
                   >
-                    + URL 추가
+                    {t('glossary.add_url')}
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -617,7 +599,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                         type="url"
                         value={url}
                         onChange={(e) => updateGithubUrl(index, e.target.value)}
-                        placeholder="https://github.com/username/repo/blob/main/file.js"
+                        placeholder={t('glossary.github_placeholder')}
                         className="flex-1 p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         disabled={glossarySaving}
                       />
@@ -627,7 +609,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                           onClick={() => removeGithubUrl(index)}
                           disabled={glossarySaving}
                           className="px-2 py-1 text-red-600 hover:text-red-800 disabled:text-gray-400"
-                          title="URL 제거"
+                          title={t('glossary.remove_url')}
                         >
                           ×
                         </button>
@@ -644,13 +626,13 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                 onClick={handleCloseGlossaryModal}
                 disabled={glossarySaving}
               >
-                취소
+                {t('buttons.cancel')}
               </Button>
               <Button 
                 onClick={addGlossary}
                 disabled={glossarySaving || !glossaryName.trim() || !glossaryDefinition.trim()}
               >
-                {glossarySaving ? '추가 중...' : '추가'}
+                {glossarySaving ? t('glossary.adding') : t('glossary.add')}
               </Button>
             </div>
           </div>
@@ -661,45 +643,39 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       {showEditModal && editingGlossary && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold mb-4">용어 수정</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('glossary.edit_modal_title')}</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  용어 이름 *
-                </label>
+                <label className="block text-sm font-medium mb-1">{t('glossary.name_label')}</label>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  placeholder="예: 유저, 상품, 주문, .."
+                  placeholder={t('glossary.name_placeholder')}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   disabled={editSaving}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  정의 *
-                </label>
+                <label className="block text-sm font-medium mb-1">{t('glossary.definition_label')}</label>
                 <textarea
                   value={editDefinition}
                   onChange={(e) => setEditDefinition(e.target.value)}
-                  placeholder="용어의 의미를 작성해주세요."
+                  placeholder={t('glossary.definition_placeholder')}
                   className="w-full p-2 border rounded-md h-24 resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   disabled={editSaving}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  예시 문구
-                </label>
+                <label className="block text-sm font-medium mb-1">{t('glossary.examples_label')}</label>
                 <input
                   type="text"
                   value={editExamples}
                   onChange={(e) => setEditExamples(e.target.value)}
-                  placeholder="예: 홍길동, 김철수, 이영희"
+                  placeholder={t('glossary.examples_placeholder')}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   disabled={editSaving}
                 />
@@ -707,16 +683,14 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium">
-                    GitHub URL
-                  </label>
+                  <label className="block text-sm font-medium">{t('glossary.github_label')}</label>
                   <button
                     type="button"
                     onClick={addEditGithubUrl}
                     disabled={editSaving}
                     className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-400"
                   >
-                    + URL 추가
+                    {t('glossary.add_url')}
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -726,7 +700,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                         type="url"
                         value={url}
                         onChange={(e) => updateEditGithubUrl(index, e.target.value)}
-                        placeholder="https://github.com/username/repo/blob/main/file.js"
+                        placeholder={t('glossary.github_placeholder')}
                         className="flex-1 p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         disabled={editSaving}
                       />
@@ -736,7 +710,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                           onClick={() => removeEditGithubUrl(index)}
                           disabled={editSaving}
                           className="px-2 py-1 text-red-600 hover:text-red-800 disabled:text-gray-400"
-                          title="URL 제거"
+                          title={t('glossary.remove_url')}
                         >
                           ×
                         </button>
@@ -753,13 +727,13 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                 onClick={handleCloseEditModal}
                 disabled={editSaving}
               >
-                취소
+                {t('buttons.cancel')}
               </Button>
               <Button 
                 onClick={updateGlossary}
                 disabled={editSaving || !editName.trim() || !editDefinition.trim()}
               >
-                {editSaving ? '수정 중...' : '수정'}
+                {editSaving ? t('glossary.updating') : t('glossary.update')}
               </Button>
             </div>
           </div>
