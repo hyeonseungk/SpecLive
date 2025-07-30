@@ -318,7 +318,11 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
             {/* 확인 모달 */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => {
+                  if (messages.length <= 1) {
+                    onClose();
+                  }
+                }}>
                   {t('ai.close')}
                 </Button>
               </AlertDialogTrigger>
