@@ -143,7 +143,7 @@ export default function AiChatModal({ isOpen, onClose, onSavePrd }: AiChatModalP
               onClick={handleSavePrd}
               disabled={messages.length <= 1}
             >
-              PRD로 저장
+              최종 답변을 PRD로 저장
             </Button>
             <Button variant="outline" onClick={onClose}>
               닫기

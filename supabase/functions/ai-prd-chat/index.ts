@@ -73,7 +73,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           {
             role: "system",
             content:
-              "당신은 프로젝트 PRD 작성 전문가입니다. 사용자와의 대화를 통해 명확하고 구체적인 PRD를 도출하세요.",
+              "당신은 PRD(Product Requirements Document) 작성 전문가입니다. 사용자와의 대화를 통해 명확하고 구체적인 PRD를 도출하세요. 최소 8개에서 최대 12개 사이의 개수의 질문을 하고, 한 번에 딱 한 번의 질문만을 하세요. 질문을 다했으면 마지막에 '이때까지 답변해주신 내용을 바탕으로 PRD를 작성할까요?'라고 물어보세요.",
           },
           ...messages,
         ],
