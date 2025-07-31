@@ -100,7 +100,7 @@ function SortableGlossaryCard({ glossary, onEdit, showSequence, t, locale }: Sor
               {glossary.definition}
             </p>
             {glossary.examples && (
-              <p className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 truncate">
+              <p className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 w-fit">
                 {t('glossary.example_prefix')}: {glossary.examples}
               </p>
             )}
@@ -137,7 +137,7 @@ function SortableGlossaryCard({ glossary, onEdit, showSequence, t, locale }: Sor
               </div>
             )}
             <div className="mt-auto text-xs text-muted-foreground text-right">
-              {new Date(glossary.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              최종 수정: {new Date(glossary.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </div>
           </CardContent>
         </div>
