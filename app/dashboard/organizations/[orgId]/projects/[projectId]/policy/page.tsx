@@ -299,26 +299,21 @@ function SortablePolicyCard({ policy, onEdit, membership }: SortablePolicyCardPr
 
         {/* 메타 정보 */}
         <div className={`pt-2 border-t border-gray-200 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
-          <div className="flex items-center text-xs text-gray-500">
-            <span className="flex-1">
-              {policy.created_at ? new Date(policy.created_at).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              }) : '생성일 미확인'}
-            </span>
-            {policy.updated_at && policy.updated_at !== policy.created_at && (
-              <span className="ml-auto text-right">
-                최종 수정: {new Date(policy.updated_at).toLocaleDateString('ko-KR', {
+          <div className="flex justify-end text-xs text-gray-500">
+            <span className="flex-1"></span>
+            <span className="text-right">
+              {policy.updated_at ? (
+                <>최종 수정: {new Date(policy.updated_at).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
                   month: 'short',
                   day: 'numeric',
                   hour: '2-digit',
                   minute: '2-digit'
-                })}
-              </span>
-            )}
+                })}</>
+              ) : (
+                <>최종 수정 정보 없음</>
+              )}
+            </span>
           </div>
         </div>
       </Card>
