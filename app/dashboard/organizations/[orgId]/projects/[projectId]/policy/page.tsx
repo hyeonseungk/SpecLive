@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-browser'
 import { Tables } from '@/types/database'
 import { Button } from '@/components/ui/button'
@@ -75,6 +75,27 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [usecaseSaving, setUsecaseSaving] = useState(false)
   
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // URL query parameter 업데이트 함수
+  const updateURL = (actorId?: string, usecaseId?: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    
+    if (actorId) {
+      params.set('actorId', actorId)
+    } else {
+      params.delete('actorId')
+    }
+    
+    if (usecaseId) {
+      params.set('usecaseId', usecaseId)
+    } else {
+      params.delete('usecaseId')
+    }
+    
+    const newUrl = `${window.location.pathname}?${params.toString()}`
+    router.replace(newUrl, { scroll: false })
+  }
 
   useEffect(() => {
     const loadProjectData = async () => {
@@ -143,10 +164,21 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setActors(data || [])
       
-      // 첫 번째 액터를 자동 선택
+      // URL parameter에서 선택할 액터 확인
+      const urlActorId = searchParams.get('actorId')
+      let actorToSelect = null
+      
       if (data && data.length > 0) {
-        setSelectedActor(data[0])
-        await loadUsecasesForActor(data[0].id)
+        if (urlActorId) {
+          // URL에 actorId가 있으면 해당 액터 찾기
+          actorToSelect = data.find(actor => actor.id === urlActorId) || data[0]
+        } else {
+          // URL에 actorId가 없으면 첫 번째 액터 선택
+          actorToSelect = data[0]
+        }
+        
+        setSelectedActor(actorToSelect)
+        await loadUsecasesForActor(actorToSelect.id)
       }
     } catch (error) {
       console.error('Error loading actors:', error)
@@ -169,11 +201,23 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setUsecases(data || [])
       
-      // 첫 번째 유즈케이스를 자동 선택
+      // URL parameter에서 선택할 유즈케이스 확인
+      const urlUsecaseId = searchParams.get('usecaseId')
+      let usecaseToSelect = null
+      
       if (data && data.length > 0) {
-        setSelectedUsecase(data[0])
+        if (urlUsecaseId) {
+          // URL에 usecaseId가 있으면 해당 유즈케이스 찾기
+          usecaseToSelect = data.find(usecase => usecase.id === urlUsecaseId) || data[0]
+        } else {
+          // URL에 usecaseId가 없으면 첫 번째 유즈케이스 선택
+          usecaseToSelect = data[0]
+        }
+        setSelectedUsecase(usecaseToSelect)
+        updateURL(actorId, usecaseToSelect.id)
       } else {
         setSelectedUsecase(null)
+        updateURL(actorId) // usecaseId 제거
       }
     } catch (error) {
       console.error('Error loading usecases:', error)
@@ -185,7 +229,16 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const handleActorSelect = async (actor: Actor) => {
     setSelectedActor(actor)
     setSelectedUsecase(null)
+    // 액터 변경 시 URL 업데이트 (usecaseId는 제거)
+    updateURL(actor.id)
     await loadUsecasesForActor(actor.id)
+  }
+
+  // 유즈케이스 선택 핸들러
+  const handleUsecaseSelect = (usecase: Usecase) => {
+    setSelectedUsecase(usecase)
+    // 유즈케이스 선택 시 URL 업데이트
+    updateURL(selectedActor?.id, usecase.id)
   }
 
   // 액터 추가 함수
@@ -219,6 +272,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         setSelectedActor(actor)
         setUsecases([])
         setSelectedUsecase(null)
+        updateURL(actor.id)
       }
       
       showSimpleSuccess(t('actor.add_success'))
@@ -259,6 +313,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       // 첫 번째 유즈케이스라면 자동 선택
       if (usecases.length === 0) {
         setSelectedUsecase(usecase)
+        updateURL(selectedActor?.id, usecase.id)
       }
       
       showSimpleSuccess(t('usecase.add_success'))
@@ -389,7 +444,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                         {usecases.map(usecase => (
                           <DropdownMenuItem
                             key={usecase.id}
-                            onClick={() => setSelectedUsecase(usecase)}
+                            onClick={() => handleUsecaseSelect(usecase)}
                             className="text-base py-2"
                           >
                             {usecase.name}
