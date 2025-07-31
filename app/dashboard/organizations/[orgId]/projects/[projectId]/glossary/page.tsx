@@ -315,7 +315,20 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
     setGlossarySaving(true)
     try {
-      // 1. 용어 추가
+      // 1. 현재 프로젝트의 최대 sequence 값 조회
+      const { data: maxSequenceData, error: maxSequenceError } = await supabase
+        .from('glossaries')
+        .select('sequence')
+        .eq('project_id', project.id)
+        .order('sequence', { ascending: false })
+        .limit(1)
+
+      if (maxSequenceError) throw maxSequenceError
+
+      // 다음 sequence 값 계산 (최대값 + 1부터 시작)
+      const nextSequence = (maxSequenceData?.[0]?.sequence || 0) + 1
+
+      // 2. 용어 추가 (sequence 값 포함)
       const { data: glossary, error: glossaryError } = await supabase
       .from('glossaries')
       .insert({
@@ -323,7 +336,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
           name: glossaryName.trim(),
           definition: glossaryDefinition.trim(),
           examples: glossaryExamples.trim() || null,
-          author_id: user.id
+          author_id: user.id,
+          sequence: nextSequence
       })
       .select()
       .single()
