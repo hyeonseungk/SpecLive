@@ -79,18 +79,21 @@ export type Database = {
           feature_id: string | null
           id: string
           policy_id: string | null
+          sequence: number
         }
         Insert: {
           created_at?: string | null
           feature_id?: string | null
           id?: string
           policy_id?: string | null
+          sequence?: number
         }
         Update: {
           created_at?: string | null
           feature_id?: string | null
           id?: string
           policy_id?: string | null
+          sequence?: number
         }
         Relationships: [
           {

@@ -27,7 +27,30 @@ type Usecase = Tables<'usecases'>
 
 type Feature = Tables<'features'>
 
-type FeaturePolicy = Tables<'policies'>
+type FeaturePolicy = Tables<'policies'> & {
+  sequence?: number
+  policy_links?: {
+    id: string
+    url: string
+    type: string
+  }[]
+  policy_terms?: {
+    glossary_id: string
+    glossaries?: {
+      name: string
+    }
+  }[]
+  connected_features?: {
+    id: string
+    name: string
+    usecase: {
+      name: string
+      actor: {
+        name: string
+      }
+    }
+  }[]
+}
 
 interface PolicyPageProps {
   params: {
@@ -86,7 +109,26 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [generalLinks, setGeneralLinks] = useState<string[]>([''])
   const [selectedGlossaryIds, setSelectedGlossaryIds] = useState<string[]>([])
   const [glossarySearchTerm, setGlossarySearchTerm] = useState('')
+  const [selectedFeatureIds, setSelectedFeatureIds] = useState<string[]>([])
+  const [featureSearchTerm, setFeatureSearchTerm] = useState('')
   const [policySaving, setPolicySaving] = useState(false)
+
+  // 정책 편집 모달 상태
+  const [showEditPolicyModal, setShowEditPolicyModal] = useState(false)
+  const [editingPolicy, setEditingPolicy] = useState<FeaturePolicy | null>(null)
+  const [editPolicyContents, setEditPolicyContents] = useState('')
+  const [editContextLinks, setEditContextLinks] = useState<string[]>([''])
+  const [editGeneralLinks, setEditGeneralLinks] = useState<string[]>([''])
+  const [editSelectedGlossaryIds, setEditSelectedGlossaryIds] = useState<string[]>([])
+  const [editGlossarySearchTerm, setEditGlossarySearchTerm] = useState('')
+  const [editSelectedFeatureIds, setEditSelectedFeatureIds] = useState<string[]>([])
+  const [editFeatureSearchTerm, setEditFeatureSearchTerm] = useState('')
+  const [editPolicySaving, setEditPolicySaving] = useState(false)
+
+  // 정책 삭제 확인 모달 상태
+  const [showDeletePolicyModal, setShowDeletePolicyModal] = useState(false)
+  const [deletingPolicy, setDeletingPolicy] = useState<FeaturePolicy | null>(null)
+  const [policyDeleting, setPolicyDeleting] = useState(false)
   
   // 기능과 정책 관련 상태
   const [features, setFeatures] = useState<Feature[]>([])
@@ -95,9 +137,21 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [featuresLoading, setFeaturesLoading] = useState(false)
   const [policiesLoading, setPoliciesLoading] = useState(false)
   
+  // 기능 목록 검색 상태
+  const [featureListSearchTerm, setFeatureListSearchTerm] = useState('')
+  
+  // 정책 목록 검색 상태
+  const [policyListSearchTerm, setPolicyListSearchTerm] = useState('')
+  
   // 용어 관련 상태
   const [glossaries, setGlossaries] = useState<Tables<'glossaries'>[]>([])
   const [glossariesLoading, setGlossariesLoading] = useState(false)
+  
+  // 모든 기능 관련 상태 (정책 모달용)
+  const [allFeatures, setAllFeatures] = useState<(Feature & { 
+    usecase: { name: string; actor: { name: string } } 
+  })[]>([])
+  const [allFeaturesLoading, setAllFeaturesLoading] = useState(false)
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -161,9 +215,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setMembership(membershipData)
 
-      // 액터와 용어 로드
+      // 액터, 용어, 모든 기능 로드
       await loadActorsForProject(params.projectId)
       await loadGlossariesForProject(params.projectId)
+      await loadAllFeaturesForProject(params.projectId)
 
       setLoading(false)
     }
@@ -295,23 +350,83 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       const { data, error } = await supabase
         .from('feature_policies')
         .select(`
+          sequence,
           policies (
             id,
             contents,
             author_id,
             created_at,
             updated_at,
-            project_id
+            project_id,
+            policy_links (
+              id,
+              url,
+              type
+            ),
+            policy_terms (
+              glossary_id,
+              glossaries (
+                name
+              )
+            )
           )
         `)
         .eq('feature_id', featureId)
-        .order('created_at', { ascending: true })
+        .order('sequence', { ascending: true })
 
       if (error) throw error
 
-      // 조인된 정책 데이터 추출
-      const policies = data?.map(item => item.policies).filter(Boolean) || []
-      setFeaturePolicies(policies as FeaturePolicy[])
+      // 조인된 정책 데이터 추출 (sequence 포함)
+      const policies = data?.map(item => ({
+        ...item.policies,
+        sequence: item.sequence
+      })).filter(Boolean) || []
+      
+      // 각 정책에 연결된 기능들 정보 가져오기
+      const policiesWithFeatures = await Promise.all(
+        policies.map(async (policy) => {
+          if (!policy) return policy
+          
+          const { data: featureData, error: featureError } = await supabase
+            .from('feature_policies')
+            .select(`
+              features (
+                id,
+                name,
+                usecase:usecases (
+                  name,
+                  actor:actors (
+                    name
+                  )
+                )
+              )
+            `)
+            .eq('policy_id', policy.id)
+
+          if (featureError) {
+            console.error('Error loading connected features:', featureError)
+            return policy
+          }
+
+          const connectedFeatures = featureData?.map(item => ({
+            id: item.features?.id || '',
+            name: item.features?.name || '',
+            usecase: {
+              name: item.features?.usecase?.name || '',
+              actor: {
+                name: item.features?.usecase?.actor?.name || ''
+              }
+            }
+          })).filter(feature => feature.name) || []
+
+          return {
+            ...policy,
+            connected_features: connectedFeatures
+          }
+        })
+      )
+      
+      setFeaturePolicies(policiesWithFeatures as FeaturePolicy[])
     } catch (error) {
       console.error('Error loading feature policies:', error)
       // 임시로 showError 대신 console.error만 사용 (나중에 다국어 추가)
@@ -367,6 +482,48 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       showError('용어 로드 실패', '용어를 불러오는 중 오류가 발생했습니다.')
     } finally {
       setGlossariesLoading(false)
+    }
+  }
+
+  // 모든 기능 로드 함수 (정책 모달용)
+  const loadAllFeaturesForProject = async (projectId: string) => {
+    setAllFeaturesLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('features')
+        .select(`
+          *,
+          usecase:usecases (
+            name,
+            actor:actors (
+              name
+            )
+          )
+        `)
+        .eq('usecase.actor.project_id', projectId)
+        .order('sequence', { ascending: true })
+
+      if (error) throw error
+
+      // 타입 변환 및 필터링
+      const featuresWithHierarchy = data?.map(feature => ({
+        ...feature,
+        usecase: {
+          name: feature.usecase?.name || '',
+          actor: {
+            name: feature.usecase?.actor?.name || ''
+          }
+        }
+      })).filter(feature => 
+        feature.usecase.name && feature.usecase.actor.name
+      ) || []
+
+      setAllFeatures(featuresWithHierarchy)
+    } catch (error) {
+      console.error('Error loading all features:', error)
+      showError('기능 로드 실패', '기능을 불러오는 중 오류가 발생했습니다.')
+    } finally {
+      setAllFeaturesLoading(false)
     }
   }
 
@@ -612,11 +769,38 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     return nameMatches || definitionMatches
   })
 
+  // 기능 선택 관리 함수들
+  const handleFeatureToggle = (featureId: string) => {
+    setSelectedFeatureIds(prev => 
+      prev.includes(featureId) 
+        ? prev.filter(id => id !== featureId)
+        : [...prev, featureId]
+    )
+  }
+
+  // 기능 검색 필터링
+  const filteredFeatures = allFeatures.filter(feature => {
+    if (!featureSearchTerm.trim()) return true
+    
+    const searchTerm = featureSearchTerm.toLowerCase().trim()
+    const featureNameMatches = feature.name.toLowerCase().includes(searchTerm)
+    const usecaseNameMatches = feature.usecase.name.toLowerCase().includes(searchTerm)
+    const actorNameMatches = feature.usecase.actor.name.toLowerCase().includes(searchTerm)
+    
+    return featureNameMatches || usecaseNameMatches || actorNameMatches
+  })
+
   // 정책 추가 함수
   const addPolicy = async () => {
-    if (!selectedFeature || !user) return
+    if (!user) return
     if (!policyContents.trim()) {
       showSimpleError('정책 내용을 입력해주세요.')
+      return
+    }
+
+    // 모달에서 체크박스로 선택된 기능들만 기준으로 체크
+    if (selectedFeatureIds.length === 0) {
+      showSimpleError('정책은 최소 1개의 기능과 연결되어야 합니다.')
       return
     }
 
@@ -635,15 +819,32 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       if (policyError) throw policyError
 
-      // 2. 기능-정책 관계 추가
-      const { error: featurePolicyError } = await supabase
-        .from('feature_policies')
-        .insert({
-          feature_id: selectedFeature.id,
-          policy_id: policy.id
-        })
+      // 2. 기능-정책 관계 추가 (모달에서 선택된 기능들만)
+      if (selectedFeatureIds.length > 0) {
+        // 각 기능별로 현재 최대 sequence 값을 조회하고 새로운 sequence 할당
+        for (const featureId of selectedFeatureIds) {
+          const { data: maxSequenceData, error: maxSequenceError } = await supabase
+            .from('feature_policies')
+            .select('sequence')
+            .eq('feature_id', featureId)
+            .order('sequence', { ascending: false })
+            .limit(1)
 
-      if (featurePolicyError) throw featurePolicyError
+          if (maxSequenceError) throw maxSequenceError
+
+          const nextSequence = (maxSequenceData?.[0]?.sequence || 0) + 1
+
+          const { error: featurePolicyError } = await supabase
+            .from('feature_policies')
+            .insert({
+              feature_id: featureId,
+              policy_id: policy.id,
+              sequence: nextSequence
+            })
+
+          if (featurePolicyError) throw featurePolicyError
+        }
+      }
 
       // 3. 컨텍스트 링크 추가
       const validContextLinks = contextLinks.filter(link => link.trim())
@@ -691,8 +892,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         if (policyTermsError) throw policyTermsError
       }
 
-      // 6. 정책 목록 새로고침
-      await loadPoliciesForFeature(selectedFeature.id)
+      // 6. 정책 목록 새로고침 (현재 선택된 기능이 있는 경우에만)
+      if (selectedFeature && selectedFeature.id) {
+        await loadPoliciesForFeature(selectedFeature.id)
+      }
 
       // 7. 모달 초기화 및 닫기
       setPolicyContents('')
@@ -700,6 +903,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setGeneralLinks([''])
       setSelectedGlossaryIds([])
       setGlossarySearchTerm('')
+      setSelectedFeatureIds([])
+      setFeatureSearchTerm('')
       setShowPolicyModal(false)
       
       showSimpleSuccess('정책이 성공적으로 추가되었습니다.')
@@ -792,6 +997,311 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setFeatureDeleting(false)
     }
   }
+
+  // 정책 편집 모달 열기
+  const handleEditPolicy = async (policy: FeaturePolicy) => {
+    setEditingPolicy(policy)
+    setEditPolicyContents(policy.contents)
+    
+    // 기존 링크들 불러오기
+    if (policy.policy_links) {
+      const contextLinks = policy.policy_links.filter(link => link.type === 'context').map(link => link.url)
+      const generalLinks = policy.policy_links.filter(link => link.type === 'general').map(link => link.url)
+      
+      setEditContextLinks(contextLinks.length > 0 ? contextLinks : [''])
+      setEditGeneralLinks(generalLinks.length > 0 ? generalLinks : [''])
+    } else {
+      setEditContextLinks([''])
+      setEditGeneralLinks([''])
+    }
+    
+    // 기존 연결된 용어들 불러오기
+    if (policy.policy_terms) {
+      setEditSelectedGlossaryIds(policy.policy_terms.map(term => term.glossary_id))
+    } else {
+      setEditSelectedGlossaryIds([])
+    }
+    
+    // 기존 연결된 기능들 불러오기
+    if (policy.connected_features) {
+      setEditSelectedFeatureIds(policy.connected_features.map(feature => feature.id))
+    } else {
+      setEditSelectedFeatureIds([])
+    }
+    
+    setEditGlossarySearchTerm('')
+    setEditFeatureSearchTerm('')
+    setShowEditPolicyModal(true)
+  }
+
+  // 정책 수정 함수
+  const updatePolicy = async () => {
+    if (!editingPolicy || !user) return
+    if (!editPolicyContents.trim()) {
+      showSimpleError('정책 내용을 입력해주세요.')
+      return
+    }
+    if (editSelectedFeatureIds.length === 0) {
+      showSimpleError('정책은 최소 1개의 기능과 연결되어야 합니다.')
+      return
+    }
+
+    setEditPolicySaving(true)
+    try {
+      // 1. 정책 내용 업데이트
+      const { error: policyError } = await supabase
+        .from('policies')
+        .update({
+          contents: editPolicyContents.trim()
+        })
+        .eq('id', editingPolicy.id)
+
+      if (policyError) throw policyError
+
+      // 2. 기존 링크들 삭제 후 새로 추가
+      const { error: deleteLinkError } = await supabase
+        .from('policy_links')
+        .delete()
+        .eq('policy_id', editingPolicy.id)
+
+      if (deleteLinkError) throw deleteLinkError
+
+      // 3. 컨텍스트 링크 추가
+      const validContextLinks = editContextLinks.filter(link => link.trim())
+      if (validContextLinks.length > 0) {
+        const { error: contextLinksError } = await supabase
+          .from('policy_links')
+          .insert(
+            validContextLinks.map(url => ({
+              policy_id: editingPolicy.id,
+              url: url.trim(),
+              type: 'context' as const
+            }))
+          )
+
+        if (contextLinksError) throw contextLinksError
+      }
+
+      // 4. 일반 링크 추가
+      const validGeneralLinks = editGeneralLinks.filter(link => link.trim())
+      if (validGeneralLinks.length > 0) {
+        const { error: generalLinksError } = await supabase
+          .from('policy_links')
+          .insert(
+            validGeneralLinks.map(url => ({
+              policy_id: editingPolicy.id,
+              url: url.trim(),
+              type: 'general' as const
+            }))
+          )
+
+        if (generalLinksError) throw generalLinksError
+      }
+
+      // 5. 기존 용어 연결 삭제 후 새로 추가
+      const { error: deleteTermsError } = await supabase
+        .from('policy_terms')
+        .delete()
+        .eq('policy_id', editingPolicy.id)
+
+      if (deleteTermsError) throw deleteTermsError
+
+      if (editSelectedGlossaryIds.length > 0) {
+        const { error: policyTermsError } = await supabase
+          .from('policy_terms')
+          .insert(
+            editSelectedGlossaryIds.map(glossaryId => ({
+              policy_id: editingPolicy.id,
+              glossary_id: glossaryId
+            }))
+          )
+
+        if (policyTermsError) throw policyTermsError
+      }
+
+      // 6. 기존 기능 연결 삭제 후 새로 추가
+      const { error: deleteFeaturePoliciesError } = await supabase
+        .from('feature_policies')
+        .delete()
+        .eq('policy_id', editingPolicy.id)
+
+      if (deleteFeaturePoliciesError) throw deleteFeaturePoliciesError
+
+      // 각 기능별로 현재 최대 sequence 값을 조회하고 새로운 sequence 할당
+      for (const featureId of editSelectedFeatureIds) {
+        const { data: maxSequenceData, error: maxSequenceError } = await supabase
+          .from('feature_policies')
+          .select('sequence')
+          .eq('feature_id', featureId)
+          .order('sequence', { ascending: false })
+          .limit(1)
+
+        if (maxSequenceError) throw maxSequenceError
+
+        const nextSequence = (maxSequenceData?.[0]?.sequence || 0) + 1
+
+        const { error: featurePolicyError } = await supabase
+          .from('feature_policies')
+          .insert({
+            feature_id: featureId,
+            policy_id: editingPolicy.id,
+            sequence: nextSequence
+          })
+
+        if (featurePolicyError) throw featurePolicyError
+      }
+
+      // 7. 정책 목록 새로고침
+      if (selectedFeature && selectedFeature.id) {
+        await loadPoliciesForFeature(selectedFeature.id)
+      }
+
+      // 8. 모달 초기화 및 닫기
+      setShowEditPolicyModal(false)
+      setEditingPolicy(null)
+      setEditPolicyContents('')
+      setEditContextLinks([''])
+      setEditGeneralLinks([''])
+      setEditSelectedGlossaryIds([])
+      setEditGlossarySearchTerm('')
+      setEditSelectedFeatureIds([])
+      setEditFeatureSearchTerm('')
+      
+      showSimpleSuccess('정책이 성공적으로 수정되었습니다.')
+    } catch (error) {
+      console.error('Error updating policy:', error)
+      showError('정책 수정 실패', '정책을 수정하는 중 오류가 발생했습니다.')
+    } finally {
+      setEditPolicySaving(false)
+    }
+  }
+
+  // 정책 삭제 확인 모달 열기
+  const handleDeletePolicy = (policy: FeaturePolicy) => {
+    setDeletingPolicy(policy)
+    setShowDeletePolicyModal(true)
+  }
+
+  // 정책 삭제 함수
+  const deletePolicy = async () => {
+    if (!deletingPolicy || !user) return
+
+    setPolicyDeleting(true)
+    try {
+      // 1. 정책에 연결된 링크들 삭제
+      const { error: deleteLinksError } = await supabase
+        .from('policy_links')
+        .delete()
+        .eq('policy_id', deletingPolicy.id)
+
+      if (deleteLinksError) throw deleteLinksError
+
+      // 2. 정책에 연결된 용어 관계 삭제
+      const { error: deleteTermsError } = await supabase
+        .from('policy_terms')
+        .delete()
+        .eq('policy_id', deletingPolicy.id)
+
+      if (deleteTermsError) throw deleteTermsError
+
+      // 3. 정책에 연결된 기능 관계 삭제
+      const { error: deleteFeaturePoliciesError } = await supabase
+        .from('feature_policies')
+        .delete()
+        .eq('policy_id', deletingPolicy.id)
+
+      if (deleteFeaturePoliciesError) throw deleteFeaturePoliciesError
+
+      // 4. 정책 자체 삭제
+      const { error: deletePolicyError } = await supabase
+        .from('policies')
+        .delete()
+        .eq('id', deletingPolicy.id)
+
+      if (deletePolicyError) throw deletePolicyError
+
+      // 5. 정책 목록 새로고침
+      if (selectedFeature && selectedFeature.id) {
+        await loadPoliciesForFeature(selectedFeature.id)
+      }
+
+      setShowDeletePolicyModal(false)
+      setDeletingPolicy(null)
+      
+      showSimpleSuccess('정책이 성공적으로 삭제되었습니다.')
+    } catch (error) {
+      console.error('Error deleting policy:', error)
+      showError('정책 삭제 실패', '정책을 삭제하는 중 오류가 발생했습니다.')
+    } finally {
+      setPolicyDeleting(false)
+    }
+  }
+
+  // 편집용 링크 관리 함수들
+  const addEditLinkField = (type: 'context' | 'general') => {
+    if (type === 'context') {
+      setEditContextLinks(prev => [...prev, ''])
+    } else {
+      setEditGeneralLinks(prev => [...prev, ''])
+    }
+  }
+
+  const removeEditLinkField = (type: 'context' | 'general', index: number) => {
+    if (type === 'context') {
+      setEditContextLinks(prev => prev.filter((_, i) => i !== index))
+    } else {
+      setEditGeneralLinks(prev => prev.filter((_, i) => i !== index))
+    }
+  }
+
+  const updateEditLinkField = (type: 'context' | 'general', index: number, value: string) => {
+    if (type === 'context') {
+      setEditContextLinks(prev => prev.map((link, i) => i === index ? value : link))
+    } else {
+      setEditGeneralLinks(prev => prev.map((link, i) => i === index ? value : link))
+    }
+  }
+
+  // 편집용 용어 선택 관리 함수들
+  const handleEditGlossaryToggle = (glossaryId: string) => {
+    setEditSelectedGlossaryIds(prev => 
+      prev.includes(glossaryId) 
+        ? prev.filter(id => id !== glossaryId)
+        : [...prev, glossaryId]
+    )
+  }
+
+  // 편집용 기능 선택 관리 함수들  
+  const handleEditFeatureToggle = (featureId: string) => {
+    setEditSelectedFeatureIds(prev => 
+      prev.includes(featureId) 
+        ? prev.filter(id => id !== featureId)
+        : [...prev, featureId]
+    )
+  }
+
+  // 기능 목록 필터링
+  const filteredFeatureList = features.filter(feature => {
+    if (!featureListSearchTerm.trim()) return true
+    const searchTerm = featureListSearchTerm.toLowerCase().trim()
+    return feature.name.toLowerCase().includes(searchTerm)
+  })
+
+  // 정책 목록 필터링
+  const filteredPolicyList = featurePolicies.filter(policy => {
+    if (!policyListSearchTerm.trim()) return true
+    const searchTerm = policyListSearchTerm.toLowerCase().trim()
+    
+    // 정책 내용으로 검색
+    const contentMatches = policy.contents.toLowerCase().includes(searchTerm)
+    
+    // 연결된 용어 이름으로 검색
+    const termMatches = policy.policy_terms?.some(term => 
+      term.glossaries?.name.toLowerCase().includes(searchTerm)
+    ) || false
+    
+    return contentMatches || termMatches
+  })
 
 
 
@@ -968,6 +1478,23 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   )}
                 </div>
                 
+                {/* 기능 검색창 */}
+                <div className="mb-3 flex-shrink-0">
+                  <input
+                    type="text"
+                    value={featureListSearchTerm}
+                    onChange={(e) => setFeatureListSearchTerm(e.target.value)}
+                    placeholder="기능 이름으로 검색..."
+                    className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    disabled={featuresLoading}
+                  />
+                  {featureListSearchTerm && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      "{featureListSearchTerm}" 검색 결과: {filteredFeatureList.length}개
+                    </p>
+                  )}
+                </div>
+                
                 <div className="flex-1 overflow-y-auto min-h-0">
                   {featuresLoading ? (
                     <div className="flex items-center justify-center h-32">
@@ -978,9 +1505,22 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       <p>아직 기능이</p>
                       <p>없습니다</p>
                     </div>
+                  ) : filteredFeatureList.length === 0 ? (
+                    <div className="text-center text-gray-500 text-sm mt-8">
+                      <p>검색 결과가</p>
+                      <p>없습니다</p>
+                      {featureListSearchTerm && (
+                        <button
+                          onClick={() => setFeatureListSearchTerm('')}
+                          className="text-xs text-blue-600 hover:text-blue-700 mt-2"
+                        >
+                          검색어 초기화
+                        </button>
+                      )}
+                    </div>
                   ) : (
                     <div className="space-y-2 pr-2">
-                      {features.map(feature => (
+                      {filteredFeatureList.map(feature => (
                         <div
                           key={feature.id}
                           className={`relative group p-2 rounded cursor-pointer text-sm transition-colors ${
@@ -1040,12 +1580,37 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => setShowPolicyModal(true)}
+                      onClick={() => {
+                        // 현재 선택된 기능을 자동으로 포함
+                        if (selectedFeature) {
+                          setSelectedFeatureIds([selectedFeature.id])
+                        }
+                        setShowPolicyModal(true)
+                      }}
                     >
                       + 정책 추가
                     </Button>
                   )}
                 </div>
+
+                {/* 정책 검색창 */}
+                {selectedFeature && featurePolicies.length > 0 && (
+                  <div className="mb-3 flex-shrink-0">
+                    <input
+                      type="text"
+                      value={policyListSearchTerm}
+                      onChange={(e) => setPolicyListSearchTerm(e.target.value)}
+                      placeholder="정책 내용이나 연결된 용어로 검색..."
+                      className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      disabled={policiesLoading}
+                    />
+                    {policyListSearchTerm && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        "{policyListSearchTerm}" 검색 결과: {filteredPolicyList.length}개
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex-1 overflow-y-auto min-h-0">
                   {!selectedFeature ? (
@@ -1063,24 +1628,155 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                         <p className="text-sm mt-2">첫 번째 정책을 추가해보세요</p>
                       )}
                     </div>
+                  ) : filteredPolicyList.length === 0 ? (
+                    <div className="text-center text-gray-500 mt-8">
+                      <p>검색 결과가 없습니다</p>
+                      {policyListSearchTerm && (
+                        <button
+                          onClick={() => setPolicyListSearchTerm('')}
+                          className="text-xs text-blue-600 hover:text-blue-700 mt-2"
+                        >
+                          검색어 초기화
+                        </button>
+                      )}
+                    </div>
                   ) : (
-                    <div className="space-y-3 pr-2">
-                      {featurePolicies.map(policy => (
-                        <Card key={policy.id} className="p-3 flex-shrink-0">
-                          <p className="text-xs text-gray-600 overflow-hidden whitespace-pre-line" 
-                             style={{
-                               display: '-webkit-box',
-                               WebkitLineClamp: 4,
-                               WebkitBoxOrient: 'vertical',
-                               lineHeight: '1.4em',
-                               maxHeight: '5.6em'
-                             }}>
+                    <div className="space-y-4 pr-2">
+                      {filteredPolicyList.map(policy => (
+                        <Card 
+                          key={policy.id} 
+                          className={`p-4 flex-shrink-0 relative ${membership?.role === 'admin' ? 'cursor-pointer hover:bg-gray-50' : ''} transition-colors`}
+                          onClick={() => membership?.role === 'admin' && handleEditPolicy(policy)}
+                        >
+                          {/* 시퀀스 번호 (우측 상단) */}
+                          {policy.sequence && (
+                            <div className="absolute top-3 right-3 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                              {policy.sequence}
+                            </div>
+                          )}
+
+                          {/* 정책 내용 */}
+                          <div className="mb-3 pr-8">
+                            <p className="text-2xl font-medium text-black whitespace-pre-line">
                             {policy.contents}
                           </p>
-                          <div className="flex justify-end mt-2">
-                            <Button size="sm" variant="ghost" className="text-xs">
-                              자세히 보기
-                            </Button>
+                          </div>
+
+                          {/* 연결된 기능들 */}
+                          {policy.connected_features && policy.connected_features.length > 0 && (
+                            <div className="mb-3">
+                              <h5 className="text-xs font-medium text-gray-700 mb-1">연결된 기능</h5>
+                              <div className="space-y-1">
+                                {policy.connected_features.map((feature) => (
+                                  <div 
+                                    key={feature.id}
+                                    className="text-sm text-blue-600 font-medium"
+                                  >
+                                    {feature.usecase.actor.name} &gt; {feature.usecase.name} &gt; {feature.name}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 연결된 용어들 */}
+                          {policy.policy_terms && policy.policy_terms.length > 0 && (
+                            <div className="mb-3">
+                              <h5 className="text-xs font-medium text-gray-700 mb-1">연결된 용어</h5>
+                              <div className="flex flex-wrap gap-1">
+                                {policy.policy_terms.map((term, index) => (
+                                  <span 
+                                    key={index}
+                                    className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md"
+                                  >
+                                    {term.glossaries?.name}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 컨텍스트 링크들 */}
+                          {policy.policy_links && policy.policy_links.filter(link => link.type === 'context').length > 0 && (
+                            <div className="mb-3">
+                              <h5 className="text-xs font-medium text-gray-700 mb-1">컨텍스트 링크</h5>
+                              <div className="flex flex-wrap gap-1">
+                                {policy.policy_links
+                                  .filter(link => link.type === 'context')
+                                  .map((link, index) => (
+                                    <a 
+                                      key={index}
+                                      href={link.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-block px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors"
+                                      title={link.url}
+                                    >
+                                      🔗 {(() => {
+                                        try {
+                                          return new URL(link.url).hostname
+                                        } catch {
+                                          return link.url.length > 20 ? `${link.url.substring(0, 20)}...` : link.url
+                                        }
+                                      })()}
+                                    </a>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 일반 링크들 */}
+                          {policy.policy_links && policy.policy_links.filter(link => link.type === 'general').length > 0 && (
+                            <div className="mb-3">
+                              <h5 className="text-xs font-medium text-gray-700 mb-1">일반 링크</h5>
+                              <div className="flex flex-wrap gap-1">
+                                {policy.policy_links
+                                  .filter(link => link.type === 'general')
+                                  .map((link, index) => (
+                                    <a 
+                                      key={index}
+                                      href={link.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-block px-2 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                                      title={link.url}
+                                    >
+                                      📄 {(() => {
+                                        try {
+                                          return new URL(link.url).hostname
+                                        } catch {
+                                          return link.url.length > 20 ? `${link.url.substring(0, 20)}...` : link.url
+                                        }
+                                      })()}
+                                    </a>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 메타 정보 */}
+                          <div className="pt-2 border-t border-gray-200">
+                            <div className="flex justify-between items-center text-xs text-gray-500">
+                              <span>
+                                {policy.created_at ? new Date(policy.created_at).toLocaleDateString('ko-KR', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                }) : '생성일 미확인'}
+                              </span>
+                              {policy.updated_at && policy.updated_at !== policy.created_at && (
+                                <span className="text-right">
+                                  최근 수정: {new Date(policy.updated_at).toLocaleDateString('ko-KR', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </Card>
                       ))}
@@ -1332,6 +2028,105 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   />
                 </div>
 
+                {/* 관련 기능 선택 */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    관련 기능들 <span className="text-red-500">*</span>
+                    <span className="text-xs text-gray-500 font-normal ml-1">
+                      (정책은 최소 1개의 기능과 연결되어야 합니다)
+                    </span>
+                  </label>
+                  {allFeaturesLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      <span className="ml-2 text-sm text-gray-500">기능 로딩 중...</span>
+                    </div>
+                  ) : allFeatures.length === 0 ? (
+                    <p className="text-sm text-gray-500 py-2">
+                      프로젝트에 기능이 아직 없습니다. 
+                      <br />
+                      <span className="text-xs">먼저 액터, 유즈케이스, 기능을 추가해보세요.</span>
+                    </p>
+                  ) : (
+                    <>
+                      {/* 기능 검색창 */}
+                      <div className="mb-3">
+                        <input
+                          type="text"
+                          value={featureSearchTerm}
+                          onChange={(e) => setFeatureSearchTerm(e.target.value)}
+                          placeholder="액터, 유즈케이스, 기능 이름으로 검색..."
+                          className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          disabled={policySaving}
+                        />
+                        {featureSearchTerm && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            "{featureSearchTerm}" 검색 결과: {filteredFeatures.length}개
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 기능 목록 */}
+                      <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50">
+                        {filteredFeatures.length === 0 ? (
+                          <div className="text-center py-4">
+                            <p className="text-sm text-gray-500">
+                              {featureSearchTerm ? '검색 결과가 없습니다' : '기능이 없습니다'}
+                            </p>
+                            {featureSearchTerm && (
+                              <button
+                                onClick={() => setFeatureSearchTerm('')}
+                                className="text-xs text-blue-600 hover:text-blue-700 mt-1"
+                                disabled={policySaving}
+                              >
+                                검색어 초기화
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          filteredFeatures.map(feature => (
+                            <label
+                              key={feature.id}
+                              className="flex items-start gap-2 p-2 hover:bg-white rounded cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedFeatureIds.includes(feature.id)}
+                                onChange={() => handleFeatureToggle(feature.id)}
+                                disabled={policySaving}
+                                className="mt-0.5 flex-shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-sm font-medium block">
+                                  {feature.usecase.actor.name} &gt; {feature.usecase.name} &gt; {feature.name}
+                                </span>
+                              </div>
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    </>
+                  )}
+                  {selectedFeatureIds.length > 0 && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded-md border">
+                      <p className="text-sm font-medium text-gray-700 mb-2">
+                        선택된 기능 ({selectedFeatureIds.length}개):
+                      </p>
+                      <div className="space-y-1">
+                        {selectedFeatureIds.map(featureId => {
+                          const feature = allFeatures.find(f => f.id === featureId)
+                          if (!feature) return null
+                          return (
+                            <div key={featureId} className="text-sm text-blue-600 font-medium">
+                              {feature.usecase.actor.name} &gt; {feature.usecase.name} &gt; {feature.name}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* 컨텍스트 링크들 */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -1499,9 +2294,27 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     </>
                   )}
                   {selectedGlossaryIds.length > 0 && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {selectedGlossaryIds.length}개 용어 선택됨
-                    </p>
+                    <div className="mt-3 p-3 bg-blue-50 rounded-md border">
+                      <p className="text-sm font-medium text-gray-700 mb-2">
+                        선택된 용어 ({selectedGlossaryIds.length}개):
+                      </p>
+                      <div className="space-y-1">
+                        {selectedGlossaryIds.map(glossaryId => {
+                          const glossary = glossaries.find(g => g.id === glossaryId)
+                          if (!glossary) return null
+                          return (
+                            <div key={glossaryId} className="text-sm text-blue-600 font-medium">
+                              {glossary.name}
+                              <span className="text-xs text-gray-500 ml-2">
+                                - {glossary.definition.length > 50 
+                                    ? `${glossary.definition.substring(0, 50)}...` 
+                                    : glossary.definition}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -1516,6 +2329,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     setGeneralLinks([''])
                     setSelectedGlossaryIds([])
                     setGlossarySearchTerm('')
+                    setSelectedFeatureIds([])
+                    setFeatureSearchTerm('')
                   }}
                   disabled={policySaving}
                 >
@@ -1523,9 +2338,335 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </Button>
                 <Button 
                   onClick={addPolicy}
-                  disabled={policySaving || !policyContents.trim()}
+                  disabled={(() => {
+                    if (policySaving) return true
+                    if (!policyContents.trim()) return true
+                    
+                    // 모달에서 체크박스로 선택된 기능들만 기준으로 판단
+                    return selectedFeatureIds.length === 0
+                  })()}
                 >
                   {policySaving ? '추가 중...' : '정책 추가'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 정책 편집 모달 */}
+        {showEditPolicyModal && editingPolicy && membership?.role === 'admin' && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">정책 편집</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      setShowEditPolicyModal(false)
+                      handleDeletePolicy(editingPolicy)
+                    }}
+                    disabled={editPolicySaving}
+                  >
+                    삭제
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                {/* 정책 내용 */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    정책 내용 <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={editPolicyContents}
+                    onChange={(e) => setEditPolicyContents(e.target.value)}
+                    placeholder="정책의 전체 내용을 입력하세요"
+                    rows={5}
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
+                    disabled={editPolicySaving}
+                  />
+                </div>
+
+                {/* 관련 기능 선택 */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    관련 기능들 <span className="text-red-500">*</span>
+                    <span className="text-xs text-gray-500 font-normal ml-1">
+                      (정책은 최소 1개의 기능과 연결되어야 합니다)
+                    </span>
+                  </label>
+                  {allFeaturesLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      <span className="ml-2 text-sm text-gray-500">기능 로딩 중...</span>
+                    </div>
+                  ) : allFeatures.length === 0 ? (
+                    <p className="text-sm text-gray-500 py-2">
+                      프로젝트에 기능이 아직 없습니다.
+                    </p>
+                  ) : (
+                    <>
+                      {/* 기능 검색창 */}
+                      <div className="mb-3">
+                        <input
+                          type="text"
+                          value={editFeatureSearchTerm}
+                          onChange={(e) => setEditFeatureSearchTerm(e.target.value)}
+                          placeholder="액터, 유즈케이스, 기능 이름으로 검색..."
+                          className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          disabled={editPolicySaving}
+                        />
+                      </div>
+
+                      {/* 기능 목록 */}
+                      <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50">
+                        {allFeatures
+                          .filter(feature => {
+                            if (!editFeatureSearchTerm.trim()) return true
+                            const searchTerm = editFeatureSearchTerm.toLowerCase().trim()
+                            return feature.name.toLowerCase().includes(searchTerm) ||
+                                   feature.usecase.name.toLowerCase().includes(searchTerm) ||
+                                   feature.usecase.actor.name.toLowerCase().includes(searchTerm)
+                          })
+                          .map(feature => (
+                            <label
+                              key={feature.id}
+                              className="flex items-start gap-2 p-2 hover:bg-white rounded cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={editSelectedFeatureIds.includes(feature.id)}
+                                onChange={() => handleEditFeatureToggle(feature.id)}
+                                disabled={editPolicySaving}
+                                className="mt-0.5 flex-shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-sm font-medium block">
+                                  {feature.usecase.actor.name} &gt; {feature.usecase.name} &gt; {feature.name}
+                                </span>
+                              </div>
+                            </label>
+                          ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* 컨텍스트 링크들 */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium">
+                      컨텍스트 링크들
+                      <span className="text-xs text-gray-500 font-normal ml-1">
+                        (정책 배경: 슬랙, 회의록 등)
+                      </span>
+                    </label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => addEditLinkField('context')}
+                      disabled={editPolicySaving}
+                      className="text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      + 링크 추가
+                    </Button>
+                  </div>
+                  {editContextLinks.map((link, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => updateEditLinkField('context', index, e.target.value)}
+                        placeholder="https://..."
+                        className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        disabled={editPolicySaving}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeEditLinkField('context', index)}
+                        disabled={editPolicySaving || editContextLinks.length === 1}
+                        className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
+                        title="링크 삭제"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 일반 링크들 */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium">
+                      일반 링크들
+                      <span className="text-xs text-gray-500 font-normal ml-1">
+                        (UI/UX 설계, 구현 코드 등)
+                      </span>
+                    </label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => addEditLinkField('general')}
+                      disabled={editPolicySaving}
+                      className="text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      + 링크 추가
+                    </Button>
+                  </div>
+                  {editGeneralLinks.map((link, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => updateEditLinkField('general', index, e.target.value)}
+                        placeholder="https://..."
+                        className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        disabled={editPolicySaving}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeEditLinkField('general', index)}
+                        disabled={editPolicySaving || editGeneralLinks.length === 1}
+                        className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
+                        title="링크 삭제"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 관련 용어 선택 */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    관련 용어들
+                    <span className="text-xs text-gray-500 font-normal ml-1">
+                      (이 정책과 연관된 용어를 선택하세요)
+                    </span>
+                  </label>
+                  {glossariesLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      <span className="ml-2 text-sm text-gray-500">용어 로딩 중...</span>
+                    </div>
+                  ) : glossaries.length === 0 ? (
+                    <p className="text-sm text-gray-500 py-2">
+                      프로젝트에 용어가 아직 없습니다.
+                    </p>
+                  ) : (
+                    <>
+                      {/* 용어 검색창 */}
+                      <div className="mb-3">
+                        <input
+                          type="text"
+                          value={editGlossarySearchTerm}
+                          onChange={(e) => setEditGlossarySearchTerm(e.target.value)}
+                          placeholder="용어 이름이나 정의로 검색..."
+                          className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          disabled={editPolicySaving}
+                        />
+                      </div>
+
+                      {/* 용어 목록 */}
+                      <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50">
+                        {glossaries
+                          .filter(glossary => {
+                            if (!editGlossarySearchTerm.trim()) return true
+                            const searchTerm = editGlossarySearchTerm.toLowerCase().trim()
+                            return glossary.name.toLowerCase().includes(searchTerm) ||
+                                   glossary.definition.toLowerCase().includes(searchTerm)
+                          })
+                          .map(glossary => (
+                            <label
+                              key={glossary.id}
+                              className="flex items-start gap-2 p-2 hover:bg-white rounded cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={editSelectedGlossaryIds.includes(glossary.id)}
+                                onChange={() => handleEditGlossaryToggle(glossary.id)}
+                                disabled={editPolicySaving}
+                                className="mt-0.5 flex-shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-sm font-medium block">{glossary.name}</span>
+                                <span className="text-xs text-gray-600 block truncate">
+                                  {glossary.definition}
+                                </span>
+                              </div>
+                            </label>
+                          ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowEditPolicyModal(false)
+                    setEditingPolicy(null)
+                    setEditPolicyContents('')
+                    setEditContextLinks([''])
+                    setEditGeneralLinks([''])
+                    setEditSelectedGlossaryIds([])
+                    setEditGlossarySearchTerm('')
+                    setEditSelectedFeatureIds([])
+                    setEditFeatureSearchTerm('')
+                  }}
+                  disabled={editPolicySaving}
+                >
+                  취소
+                </Button>
+                <Button 
+                  onClick={updatePolicy}
+                  disabled={(() => {
+                    if (editPolicySaving) return true
+                    if (!editPolicyContents.trim()) return true
+                    return editSelectedFeatureIds.length === 0
+                  })()}
+                >
+                  {editPolicySaving ? '수정 중...' : '정책 수정'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 정책 삭제 확인 모달 */}
+        {showDeletePolicyModal && deletingPolicy && membership?.role === 'admin' && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+              <h3 className="text-lg font-semibold mb-4">정책 삭제</h3>
+              <p className="text-muted-foreground mb-6">
+                정말로 이 정책을 삭제하시겠어요?
+                <br />
+                <span className="text-sm text-red-600">삭제된 정책은 복구할 수 없습니다.</span>
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowDeletePolicyModal(false)
+                    setDeletingPolicy(null)
+                  }}
+                  disabled={policyDeleting}
+                >
+                  취소
+                </Button>
+                <Button 
+                  variant="destructive"
+                  onClick={deletePolicy}
+                  disabled={policyDeleting}
+                >
+                  {policyDeleting ? '삭제 중...' : '삭제'}
                 </Button>
               </div>
             </div>
