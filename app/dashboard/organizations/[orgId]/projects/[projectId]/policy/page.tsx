@@ -12,6 +12,217 @@ import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
 import { useT } from '@/lib/i18n'
 import { useLangStore } from '@/lib/i18n-store'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import {
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+// 드래그 가능한 정책 카드 컴포넌트
+interface SortablePolicyCardProps {
+  policy: FeaturePolicy
+  onEdit: (policy: FeaturePolicy) => void
+  membership: Membership | null
+}
+
+function SortablePolicyCard({ policy, onEdit, membership }: SortablePolicyCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: policy.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className={isDragging ? 'opacity-50' : ''}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Card 
+        className={`p-4 flex-shrink-0 relative ${membership?.role === 'admin' ? 'cursor-pointer hover:bg-gray-50' : ''} transition-colors`}
+        onClick={() => membership?.role === 'admin' && onEdit(policy)}
+      >
+        {/* 드래그 핸들 (호버 시에만 표시) */}
+        {isHovered && membership?.role === 'admin' && (
+          <div
+            {...attributes}
+            {...listeners}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col gap-0.5">
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+            </div>
+          </div>
+        )}
+
+        {/* 시퀀스 번호 (우측 상단) */}
+        {policy.sequence && (
+          <div className="absolute top-3 right-3 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+            {policy.sequence}
+          </div>
+        )}
+
+        {/* 정책 내용 */}
+        <div className={`mb-3 pr-8 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+          <p className="text-2xl font-medium text-black whitespace-pre-line">
+            {policy.contents}
+          </p>
+        </div>
+
+        {/* 연결된 기능들 */}
+        {policy.connected_features && policy.connected_features.length > 0 && (
+          <div className={`mb-3 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+            <h5 className="text-xs font-medium text-gray-700 mb-1">연결된 기능</h5>
+            <div className="space-y-1">
+              {policy.connected_features.map((feature) => (
+                <div 
+                  key={feature.id}
+                  className="text-sm text-blue-600 font-medium"
+                >
+                  {feature.usecase.actor.name} &gt; {feature.usecase.name} &gt; {feature.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 연결된 용어들 */}
+        {policy.policy_terms && policy.policy_terms.length > 0 && (
+          <div className={`mb-3 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+            <h5 className="text-xs font-medium text-gray-700 mb-1">연결된 용어</h5>
+            <div className="flex flex-wrap gap-1">
+              {policy.policy_terms.map((term, index) => (
+                <span 
+                  key={index}
+                  className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md"
+                >
+                  {term.glossaries?.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 컨텍스트 링크들 */}
+        {policy.policy_links && policy.policy_links.filter(link => link.type === 'context').length > 0 && (
+          <div className={`mb-3 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+            <h5 className="text-xs font-medium text-gray-700 mb-1">컨텍스트 링크</h5>
+            <div className="flex flex-wrap gap-1">
+              {policy.policy_links
+                .filter(link => link.type === 'context')
+                .map((link, index) => (
+                  <a 
+                    key={index}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors"
+                    title={link.url}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    🔗 {(() => {
+                      try {
+                        return new URL(link.url).hostname
+                      } catch {
+                        return link.url.length > 20 ? `${link.url.substring(0, 20)}...` : link.url
+                      }
+                    })()}
+                  </a>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* 일반 링크들 */}
+        {policy.policy_links && policy.policy_links.filter(link => link.type === 'general').length > 0 && (
+          <div className={`mb-3 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+            <h5 className="text-xs font-medium text-gray-700 mb-1">일반 링크</h5>
+            <div className="flex flex-wrap gap-1">
+              {policy.policy_links
+                .filter(link => link.type === 'general')
+                .map((link, index) => (
+                  <a 
+                    key={index}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-2 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                    title={link.url}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    📄 {(() => {
+                      try {
+                        return new URL(link.url).hostname
+                      } catch {
+                        return link.url.length > 20 ? `${link.url.substring(0, 20)}...` : link.url
+                      }
+                    })()}
+                  </a>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* 메타 정보 */}
+        <div className={`pt-2 border-t border-gray-200 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+          <div className="flex justify-between items-center text-xs text-gray-500">
+            <span>
+              {policy.created_at ? new Date(policy.created_at).toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : '생성일 미확인'}
+            </span>
+            {policy.updated_at && policy.updated_at !== policy.created_at && (
+              <span className="text-right">
+                최근 수정: {new Date(policy.updated_at).toLocaleDateString('ko-KR', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            )}
+          </div>
+        </div>
+      </Card>
+    </div>
+  )
+}
 
 type User = {
   id: string
@@ -155,6 +366,14 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  // 드래그 앤 드롭 센서
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   // URL query parameter 업데이트 함수
   const updateURL = (actorId?: string, usecaseId?: string) => {
@@ -401,7 +620,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 )
               )
             `)
-            .eq('policy_id', policy.id)
+            .eq('policy_id', policy.id!)
 
           if (featureError) {
             console.error('Error loading connected features:', featureError)
@@ -1280,6 +1499,47 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     )
   }
 
+  // 드래그 엔드 핸들러 (정책 순서 변경)
+  const handlePolicyDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!selectedFeature || !over || active.id === over.id) return
+
+    const oldIndex = featurePolicies.findIndex((item) => item.id === active.id)
+    const newIndex = featurePolicies.findIndex((item) => item.id === over.id)
+
+    if (oldIndex === -1 || newIndex === -1) return
+
+    // 로컬 상태를 시퀀스와 함께 한 번에 업데이트
+    const newPolicies = arrayMove(featurePolicies, oldIndex, newIndex).map((policy, index) => ({
+      ...policy,
+      sequence: index + 1
+    }))
+    
+    setFeaturePolicies(newPolicies)
+
+    // 백그라운드에서 Supabase 업데이트 (UI 블로킹 없이)
+    try {
+      // 배치 업데이트를 위한 Promise 배열
+      const updatePromises = newPolicies.map((policy, index) => 
+        supabase
+          .from('feature_policies')
+          .update({ sequence: index + 1 })
+          .eq('feature_id', selectedFeature.id)
+          .eq('policy_id', policy.id!)
+      )
+
+      await Promise.all(updatePromises)
+    } catch (error) {
+      console.error('Error updating policy sequence:', error)
+      showError('정책 순서 변경 실패', '정책 순서를 변경하는 중 오류가 발생했습니다.')
+      // 에러 발생 시 원래 상태로 복원
+      if (selectedFeature) {
+        await loadPoliciesForFeature(selectedFeature.id)
+      }
+    }
+  }
+
   // 기능 목록 필터링
   const filteredFeatureList = features.filter(feature => {
     if (!featureListSearchTerm.trim()) return true
@@ -1641,146 +1901,27 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       )}
                     </div>
                   ) : (
-                    <div className="space-y-4 pr-2">
-                      {filteredPolicyList.map(policy => (
-                        <Card 
-                          key={policy.id} 
-                          className={`p-4 flex-shrink-0 relative ${membership?.role === 'admin' ? 'cursor-pointer hover:bg-gray-50' : ''} transition-colors`}
-                          onClick={() => membership?.role === 'admin' && handleEditPolicy(policy)}
-                        >
-                          {/* 시퀀스 번호 (우측 상단) */}
-                          {policy.sequence && (
-                            <div className="absolute top-3 right-3 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
-                              {policy.sequence}
-                            </div>
-                          )}
-
-                          {/* 정책 내용 */}
-                          <div className="mb-3 pr-8">
-                            <p className="text-2xl font-medium text-black whitespace-pre-line">
-                            {policy.contents}
-                          </p>
-                          </div>
-
-                          {/* 연결된 기능들 */}
-                          {policy.connected_features && policy.connected_features.length > 0 && (
-                            <div className="mb-3">
-                              <h5 className="text-xs font-medium text-gray-700 mb-1">연결된 기능</h5>
-                              <div className="space-y-1">
-                                {policy.connected_features.map((feature) => (
-                                  <div 
-                                    key={feature.id}
-                                    className="text-sm text-blue-600 font-medium"
-                                  >
-                                    {feature.usecase.actor.name} &gt; {feature.usecase.name} &gt; {feature.name}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* 연결된 용어들 */}
-                          {policy.policy_terms && policy.policy_terms.length > 0 && (
-                            <div className="mb-3">
-                              <h5 className="text-xs font-medium text-gray-700 mb-1">연결된 용어</h5>
-                              <div className="flex flex-wrap gap-1">
-                                {policy.policy_terms.map((term, index) => (
-                                  <span 
-                                    key={index}
-                                    className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md"
-                                  >
-                                    {term.glossaries?.name}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* 컨텍스트 링크들 */}
-                          {policy.policy_links && policy.policy_links.filter(link => link.type === 'context').length > 0 && (
-                            <div className="mb-3">
-                              <h5 className="text-xs font-medium text-gray-700 mb-1">컨텍스트 링크</h5>
-                              <div className="flex flex-wrap gap-1">
-                                {policy.policy_links
-                                  .filter(link => link.type === 'context')
-                                  .map((link, index) => (
-                                    <a 
-                                      key={index}
-                                      href={link.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-block px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors"
-                                      title={link.url}
-                                    >
-                                      🔗 {(() => {
-                                        try {
-                                          return new URL(link.url).hostname
-                                        } catch {
-                                          return link.url.length > 20 ? `${link.url.substring(0, 20)}...` : link.url
-                                        }
-                                      })()}
-                                    </a>
-                                  ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* 일반 링크들 */}
-                          {policy.policy_links && policy.policy_links.filter(link => link.type === 'general').length > 0 && (
-                            <div className="mb-3">
-                              <h5 className="text-xs font-medium text-gray-700 mb-1">일반 링크</h5>
-                              <div className="flex flex-wrap gap-1">
-                                {policy.policy_links
-                                  .filter(link => link.type === 'general')
-                                  .map((link, index) => (
-                                    <a 
-                                      key={index}
-                                      href={link.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-block px-2 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                      title={link.url}
-                                    >
-                                      📄 {(() => {
-                                        try {
-                                          return new URL(link.url).hostname
-                                        } catch {
-                                          return link.url.length > 20 ? `${link.url.substring(0, 20)}...` : link.url
-                                        }
-                                      })()}
-                                    </a>
-                                  ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* 메타 정보 */}
-                          <div className="pt-2 border-t border-gray-200">
-                            <div className="flex justify-between items-center text-xs text-gray-500">
-                              <span>
-                                {policy.created_at ? new Date(policy.created_at).toLocaleDateString('ko-KR', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                }) : '생성일 미확인'}
-                              </span>
-                              {policy.updated_at && policy.updated_at !== policy.created_at && (
-                                <span className="text-right">
-                                  최근 수정: {new Date(policy.updated_at).toLocaleDateString('ko-KR', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handlePolicyDragEnd}
+                    >
+                      <SortableContext
+                        items={filteredPolicyList.map(p => p.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-4 pr-2">
+                          {filteredPolicyList.map(policy => (
+                            <SortablePolicyCard
+                              key={policy.id}
+                              policy={policy}
+                              onEdit={handleEditPolicy}
+                              membership={membership}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
                   )}
                 </div>
               </div>
