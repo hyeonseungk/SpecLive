@@ -97,7 +97,7 @@ export default function ProjectLayout({
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full">
       {/* 왼쪽 사이드바 - 고정 */}
       <div className="w-64 border-r bg-card flex flex-col">
         {/* 헤더 */}
