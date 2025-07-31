@@ -387,8 +387,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [actorsLoading, setActorsLoading] = useState(false)
   const [actorDropdownOpen, setActorDropdownOpen] = useState(false)
   const [usecaseDropdownOpen, setUsecaseDropdownOpen] = useState(false)
-  
-  // 정책 관련 상태 (제거됨)
 
   // 액터 추가 모달 상태
   const [showActorModal, setShowActorModal] = useState(false)
@@ -500,6 +498,20 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     })
   )
 
+  // 액터 추가 모달 포커스
+  useEffect(() => {
+    if (showActorModal) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const input = document.querySelector('#add-actor-name-input') as HTMLInputElement
+          if (input) {
+            input.focus()
+          }
+        })
+      })
+    }
+  }, [showActorModal])  
+
   // 액터 편집 모달이 열릴 때 input에 포커스
   useEffect(() => {
     if (showEditActorModal) {
@@ -530,6 +542,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       })
     }
   }, [showEditUsecaseModal])
+
+
 
   // URL query parameter 업데이트 함수
   const updateURL = (actorId?: string, usecaseId?: string) => {
@@ -2432,6 +2446,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 <div>
                   <label className="block text-sm font-medium mb-1">{t('actor.name_label')}</label>
                   <input
+                    id="add-actor-name-input"
                     type="text"
                     value={actorName}
                     onChange={(e) => setActorName(e.target.value)}
