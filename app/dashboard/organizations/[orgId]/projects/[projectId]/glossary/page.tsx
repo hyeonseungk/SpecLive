@@ -54,11 +54,19 @@ function SortableGlossaryCard({ glossary, onEdit, showSequence, t, locale }: Sor
     transition,
   }
 
+  const [isHovered, setIsHovered] = useState(false)
+
   return (
-    <div ref={setNodeRef} style={style} className={isDragging ? 'opacity-50' : ''}>
-      <Card className="cursor-pointer hover:shadow-md transition-shadow relative">
-        {/* 드래그 핸들 (시퀀스 정렬일 때만) */}
-        {showSequence && (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className={isDragging ? 'opacity-50' : ''}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Card className="cursor-pointer hover:shadow-md transition-shadow relative group">
+        {/* 드래그 핸들 (시퀀스 정렬일 때만, 호버 시에만 표시) */}
+        {showSequence && isHovered && (
           <div
             {...attributes}
             {...listeners}
@@ -83,7 +91,7 @@ function SortableGlossaryCard({ glossary, onEdit, showSequence, t, locale }: Sor
           </div>
         )}
 
-        <div onClick={() => onEdit(glossary)} className={showSequence ? 'ml-8' : ''}>
+        <div onClick={() => onEdit(glossary)} className={showSequence && isHovered ? 'ml-8' : ''}>
           <CardHeader>
             <CardTitle className="text-3xl">{glossary.name}</CardTitle>
           </CardHeader>
