@@ -315,32 +315,26 @@ export type Database = {
       policies: {
         Row: {
           author_id: string | null
-          body: string
-          category: string
+          contents: string
           created_at: string | null
           id: string
           project_id: string | null
-          title: string
           updated_at: string | null
         }
         Insert: {
           author_id?: string | null
-          body: string
-          category: string
+          contents: string
           created_at?: string | null
           id?: string
           project_id?: string | null
-          title: string
           updated_at?: string | null
         }
         Update: {
           author_id?: string | null
-          body?: string
-          category?: string
+          contents?: string
           created_at?: string | null
           id?: string
           project_id?: string | null
-          title?: string
           updated_at?: string | null
         }
         Relationships: [

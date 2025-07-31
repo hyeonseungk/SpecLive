@@ -50,7 +50,7 @@ Resend API
 | 테이블 | 주요 컬럼 | 설명 |
 | --- | --- | --- |
 | glossaries | id, project_id, name, definition, author_id, updated_at | 용어 정의 |
-| policies | id, project_id, title, body, category, author_id, updated_at | 정책 |
+| policies | id, project_id, contents, author_id, updated_at | 정책 |
 | policy_links | id, policy_id, url, type (`context`/`general`) | 다중 URL |
 | glossary_links | id, glossary_id, url |  |
 | 관계 매핑 | policy_terms (`policy_id`, `glossary_id`)<br/>glossary_relations (`glossary_id`, `related_id`) | 정책‑용어 / 용어‑용어 |

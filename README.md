@@ -83,9 +83,7 @@ CREATE TABLE glossaries (
 CREATE TABLE policies (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  body TEXT NOT NULL,
-  category TEXT NOT NULL,
+  contents TEXT NOT NULL,
   author_id UUID REFERENCES auth.users(id),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

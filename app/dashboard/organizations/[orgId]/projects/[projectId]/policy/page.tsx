@@ -81,9 +81,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
   // 정책 추가 모달 상태
   const [showPolicyModal, setShowPolicyModal] = useState(false)
-  const [policyTitle, setPolicyTitle] = useState('')
-  const [policyBody, setPolicyBody] = useState('')
-  const [policyCategory, setPolicyCategory] = useState('')
+  const [policyContents, setPolicyContents] = useState('')
   const [contextLinks, setContextLinks] = useState<string[]>([''])
   const [generalLinks, setGeneralLinks] = useState<string[]>([''])
   const [selectedGlossaryIds, setSelectedGlossaryIds] = useState<string[]>([])
@@ -299,9 +297,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         .select(`
           policies (
             id,
-            title,
-            body,
-            category,
+            contents,
             author_id,
             created_at,
             updated_at,
@@ -619,8 +615,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   // 정책 추가 함수
   const addPolicy = async () => {
     if (!selectedFeature || !user) return
-    if (!policyTitle.trim() || !policyBody.trim() || !policyCategory.trim()) {
-      showSimpleError('제목, 본문, 카테고리를 모두 입력해주세요.')
+    if (!policyContents.trim()) {
+      showSimpleError('정책 내용을 입력해주세요.')
       return
     }
 
@@ -631,9 +627,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         .from('policies')
         .insert({
           project_id: project!.id,
-          title: policyTitle.trim(),
-          body: policyBody.trim(),
-          category: policyCategory.trim(),
+          contents: policyContents.trim(),
           author_id: user.id
         })
         .select()
@@ -701,9 +695,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       await loadPoliciesForFeature(selectedFeature.id)
 
       // 7. 모달 초기화 및 닫기
-      setPolicyTitle('')
-      setPolicyBody('')
-      setPolicyCategory('')
+      setPolicyContents('')
       setContextLinks([''])
       setGeneralLinks([''])
       setSelectedGlossaryIds([])
@@ -1075,16 +1067,15 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     <div className="space-y-3 pr-2">
                       {featurePolicies.map(policy => (
                         <Card key={policy.id} className="p-3 flex-shrink-0">
-                          <h5 className="font-medium text-sm mb-2">{policy.title}</h5>
-                          <p className="text-xs text-gray-600 overflow-hidden" 
+                          <p className="text-xs text-gray-600 overflow-hidden whitespace-pre-line" 
                              style={{
                                display: '-webkit-box',
-                               WebkitLineClamp: 3,
+                               WebkitLineClamp: 4,
                                WebkitBoxOrient: 'vertical',
                                lineHeight: '1.4em',
-                               maxHeight: '4.2em'
+                               maxHeight: '5.6em'
                              }}>
-                            {policy.body}
+                            {policy.contents}
                           </p>
                           <div className="flex justify-end mt-2">
                             <Button size="sm" variant="ghost" className="text-xs">
@@ -1326,46 +1317,16 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               <h3 className="text-lg font-semibold mb-4">정책 추가</h3>
               
               <div className="space-y-4">
-                {/* 제목 */}
+                {/* 정책 내용 */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    정책 제목 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={policyTitle}
-                    onChange={(e) => setPolicyTitle(e.target.value)}
-                    placeholder="정책 제목을 입력하세요"
-                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    disabled={policySaving}
-                  />
-                </div>
-
-                {/* 카테고리 */}
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    카테고리 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={policyCategory}
-                    onChange={(e) => setPolicyCategory(e.target.value)}
-                    placeholder="예: 회원가입, 상품 구매, 결제 등"
-                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    disabled={policySaving}
-                  />
-                </div>
-
-                {/* 본문 */}
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    정책 본문 <span className="text-red-500">*</span>
+                    정책 내용 <span className="text-red-500">*</span>
                   </label>
                   <textarea
-                    value={policyBody}
-                    onChange={(e) => setPolicyBody(e.target.value)}
-                    placeholder="정책의 상세 내용을 입력하세요"
-                    rows={6}
+                    value={policyContents}
+                    onChange={(e) => setPolicyContents(e.target.value)}
+                    placeholder="정책의 전체 내용을 입력하세요"
+                    rows={10}
                     className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
                     disabled={policySaving}
                   />
@@ -1550,9 +1511,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   variant="outline" 
                   onClick={() => {
                     setShowPolicyModal(false)
-                    setPolicyTitle('')
-                    setPolicyBody('')
-                    setPolicyCategory('')
+                    setPolicyContents('')
                     setContextLinks([''])
                     setGeneralLinks([''])
                     setSelectedGlossaryIds([])
@@ -1564,7 +1523,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </Button>
                 <Button 
                   onClick={addPolicy}
-                  disabled={policySaving || !policyTitle.trim() || !policyBody.trim() || !policyCategory.trim()}
+                  disabled={policySaving || !policyContents.trim()}
                 >
                   {policySaving ? '추가 중...' : '정책 추가'}
                 </Button>
