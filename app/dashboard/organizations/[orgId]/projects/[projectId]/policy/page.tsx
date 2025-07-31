@@ -62,6 +62,11 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [showUsecaseModal, setShowUsecaseModal] = useState(false)
   const [usecaseName, setUsecaseName] = useState('')
   const [usecaseSaving, setUsecaseSaving] = useState(false)
+
+  // 기능 추가 모달 상태
+  const [showFeatureModal, setShowFeatureModal] = useState(false)
+  const [featureName, setFeatureName] = useState('')
+  const [featureSaving, setFeatureSaving] = useState(false)
   
   // 기능과 정책 관련 상태
   const [features, setFeatures] = useState<Feature[]>([])
@@ -405,6 +410,47 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     }
   }
 
+  // 기능 추가 함수
+  const addFeature = async () => {
+    if (!selectedUsecase || !user) return
+    if (!featureName.trim()) {
+      showSimpleError('기능 이름을 입력해주세요.')
+      return
+    }
+
+    setFeatureSaving(true)
+    try {
+      const { data: feature, error } = await supabase
+        .from('features')
+        .insert({
+          usecase_id: selectedUsecase.id,
+          name: featureName.trim(),
+          author_id: user.id
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setFeatures(prev => [...prev, feature])
+      setFeatureName('')
+      setShowFeatureModal(false)
+      
+      // 첫 번째 기능이라면 자동 선택
+      if (features.length === 0) {
+        setSelectedFeature(feature)
+        await loadPoliciesForFeature(feature.id)
+      }
+      
+      showSimpleSuccess('기능이 성공적으로 추가되었습니다.')
+    } catch (error) {
+      console.error('Error adding feature:', error)
+      showError('기능 추가 실패', '기능을 추가하는 중 오류가 발생했습니다.')
+    } finally {
+      setFeatureSaving(false)
+    }
+  }
+
 
 
   if (loading) {
@@ -566,17 +612,21 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
             <div className="grid grid-cols-5 gap-6 flex-1 min-h-0">
               {/* 좌측: 기능 목록 (1/5) */}
-              <div className="col-span-1 bg-gray-50 rounded-lg p-4 flex flex-col">
+              <div className="col-span-1 bg-gray-50 rounded-lg p-4 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">기능</h4>
                   {membership?.role === 'admin' && (
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setShowFeatureModal(true)}
+                    >
                       + 추가
                     </Button>
                   )}
                 </div>
                 
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 min-h-0 overflow-hidden">
                   {featuresLoading ? (
                     <div className="flex items-center justify-center h-32">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -587,7 +637,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       <p>없습니다</p>
                     </div>
                   ) : (
-                    <div className="space-y-2 h-full overflow-y-auto">
+                    <div className="space-y-2 h-full overflow-y-auto pr-2">
                       {features.map(feature => (
                         <div
                           key={feature.id}
@@ -607,7 +657,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </div>
 
               {/* 우측: 정책 목록 (4/5) */}
-              <div className="col-span-4 bg-gray-50 rounded-lg p-4 flex flex-col">
+              <div className="col-span-4 bg-gray-50 rounded-lg p-4 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">
                     {selectedFeature ? `${selectedFeature.name} 정책` : '정책'}
@@ -619,7 +669,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   )}
                 </div>
 
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 min-h-0 overflow-hidden">
                   {!selectedFeature ? (
                     <div className="flex items-center justify-center h-32">
                       <p className="text-gray-500">기능을 선택해주세요</p>
@@ -636,9 +686,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       )}
                     </div>
                   ) : (
-                    <div className="space-y-3 h-full overflow-y-auto">
+                    <div className="space-y-3 h-full overflow-y-auto pr-2">
                       {featurePolicies.map(policy => (
-                        <Card key={policy.id} className="p-3">
+                        <Card key={policy.id} className="p-3 flex-shrink-0">
                           <h5 className="font-medium text-sm mb-2">{policy.title}</h5>
                           <p className="text-xs text-gray-600 overflow-hidden" 
                              style={{
@@ -749,6 +799,53 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   disabled={usecaseSaving || !usecaseName.trim()}
                 >
                   {usecaseSaving ? t('buttons.adding') : t('buttons.add')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 기능 추가 모달 */}
+        {showFeatureModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <h3 className="text-lg font-semibold mb-4">기능 추가</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    기능 이름
+                    <span className="text-xs text-gray-500 font-normal">
+                      ({selectedUsecase?.name} 유즈케이스)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={featureName}
+                    onChange={(e) => setFeatureName(e.target.value)}
+                    placeholder="기능 이름을 입력하세요"
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    disabled={featureSaving}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowFeatureModal(false)
+                    setFeatureName('')
+                  }}
+                  disabled={featureSaving}
+                >
+                  취소
+                </Button>
+                <Button 
+                  onClick={addFeature}
+                  disabled={featureSaving || !featureName.trim()}
+                >
+                  {featureSaving ? '추가 중...' : '추가'}
                 </Button>
               </div>
             </div>
