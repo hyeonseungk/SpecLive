@@ -903,8 +903,9 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   })
 
   return (
-    <div className="p-6">
-      <div>
+    <div className="h-full flex flex-col">
+      {/* 고정 영역: 헤더와 검색 바 */}
+      <div className="flex-shrink-0 p-6 pb-0">
         {/* 헤더 영역 */}
         <div className="mb-6">
           <h2 className="text-3xl font-bold mb-2">{t('glossary.header')}</h2>
@@ -984,7 +985,10 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             <Button onClick={() => setShowGlossaryModal(true)}>{t('glossary.add_term_button')}</Button>
           </div>
         </div>
+      </div>
 
+      {/* 스크롤 영역: 용어 카드들 */}
+      <div className="flex-1 overflow-y-auto px-6 pb-6">
         {/* 필터링된 용어 목록 */}
         {glossariesLoading ? (
           <div className="text-center py-12">

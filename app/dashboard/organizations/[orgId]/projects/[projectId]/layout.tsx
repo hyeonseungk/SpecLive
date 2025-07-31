@@ -165,7 +165,7 @@ export default function ProjectLayout({
       </div>
 
       {/* 메인 콘텐츠 영역 */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-hidden">
         {children}
       </div>
     </div>
