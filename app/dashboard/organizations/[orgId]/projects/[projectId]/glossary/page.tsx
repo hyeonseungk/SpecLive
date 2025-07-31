@@ -637,7 +637,10 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
     setEditSaving(true) // 삭제 중에는 편집 모달 버튼 비활성화
     try {
-      // 1. 용어 링크 삭제
+      // 1. 삭제할 용어의 sequence 값 저장
+      const deletedSequence = editingGlossary.sequence
+
+      // 2. 용어 링크 삭제
       const { error: deleteLinksError } = await supabase
         .from('glossary_links')
         .delete()
@@ -645,7 +648,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
       if (deleteLinksError) throw deleteLinksError
 
-      // 2. 용어 자체 삭제
+      // 3. 용어 자체 삭제
       const { error: deleteGlossaryError } = await supabase
         .from('glossaries')
         .delete()
@@ -653,8 +656,37 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
       if (deleteGlossaryError) throw deleteGlossaryError
 
-      // 3. 목록에서 제거
-      setGlossaries(prev => prev.filter(g => g.id !== editingGlossary.id))
+      // 4. 삭제된 용어보다 큰 sequence를 가진 용어들의 sequence를 -1씩 조정
+      const { data: higherSequenceGlossaries, error: updateError } = await supabase
+        .from('glossaries')
+        .select('id, sequence')
+        .eq('project_id', project!.id)
+        .gt('sequence', deletedSequence)
+        .order('sequence', { ascending: true })
+
+      if (updateError) throw updateError
+
+      // 5. sequence 업데이트 (배치 처리)
+      if (higherSequenceGlossaries && higherSequenceGlossaries.length > 0) {
+        const updatePromises = higherSequenceGlossaries.map(glossary => 
+          supabase
+            .from('glossaries')
+            .update({ sequence: glossary.sequence - 1 })
+            .eq('id', glossary.id)
+        )
+
+        await Promise.all(updatePromises)
+      }
+
+      // 6. 목록에서 제거하고 sequence 재정렬
+      setGlossaries(prev => 
+        prev
+          .filter(g => g.id !== editingGlossary.id)
+          .map(g => ({
+            ...g,
+            sequence: g.sequence > deletedSequence ? g.sequence - 1 : g.sequence
+          }))
+      )
 
       handleCloseEditModal()
       showSimpleSuccess(t('glossary.delete_success'))
