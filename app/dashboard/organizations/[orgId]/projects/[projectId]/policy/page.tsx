@@ -1326,7 +1326,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     value={policyContents}
                     onChange={(e) => setPolicyContents(e.target.value)}
                     placeholder="정책의 전체 내용을 입력하세요"
-                    rows={10}
+                    rows={5}
                     className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
                     disabled={policySaving}
                   />
@@ -1334,12 +1334,24 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
                 {/* 컨텍스트 링크들 */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    컨텍스트 링크들
-                    <span className="text-xs text-gray-500 font-normal ml-1">
-                      (정책 배경: 슬랙, 회의록 등)
-                    </span>
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium">
+                      컨텍스트 링크들
+                      <span className="text-xs text-gray-500 font-normal ml-1">
+                        (정책 배경: 슬랙, 회의록 등)
+                      </span>
+                    </label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => addLinkField('context')}
+                      disabled={policySaving}
+                      className="text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      + 링크 추가
+                    </Button>
+                  </div>
                   {contextLinks.map((link, index) => (
                     <div key={index} className="flex gap-2 mb-2">
                       <input
@@ -1350,39 +1362,39 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                         className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         disabled={policySaving}
                       />
-                      {contextLinks.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeLinkField('context', index)}
-                          disabled={policySaving}
-                        >
-                          삭제
-                        </Button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeLinkField('context', index)}
+                        disabled={policySaving || contextLinks.length === 1}
+                        className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
+                        title="링크 삭제"
+                      >
+                        ✕
+                      </button>
                     </div>
                   ))}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => addLinkField('context')}
-                    disabled={policySaving}
-                    className="text-sm"
-                  >
-                    + 컨텍스트 링크 추가
-                  </Button>
                 </div>
 
                 {/* 일반 링크들 */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    일반 링크들
-                    <span className="text-xs text-gray-500 font-normal ml-1">
-                      (UI/UX 설계, 구현 코드 등)
-                    </span>
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium">
+                      일반 링크들
+                      <span className="text-xs text-gray-500 font-normal ml-1">
+                        (UI/UX 설계, 구현 코드 등)
+                      </span>
+                    </label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => addLinkField('general')}
+                      disabled={policySaving}
+                      className="text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      + 링크 추가
+                    </Button>
+                  </div>
                   {generalLinks.map((link, index) => (
                     <div key={index} className="flex gap-2 mb-2">
                       <input
@@ -1393,29 +1405,17 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                         className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         disabled={policySaving}
                       />
-                      {generalLinks.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeLinkField('general', index)}
-                          disabled={policySaving}
-                        >
-                          삭제
-                        </Button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeLinkField('general', index)}
+                        disabled={policySaving || generalLinks.length === 1}
+                        className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
+                        title="링크 삭제"
+                      >
+                        ✕
+                      </button>
                     </div>
                   ))}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => addLinkField('general')}
-                    disabled={policySaving}
-                    className="text-sm"
-                  >
-                    + 일반 링크 추가
-                  </Button>
                 </div>
 
                 {/* 관련 용어 선택 */}
