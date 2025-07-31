@@ -51,8 +51,8 @@ Resend API
 | --- | --- | --- |
 | glossaries | id, project_id, name, definition, author_id, updated_at | 용어 정의 |
 | policies | id, project_id, title, body, category, author_id, updated_at | 정책 |
-| policy_links | id, policy_id, url, type (`context`/`figma`/`github`) | 다중 URL |
-| glossary_links | id, glossary_id, url, type (`github`) |  |
+| policy_links | id, policy_id, url, type (`context`/`general`) | 다중 URL |
+| glossary_links | id, glossary_id, url |  |
 | 관계 매핑 | policy_terms (`policy_id`, `glossary_id`)<br/>glossary_relations (`glossary_id`, `related_id`) | 정책‑용어 / 용어‑용어 |
 
 ### 3.3 알림 로그 (옵션)
@@ -85,7 +85,7 @@ Resend API
 | 기능 | 구현 |
 | --- | --- |
 | 용어·정책 CRUD | Supabase JS mutations → SWR mutate / Realtime |
-| GitHub·Figma 링크 | URL 필드 + 외부 링크 컴포넌트 |
+| 컨텍스트·일반 링크 | URL 필드 + 외부 링크 컴포넌트 |
 | 검색·필터 | 클라이언트 Fuse.js + PostgREST `ilike` |
 | 제안 흐름 | `status` (`draft`/`pending`/`approved`) |
 | 알림 토글 | `memberships.receive_emails` |

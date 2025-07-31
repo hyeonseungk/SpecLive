@@ -358,21 +358,21 @@ export type Database = {
           created_at: string | null
           id: string
           policy_id: string | null
-          type: string
+          type: 'context' | 'general'
           url: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           policy_id?: string | null
-          type: string
+          type: 'context' | 'general'
           url: string
         }
         Update: {
           created_at?: string | null
           id?: string
           policy_id?: string | null
-          type?: string
+          type?: 'context' | 'general'
           url?: string
         }
         Relationships: [

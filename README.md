@@ -96,7 +96,7 @@ CREATE TABLE policy_links (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   policy_id UUID REFERENCES policies(id) ON DELETE CASCADE,
   url TEXT NOT NULL,
-  type TEXT CHECK (type IN ('context', 'figma', 'github')) NOT NULL,
+  type TEXT CHECK (type IN ('context', 'general')) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -105,7 +105,6 @@ CREATE TABLE glossary_links (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   glossary_id UUID REFERENCES glossaries(id) ON DELETE CASCADE,
   url TEXT NOT NULL,
-  type TEXT CHECK (type IN ('github')) DEFAULT 'github',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
