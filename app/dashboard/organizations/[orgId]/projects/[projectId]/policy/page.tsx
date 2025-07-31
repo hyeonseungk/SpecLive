@@ -21,24 +21,13 @@ type User = {
 type Project = Tables<'projects'>
 type Membership = Tables<'memberships'>
 
-// 새로 생성한 테이블들의 타입을 직접 정의
-type Actor = {
-  id: string
-  name: string
-  project_id: string | null
-  author_id: string | null
-  created_at: string | null
-  updated_at: string | null
-}
+// 데이터베이스 테이블 타입 사용
+type Actor = Tables<'actors'>
+type Usecase = Tables<'usecases'>
 
-type Usecase = {
-  id: string
-  name: string
-  actor_id: string | null
-  author_id: string | null
-  created_at: string | null
-  updated_at: string | null
-}
+type Feature = Tables<'features'>
+
+type FeaturePolicy = Tables<'policies'>
 
 interface PolicyPageProps {
   params: {
@@ -73,6 +62,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [showUsecaseModal, setShowUsecaseModal] = useState(false)
   const [usecaseName, setUsecaseName] = useState('')
   const [usecaseSaving, setUsecaseSaving] = useState(false)
+  
+  // 기능과 정책 관련 상태
+  const [features, setFeatures] = useState<Feature[]>([])
+  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
+  const [featurePolicies, setFeaturePolicies] = useState<FeaturePolicy[]>([])
+  const [featuresLoading, setFeaturesLoading] = useState(false)
+  const [policiesLoading, setPoliciesLoading] = useState(false)
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -215,9 +211,15 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         }
         setSelectedUsecase(usecaseToSelect)
         updateURL(actorId, usecaseToSelect.id)
+        // 선택된 유즈케이스의 기능들 로드
+        await loadFeaturesForUsecase(usecaseToSelect.id)
       } else {
         setSelectedUsecase(null)
         updateURL(actorId) // usecaseId 제거
+        // 유즈케이스가 없으면 기능과 정책도 초기화
+        setFeatures([])
+        setSelectedFeature(null)
+        setFeaturePolicies([])
       }
     } catch (error) {
       console.error('Error loading usecases:', error)
@@ -225,20 +227,98 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     }
   }
 
+  // 기능 로드 함수
+  const loadFeaturesForUsecase = async (usecaseId: string) => {
+    setFeaturesLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('features')
+        .select('*')
+        .eq('usecase_id', usecaseId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+
+      setFeatures(data || [])
+      
+      // 첫 번째 기능을 자동 선택
+      if (data && data.length > 0) {
+        setSelectedFeature(data[0])
+        await loadPoliciesForFeature(data[0].id)
+      } else {
+        setSelectedFeature(null)
+        setFeaturePolicies([])
+      }
+    } catch (error) {
+      console.error('Error loading features:', error)
+      // 임시로 showError 대신 console.error만 사용 (나중에 다국어 추가)
+      // showError('기능 로드 실패', '기능을 불러오는 중 오류가 발생했습니다.')
+    } finally {
+      setFeaturesLoading(false)
+    }
+  }
+
+  // 정책 로드 함수
+  const loadPoliciesForFeature = async (featureId: string) => {
+    setPoliciesLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('feature_policies')
+        .select(`
+          policies (
+            id,
+            title,
+            body,
+            category,
+            author_id,
+            created_at,
+            updated_at,
+            project_id
+          )
+        `)
+        .eq('feature_id', featureId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+
+      // 조인된 정책 데이터 추출
+      const policies = data?.map(item => item.policies).filter(Boolean) || []
+      setFeaturePolicies(policies as FeaturePolicy[])
+    } catch (error) {
+      console.error('Error loading feature policies:', error)
+      // 임시로 showError 대신 console.error만 사용 (나중에 다국어 추가)
+      // showError('정책 로드 실패', '정책을 불러오는 중 오류가 발생했습니다.')
+    } finally {
+      setPoliciesLoading(false)
+    }
+  }
+
   // 액터 선택 핸들러
   const handleActorSelect = async (actor: Actor) => {
     setSelectedActor(actor)
     setSelectedUsecase(null)
+    // 액터 변경 시 기능과 정책도 초기화
+    setFeatures([])
+    setSelectedFeature(null)
+    setFeaturePolicies([])
     // 액터 변경 시 URL 업데이트 (usecaseId는 제거)
     updateURL(actor.id)
     await loadUsecasesForActor(actor.id)
   }
 
   // 유즈케이스 선택 핸들러
-  const handleUsecaseSelect = (usecase: Usecase) => {
+  const handleUsecaseSelect = async (usecase: Usecase) => {
     setSelectedUsecase(usecase)
     // 유즈케이스 선택 시 URL 업데이트
     updateURL(selectedActor?.id, usecase.id)
+    // 선택된 유즈케이스의 기능들 로드
+    await loadFeaturesForUsecase(usecase.id)
+  }
+
+  // 기능 선택 핸들러
+  const handleFeatureSelect = async (feature: Feature) => {
+    setSelectedFeature(feature)
+    await loadPoliciesForFeature(feature.id)
   }
 
   // 액터 추가 함수
@@ -470,6 +550,112 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             </div>
           </div>
 
+          {/* 기능과 정책 섹션 */}
+          {selectedUsecase && (
+            <div className="mt-8">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold">기능 및 정책</h3>
+                <p className="text-muted-foreground text-sm">
+                  {selectedUsecase.name} 유즈케이스의 기능들과 각 기능의 정책을 관리합니다.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-5 gap-6 h-96">
+                {/* 좌측: 기능 목록 (1/5) */}
+                <div className="col-span-1 bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium">기능</h4>
+                    {membership?.role === 'admin' && (
+                      <Button size="sm" variant="outline">
+                        + 추가
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {featuresLoading ? (
+                    <div className="flex items-center justify-center h-32">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    </div>
+                  ) : features.length === 0 ? (
+                    <div className="text-center text-gray-500 text-sm mt-8">
+                      <p>아직 기능이</p>
+                      <p>없습니다</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-72 overflow-y-auto">
+                      {features.map(feature => (
+                        <div
+                          key={feature.id}
+                          onClick={() => handleFeatureSelect(feature)}
+                          className={`p-2 rounded cursor-pointer text-sm transition-colors ${
+                            selectedFeature?.id === feature.id
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-white hover:bg-gray-100'
+                          }`}
+                        >
+                          {feature.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 우측: 정책 목록 (4/5) */}
+                <div className="col-span-4 bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium">
+                      {selectedFeature ? `${selectedFeature.name} 정책` : '정책'}
+                    </h4>
+                    {selectedFeature && membership?.role === 'admin' && (
+                      <Button size="sm" variant="outline">
+                        + 정책 추가
+                      </Button>
+                    )}
+                  </div>
+
+                  {!selectedFeature ? (
+                    <div className="flex items-center justify-center h-32">
+                      <p className="text-gray-500">기능을 선택해주세요</p>
+                    </div>
+                  ) : policiesLoading ? (
+                    <div className="flex items-center justify-center h-32">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    </div>
+                  ) : featurePolicies.length === 0 ? (
+                    <div className="text-center text-gray-500 mt-8">
+                      <p>아직 정책이 없습니다</p>
+                      {membership?.role === 'admin' && (
+                        <p className="text-sm mt-2">첫 번째 정책을 추가해보세요</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-72 overflow-y-auto">
+                      {featurePolicies.map(policy => (
+                        <Card key={policy.id} className="p-3">
+                          <h5 className="font-medium text-sm mb-2">{policy.title}</h5>
+                          <p className="text-xs text-gray-600 overflow-hidden" 
+                             style={{
+                               display: '-webkit-box',
+                               WebkitLineClamp: 3,
+                               WebkitBoxOrient: 'vertical',
+                               lineHeight: '1.4em',
+                               maxHeight: '4.2em'
+                             }}>
+                            {policy.body}
+                          </p>
+                          <div className="flex justify-end mt-2">
+                            <Button size="sm" variant="ghost" className="text-xs">
+                              자세히 보기
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
         </div>
 
