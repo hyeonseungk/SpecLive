@@ -775,9 +775,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </p>
             </div>
 
-            <div className="grid grid-cols-5 gap-6 flex-1 min-h-0">
+            <div className="grid grid-cols-5 gap-6 h-[700px]">
               {/* 좌측: 기능 목록 (1/5) */}
-              <div className="col-span-1 bg-gray-200 rounded-lg p-4 flex flex-col min-h-0">
+              <div className="col-span-1 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">기능</h4>
                   {membership?.role === 'admin' && (
@@ -791,7 +791,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   )}
                 </div>
                 
-                <div className="flex-1 min-h-0 overflow-hidden">
+                <div className="flex-1 overflow-y-auto min-h-0">
                   {featuresLoading ? (
                     <div className="flex items-center justify-center h-32">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -802,7 +802,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       <p>없습니다</p>
                     </div>
                   ) : (
-                    <div className="space-y-2 h-full overflow-y-auto pr-2">
+                    <div className="space-y-2 pr-2">
                       {features.map(feature => (
                         <div
                           key={feature.id}
@@ -854,7 +854,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </div>
 
               {/* 우측: 정책 목록 (4/5) */}
-              <div className="col-span-4 bg-gray-200 rounded-lg p-4 flex flex-col min-h-0">
+              <div className="col-span-4 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">
                     {selectedFeature ? `${selectedFeature.name} 정책` : '정책'}
@@ -866,7 +866,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   )}
                 </div>
 
-                <div className="flex-1 min-h-0 overflow-hidden">
+                <div className="flex-1 overflow-y-auto min-h-0">
                   {!selectedFeature ? (
                     <div className="flex items-center justify-center h-32">
                       <p className="text-gray-500">기능을 선택해주세요</p>
@@ -883,7 +883,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       )}
                     </div>
                   ) : (
-                    <div className="space-y-3 h-full overflow-y-auto pr-2">
+                    <div className="space-y-3 pr-2">
                       {featurePolicies.map(policy => (
                         <Card key={policy.id} className="p-3 flex-shrink-0">
                           <h5 className="font-medium text-sm mb-2">{policy.title}</h5>
