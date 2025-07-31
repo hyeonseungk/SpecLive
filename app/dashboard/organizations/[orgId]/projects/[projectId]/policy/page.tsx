@@ -78,6 +78,15 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [showDeleteFeatureModal, setShowDeleteFeatureModal] = useState(false)
   const [deletingFeature, setDeletingFeature] = useState<Feature | null>(null)
   const [featureDeleting, setFeatureDeleting] = useState(false)
+
+  // 정책 추가 모달 상태
+  const [showPolicyModal, setShowPolicyModal] = useState(false)
+  const [policyTitle, setPolicyTitle] = useState('')
+  const [policyBody, setPolicyBody] = useState('')
+  const [policyCategory, setPolicyCategory] = useState('')
+  const [contextLinks, setContextLinks] = useState<string[]>([''])
+  const [generalLinks, setGeneralLinks] = useState<string[]>([''])
+  const [policySaving, setPolicySaving] = useState(false)
   
   // 기능과 정책 관련 상태
   const [features, setFeatures] = useState<Feature[]>([])
@@ -534,6 +543,118 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     setShowDeleteFeatureModal(true)
   }
 
+  // 링크 관리 함수들
+  const addLinkField = (type: 'context' | 'general') => {
+    if (type === 'context') {
+      setContextLinks(prev => [...prev, ''])
+    } else {
+      setGeneralLinks(prev => [...prev, ''])
+    }
+  }
+
+  const removeLinkField = (type: 'context' | 'general', index: number) => {
+    if (type === 'context') {
+      setContextLinks(prev => prev.filter((_, i) => i !== index))
+    } else {
+      setGeneralLinks(prev => prev.filter((_, i) => i !== index))
+    }
+  }
+
+  const updateLinkField = (type: 'context' | 'general', index: number, value: string) => {
+    if (type === 'context') {
+      setContextLinks(prev => prev.map((link, i) => i === index ? value : link))
+    } else {
+      setGeneralLinks(prev => prev.map((link, i) => i === index ? value : link))
+    }
+  }
+
+  // 정책 추가 함수
+  const addPolicy = async () => {
+    if (!selectedFeature || !user) return
+    if (!policyTitle.trim() || !policyBody.trim() || !policyCategory.trim()) {
+      showSimpleError('제목, 본문, 카테고리를 모두 입력해주세요.')
+      return
+    }
+
+    setPolicySaving(true)
+    try {
+      // 1. 정책 추가
+      const { data: policy, error: policyError } = await supabase
+        .from('policies')
+        .insert({
+          project_id: project!.id,
+          title: policyTitle.trim(),
+          body: policyBody.trim(),
+          category: policyCategory.trim(),
+          author_id: user.id
+        })
+        .select()
+        .single()
+
+      if (policyError) throw policyError
+
+      // 2. 기능-정책 관계 추가
+      const { error: featurePolicyError } = await supabase
+        .from('feature_policies')
+        .insert({
+          feature_id: selectedFeature.id,
+          policy_id: policy.id
+        })
+
+      if (featurePolicyError) throw featurePolicyError
+
+      // 3. 컨텍스트 링크 추가
+      const validContextLinks = contextLinks.filter(link => link.trim())
+      if (validContextLinks.length > 0) {
+        const { error: contextLinksError } = await supabase
+          .from('policy_links')
+          .insert(
+            validContextLinks.map(url => ({
+              policy_id: policy.id,
+              url: url.trim(),
+              type: 'context' as const
+            }))
+          )
+
+        if (contextLinksError) throw contextLinksError
+      }
+
+      // 4. 일반 링크 추가
+      const validGeneralLinks = generalLinks.filter(link => link.trim())
+      if (validGeneralLinks.length > 0) {
+        const { error: generalLinksError } = await supabase
+          .from('policy_links')
+          .insert(
+            validGeneralLinks.map(url => ({
+              policy_id: policy.id,
+              url: url.trim(),
+              type: 'general' as const
+            }))
+          )
+
+        if (generalLinksError) throw generalLinksError
+      }
+
+      // 5. 정책 목록 새로고침
+      await loadPoliciesForFeature(selectedFeature.id)
+
+      // 6. 모달 초기화 및 닫기
+      setPolicyTitle('')
+      setPolicyBody('')
+      setPolicyCategory('')
+      setContextLinks([''])
+      setGeneralLinks([''])
+      setShowPolicyModal(false)
+      
+      showSimpleSuccess('정책이 성공적으로 추가되었습니다.')
+    } catch (error) {
+      console.error('Error adding policy:', error)
+      showError('정책 추가 실패', '정책을 추가하는 중 오류가 발생했습니다.')
+    } finally {
+      setPolicySaving(false)
+    }
+  }
+
   // 기능 삭제 함수
   const deleteFeature = async () => {
     if (!deletingFeature || !user) return
@@ -860,7 +981,11 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     {selectedFeature ? `${selectedFeature.name} 정책` : '정책'}
                   </h4>
                   {selectedFeature && membership?.role === 'admin' && (
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setShowPolicyModal(true)}
+                    >
                       + 정책 추가
                     </Button>
                   )}
@@ -1124,6 +1249,171 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   disabled={featureDeleting}
                 >
                   {featureDeleting ? '삭제 중...' : '삭제'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 정책 추가 모달 */}
+        {showPolicyModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-semibold mb-4">정책 추가</h3>
+              
+              <div className="space-y-4">
+                {/* 제목 */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    정책 제목 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={policyTitle}
+                    onChange={(e) => setPolicyTitle(e.target.value)}
+                    placeholder="정책 제목을 입력하세요"
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    disabled={policySaving}
+                  />
+                </div>
+
+                {/* 카테고리 */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    카테고리 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={policyCategory}
+                    onChange={(e) => setPolicyCategory(e.target.value)}
+                    placeholder="예: 회원가입, 상품 구매, 결제 등"
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    disabled={policySaving}
+                  />
+                </div>
+
+                {/* 본문 */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    정책 본문 <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={policyBody}
+                    onChange={(e) => setPolicyBody(e.target.value)}
+                    placeholder="정책의 상세 내용을 입력하세요"
+                    rows={6}
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
+                    disabled={policySaving}
+                  />
+                </div>
+
+                {/* 컨텍스트 링크들 */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    컨텍스트 링크들
+                    <span className="text-xs text-gray-500 font-normal ml-1">
+                      (정책 배경: 슬랙, 회의록 등)
+                    </span>
+                  </label>
+                  {contextLinks.map((link, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => updateLinkField('context', index, e.target.value)}
+                        placeholder="https://..."
+                        className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        disabled={policySaving}
+                      />
+                      {contextLinks.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeLinkField('context', index)}
+                          disabled={policySaving}
+                        >
+                          삭제
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => addLinkField('context')}
+                    disabled={policySaving}
+                    className="text-sm"
+                  >
+                    + 컨텍스트 링크 추가
+                  </Button>
+                </div>
+
+                {/* 일반 링크들 */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    일반 링크들
+                    <span className="text-xs text-gray-500 font-normal ml-1">
+                      (UI/UX 설계, 구현 코드 등)
+                    </span>
+                  </label>
+                  {generalLinks.map((link, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => updateLinkField('general', index, e.target.value)}
+                        placeholder="https://..."
+                        className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        disabled={policySaving}
+                      />
+                      {generalLinks.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeLinkField('general', index)}
+                          disabled={policySaving}
+                        >
+                          삭제
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => addLinkField('general')}
+                    disabled={policySaving}
+                    className="text-sm"
+                  >
+                    + 일반 링크 추가
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowPolicyModal(false)
+                    setPolicyTitle('')
+                    setPolicyBody('')
+                    setPolicyCategory('')
+                    setContextLinks([''])
+                    setGeneralLinks([''])
+                  }}
+                  disabled={policySaving}
+                >
+                  취소
+                </Button>
+                <Button 
+                  onClick={addPolicy}
+                  disabled={policySaving || !policyTitle.trim() || !policyBody.trim() || !policyCategory.trim()}
+                >
+                  {policySaving ? '추가 중...' : '정책 추가'}
                 </Button>
               </div>
             </div>
