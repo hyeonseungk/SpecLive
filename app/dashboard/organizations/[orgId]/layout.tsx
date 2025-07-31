@@ -76,8 +76,8 @@ export default function OrganizationLayout({
     <div className="min-h-screen bg-background">
       {/* 공통 헤더 */}
       <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">{t('common.brand')}</h1>
             {user && (
               <OrganizationSelector
@@ -88,7 +88,7 @@ export default function OrganizationLayout({
               />
             )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <span className="text-sm text-muted-foreground">
               {user?.email}
             </span>
