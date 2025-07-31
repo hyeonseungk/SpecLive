@@ -115,6 +115,7 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          sequence: number | null
           updated_at: string | null
           usecase_id: string | null
         }
@@ -123,6 +124,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name: string
+          sequence?: number | null
           updated_at?: string | null
           usecase_id?: string | null
         }
@@ -131,6 +133,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
+          sequence?: number | null
           updated_at?: string | null
           usecase_id?: string | null
         }

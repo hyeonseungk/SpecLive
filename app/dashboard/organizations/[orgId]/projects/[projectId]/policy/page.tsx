@@ -458,7 +458,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       if (error) throw error
 
-      setFeatures(prev => [...prev, feature].sort((a, b) => a.sequence - b.sequence))
+      setFeatures(prev => [...prev, feature].sort((a, b) => (a.sequence || 0) - (b.sequence || 0)))
       setFeatureName('')
       setShowFeatureModal(false)
       
@@ -541,7 +541,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     setFeatureDeleting(true)
     try {
       // 1. 삭제할 기능의 sequence 값 저장
-      const deletedSequence = deletingFeature.sequence
+      const deletedSequence = deletingFeature.sequence || 0
 
       // 2. 기능에 연결된 정책 관계 삭제 (feature_policies 테이블)
       const { error: deletePoliciesError } = await supabase
@@ -574,7 +574,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         const updatePromises = higherSequenceFeatures.map(feature => 
           supabase
             .from('features')
-            .update({ sequence: feature.sequence - 1 })
+            .update({ sequence: (feature.sequence || 0) - 1 })
             .eq('id', feature.id)
         )
 
@@ -586,7 +586,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         .filter(f => f.id !== deletingFeature.id)
         .map(f => ({
           ...f,
-          sequence: f.sequence > deletedSequence ? f.sequence - 1 : f.sequence
+          sequence: (f.sequence || 0) > deletedSequence ? (f.sequence || 0) - 1 : (f.sequence || 0)
         }))
 
       setFeatures(updatedFeatures)
