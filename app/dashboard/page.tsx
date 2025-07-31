@@ -157,7 +157,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-full bg-background">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -177,7 +177,7 @@ export default function Dashboard() {
       <main className="container mx-auto px-4 py-8">
         {organizations.length === 0 ? (
           // 조직이 없는 경우 - 조직 생성을 유도하는 UI  
-          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="mb-8">
               <h2 className="text-3xl font-bold mb-4">{t('dashboard.welcome')}</h2>
               <p className="text-lg text-muted-foreground mb-2">{t('dashboard.intro_line1')}</p>

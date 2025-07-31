@@ -64,8 +64,8 @@ export default function OrganizationLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="flex items-center justify-center min-h-screen">
+      <div className="h-full bg-background">
+        <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </div>
@@ -73,7 +73,7 @@ export default function OrganizationLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-full bg-background">
       {/* 공통 헤더 */}
       <header className="border-b">
         <div className="px-8 py-4 flex items-center justify-between">

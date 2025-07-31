@@ -77,7 +77,7 @@ export default function ProjectLayout({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center h-full">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
@@ -85,7 +85,7 @@ export default function ProjectLayout({
 
   if (!project || !membership) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">{t('common.no_access')}</p>
           <Button onClick={() => router.push('/dashboard')}>
@@ -160,16 +160,7 @@ export default function ProjectLayout({
             </button>
           </div>
 
-          {/* 하단 메뉴 */}
-          <div className="space-y-2 pt-4 border-t">
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-accent"
-            >
-              <span className="text-lg">🏠</span>
-              <span>{t('sidebar.dashboard')}</span>
-            </button>
-          </div>
+
         </div>
       </div>
 
