@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase-browser'
 import { Tables } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { ChevronDown } from 'lucide-react'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
 import { useT } from '@/lib/i18n'
@@ -171,7 +173,7 @@ function SortableGlossaryCard({ glossary, onEdit, onCopyUrl, showSequence, t, lo
               </div>
             )}
             <div className="mt-auto text-xs text-muted-foreground text-right">
-              최종 수정: {new Date(glossary.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              최종 수정: {glossary.updated_at && new Date(glossary.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </div>
           </CardContent>
         </div>
@@ -886,9 +888,13 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     if (sortBy === 'name') {
       return a.name.localeCompare(b.name)
     } else if (sortBy === 'updated_at') {
-      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      const aTime = a.updated_at ? new Date(a.updated_at).getTime() : 0
+      const bTime = b.updated_at ? new Date(b.updated_at).getTime() : 0
+      return bTime - aTime
     } else if (sortBy === 'updated_at_old') {
-      return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
+      const aTime = a.updated_at ? new Date(a.updated_at).getTime() : 0
+      const bTime = b.updated_at ? new Date(b.updated_at).getTime() : 0
+      return aTime - bTime
     } else if (sortBy === 'sequence') {
       return a.sequence - b.sequence
     } else {
@@ -927,18 +933,48 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
               />
             </div>
 
-            {/* 정렬 select */}
-            <div className="w-32">
-                              <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'name' | 'updated_at' | 'updated_at_old' | 'sequence')}
-                  className="w-full p-2 pr-8 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="updated_at">{t('glossary.sort_newest')}</option>
-                  <option value="updated_at_old">{t('glossary.sort_oldest')}</option>
-                  <option value="name">{t('glossary.sort_name')}</option>
-                  <option value="sequence">{t('glossary.sort_sequence')}</option>
-                </select>
+            {/* 정렬 선택 */}
+            <div className="w-40">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="justify-between w-full text-base h-10 px-4"
+                  >
+                    {sortBy === 'updated_at' && t('glossary.sort_newest')}
+                    {sortBy === 'updated_at_old' && t('glossary.sort_oldest')}
+                    {sortBy === 'name' && t('glossary.sort_name')}
+                    {sortBy === 'sequence' && t('glossary.sort_sequence')}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem
+                    onClick={() => setSortBy('updated_at')}
+                    className="text-base py-2"
+                  >
+                    {t('glossary.sort_newest')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSortBy('updated_at_old')}
+                    className="text-base py-2"
+                  >
+                    {t('glossary.sort_oldest')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSortBy('name')}
+                    className="text-base py-2"
+                  >
+                    {t('glossary.sort_name')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSortBy('sequence')}
+                    className="text-base py-2"
+                  >
+                    {t('glossary.sort_sequence')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 

@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase-browser'
 import { Tables } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { ChevronDown } from 'lucide-react'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
 import { useT } from '@/lib/i18n'
@@ -60,11 +62,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [selectedUsecase, setSelectedUsecase] = useState<Usecase | null>(null)
   const [actorsLoading, setActorsLoading] = useState(false)
   
-  // 정책 관련 상태
-  const [policies, setPolicies] = useState<Tables<'policies'>[]>([])
-  const [policiesLoading, setPoliciesLoading] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
+  // 정책 관련 상태 (제거됨)
 
   // 액터 추가 모달 상태
   const [showActorModal, setShowActorModal] = useState(false)
@@ -119,9 +117,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       // 액터 로드
       await loadActorsForProject(params.projectId)
-
-      // 정책 로드
-      await loadPoliciesForProject(params.projectId)
 
       setLoading(false)
     }
@@ -275,37 +270,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     }
   }
 
-  // 정책 로드 함수
-  const loadPoliciesForProject = async (projectId: string) => {
-    setPoliciesLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('policies')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('updated_at', { ascending: false })
 
-      if (error) throw error
-
-      setPolicies(data || [])
-    } catch (error) {
-      console.error('Error loading policies:', error)
-      showError(t('policy.load_error_title'), t('policy.load_error_desc'))
-    } finally {
-      setPoliciesLoading(false)
-    }
-  }
-
-  // 필터링된 정책 목록
-  const filteredPolicies = policies.filter(policy => {
-    const matchesSearch = policy.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         policy.body.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = !categoryFilter || policy.category === categoryFilter
-    return matchesSearch && matchesCategory
-  })
-
-  // 고유한 카테고리 목록
-  const categories = Array.from(new Set(policies.map(policy => policy.category)))
 
   if (loading) {
     return (
@@ -342,161 +307,103 @@ export default function PolicyPage({ params }: PolicyPageProps) {
           </div>
 
           {/* 액터 및 유즈케이스 선택 영역 */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-4">
-              {/* 액터 선택 */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-700">액터:</span>
-                {actors.length === 0 ? (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowActorModal(true)}
-                    disabled={membership?.role !== 'admin'}
-                  >
-                    + 액터 추가
-                  </Button>
-                ) : (
-                  <select
-                    value={selectedActor?.id || ''}
-                    onChange={(e) => {
-                      const actor = actors.find(a => a.id === e.target.value)
-                      if (actor) handleActorSelect(actor)
-                    }}
-                    className="px-3 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    {actors.map(actor => (
-                      <option key={actor.id} value={actor.id}>
-                        {actor.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
+          <div className="mb-6 p-6 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-6">
+                              {/* 액터 선택 */}
+                <div className="flex items-center gap-3">
+                  <span className="text-base font-semibold text-gray-800">액터:</span>
+                  {actors.length === 0 ? (
+                    <Button 
+                      variant="outline" 
+                      size="default"
+                      onClick={() => setShowActorModal(true)}
+                      disabled={membership?.role !== 'admin'}
+                      className="text-base px-4 py-2"
+                    >
+                      + 액터 추가
+                    </Button>
+                  ) : (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="justify-between min-w-[150px] text-base h-10 px-4"
+                        >
+                          {selectedActor?.name || '액터 선택'}
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="min-w-[150px]">
+                        {actors.map(actor => (
+                          <DropdownMenuItem
+                            key={actor.id}
+                            onClick={() => handleActorSelect(actor)}
+                            className="text-base py-2"
+                          >
+                            {actor.name}
+                          </DropdownMenuItem>
+                        ))}
+                        {actors.length > 0 && (
+                          <>
+                            <div className="h-px bg-gray-200 my-1" />
+                            <DropdownMenuItem
+                              onClick={() => setShowActorModal(true)}
+                              disabled={membership?.role !== 'admin'}
+                              className="text-base py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              + 새 액터 추가
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
 
               {/* 유즈케이스 선택 */}
               {selectedActor && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700">유즈케이스:</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-base font-semibold text-gray-800">유즈케이스:</span>
                   {usecases.length === 0 ? (
                     <Button 
                       variant="outline" 
-                      size="sm"
+                      size="default"
                       onClick={() => setShowUsecaseModal(true)}
                       disabled={membership?.role !== 'admin'}
+                      className="text-base px-4 py-2"
                     >
                       + 유즈케이스 추가
                     </Button>
                   ) : (
-                    <select
-                      value={selectedUsecase?.id || ''}
-                      onChange={(e) => {
-                        const usecase = usecases.find(u => u.id === e.target.value)
-                        setSelectedUsecase(usecase || null)
-                      }}
-                      className="px-3 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    >
-                      <option value="">유즈케이스 선택</option>
-                      {usecases.map(usecase => (
-                        <option key={usecase.id} value={usecase.id}>
-                          {usecase.name}
-                        </option>
-                      ))}
-                    </select>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="justify-between min-w-[170px] text-base h-10 px-4"
+                        >
+                          {selectedUsecase?.name || '유즈케이스 선택'}
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="min-w-[170px]">
+                        {usecases.map(usecase => (
+                          <DropdownMenuItem
+                            key={usecase.id}
+                            onClick={() => setSelectedUsecase(usecase)}
+                            className="text-base py-2"
+                          >
+                            {usecase.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
               )}
             </div>
           </div>
 
-          {/* 검색 및 필터 */}
-          <div className="flex gap-4 mb-6">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder={t('policy.search_placeholder')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div className="w-48">
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="">{t('policy.all_categories')}</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-            <Button variant="outline" disabled>
-              ➕ {t('policy.add_button')}
-            </Button>
-          </div>
 
-          {/* 정책 목록 */}
-          {policiesLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-              <p className="text-muted-foreground">{t('policy.loading')}</p>
-            </div>
-          ) : filteredPolicies.length === 0 ? (
-            <Card>
-              <CardContent className="pt-8 pb-8">
-                <div className="text-center text-muted-foreground">
-                  <p className="mb-4">
-                    {searchTerm || categoryFilter ? t('policy.no_results') : t('policy.no_policies')}
-                  </p>
-                  {!searchTerm && !categoryFilter && (
-                    <p className="text-sm mb-6">{t('policy.first_policy_sub')}</p>
-                  )}
-                  {!searchTerm && !categoryFilter && (
-                    <Button variant="outline" disabled>
-                      {t('policy.first_policy_button')}
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {filteredPolicies.map((policy) => (
-                <Card key={policy.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-xl">{policy.title}</CardTitle>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {policy.category}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {policy.updated_at && new Date(policy.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p 
-                      className="text-sm text-muted-foreground overflow-hidden" 
-                      style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        maxHeight: '4.5rem'
-                      } as React.CSSProperties}
-                    >
-                      {policy.body}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* 액터 추가 모달 */}
