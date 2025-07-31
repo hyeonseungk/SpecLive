@@ -135,6 +135,37 @@
     "prd_header": "Project PRD",
     "prd_sub": "Define the project's requirements and goals."
   },
+  "actor": {
+    "label": "Actor:",
+    "add_button": "+ Add Actor",
+    "select_placeholder": "Select Actor",
+    "add_new_button": "+ Add New Actor",
+    "add_modal_title": "Add Actor",
+    "name_label": "Actor Name *",
+    "name_placeholder": "e.g. Regular User, Admin, Customer, ...",
+    "name_required": "Please enter actor name.",
+    "add_success": "Actor has been added.",
+    "add_error_title": "Failed to Add Actor",
+    "add_error_desc": "An error occurred while adding the actor.",
+    "load_error_title": "Failed to Load Actors",
+    "load_error_desc": "An error occurred while loading actors."
+  },
+  "usecase": {
+    "label": "Use Case:",
+    "add_button": "+ Add Use Case",
+    "select_placeholder": "Select Use Case",
+    "add_new_button": "+ Add New Use Case",
+    "add_modal_title": "Add Use Case",
+    "name_label": "Use Case Name *",
+    "name_placeholder": "e.g. Purchase Product, Login, Sign Up, ...",
+    "actor_prefix": "(Actor: ",
+    "name_required": "Please enter use case name.",
+    "add_success": "Use case has been added.",
+    "add_error_title": "Failed to Add Use Case",
+    "add_error_desc": "An error occurred while adding the use case.",
+    "load_error_title": "Failed to Load Use Cases",
+    "load_error_desc": "An error occurred while loading use cases."
+  },
   "buttons": {
     "save": "Save",
     "saving": "Saving...",
@@ -143,7 +174,9 @@
     "send": "Send",
     "back": "Back to Dashboard",
     "ok": "OK",
-    "delete": "Delete"
+    "delete": "Delete",
+    "add": "Add",
+    "adding": "Adding..."
   },
   "ai": {
     "modal_title": "Write PRD via Chat with AI",

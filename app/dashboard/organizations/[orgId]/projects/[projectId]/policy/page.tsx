@@ -150,7 +150,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       }
     } catch (error) {
       console.error('Error loading actors:', error)
-      showError('액터 로드 실패', '액터를 불러오는 중 오류가 발생했습니다.')
+      showError(t('actor.load_error_title'), t('actor.load_error_desc'))
     } finally {
       setActorsLoading(false)
     }
@@ -177,7 +177,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       }
     } catch (error) {
       console.error('Error loading usecases:', error)
-      showError('유즈케이스 로드 실패', '유즈케이스를 불러오는 중 오류가 발생했습니다.')
+      showError(t('usecase.load_error_title'), t('usecase.load_error_desc'))
     }
   }
 
@@ -192,7 +192,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const addActor = async () => {
     if (!project || !user) return
     if (!actorName.trim()) {
-      showSimpleError('액터 이름을 입력해주세요.')
+      showSimpleError(t('actor.name_required'))
       return
     }
 
@@ -221,10 +221,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         setSelectedUsecase(null)
       }
       
-      showSimpleSuccess('액터가 추가되었습니다.')
+      showSimpleSuccess(t('actor.add_success'))
     } catch (error) {
       console.error('Error adding actor:', error)
-      showError('액터 추가 실패', '액터를 추가하는 중 오류가 발생했습니다.')
+      showError(t('actor.add_error_title'), t('actor.add_error_desc'))
     } finally {
       setActorSaving(false)
     }
@@ -234,7 +234,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const addUsecase = async () => {
     if (!selectedActor || !user) return
     if (!usecaseName.trim()) {
-      showSimpleError('유즈케이스 이름을 입력해주세요.')
+      showSimpleError(t('usecase.name_required'))
       return
     }
 
@@ -261,10 +261,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         setSelectedUsecase(usecase)
       }
       
-      showSimpleSuccess('유즈케이스가 추가되었습니다.')
+      showSimpleSuccess(t('usecase.add_success'))
     } catch (error) {
       console.error('Error adding usecase:', error)
-      showError('유즈케이스 추가 실패', '유즈케이스를 추가하는 중 오류가 발생했습니다.')
+      showError(t('usecase.add_error_title'), t('usecase.add_error_desc'))
     } finally {
       setUsecaseSaving(false)
     }
@@ -311,7 +311,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             <div className="flex items-center gap-6">
                               {/* 액터 선택 */}
                 <div className="flex items-center gap-3">
-                  <span className="text-base font-semibold text-gray-800">액터:</span>
+                  <span className="text-base font-semibold text-gray-800">{t('actor.label')}</span>
                   {actors.length === 0 ? (
                     <Button 
                       variant="outline" 
@@ -320,7 +320,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       disabled={membership?.role !== 'admin'}
                       className="text-base px-4 py-2"
                     >
-                      + 액터 추가
+                      {t('actor.add_button')}
                     </Button>
                   ) : (
                     <DropdownMenu>
@@ -329,7 +329,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                           variant="outline" 
                           className="justify-between min-w-[150px] text-base h-10 px-4"
                         >
-                          {selectedActor?.name || '액터 선택'}
+                          {selectedActor?.name || t('actor.select_placeholder')}
                           <ChevronDown className="ml-2 h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -351,7 +351,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                               disabled={membership?.role !== 'admin'}
                               className="text-base py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             >
-                              + 새 액터 추가
+                              {t('actor.add_new_button')}
                             </DropdownMenuItem>
                           </>
                         )}
@@ -363,7 +363,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               {/* 유즈케이스 선택 */}
               {selectedActor && (
                 <div className="flex items-center gap-3">
-                  <span className="text-base font-semibold text-gray-800">유즈케이스:</span>
+                  <span className="text-base font-semibold text-gray-800">{t('usecase.label')}</span>
                   {usecases.length === 0 ? (
                     <Button 
                       variant="outline" 
@@ -372,7 +372,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       disabled={membership?.role !== 'admin'}
                       className="text-base px-4 py-2"
                     >
-                      + 유즈케이스 추가
+                      {t('usecase.add_button')}
                     </Button>
                   ) : (
                     <DropdownMenu>
@@ -381,7 +381,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                           variant="outline" 
                           className="justify-between min-w-[170px] text-base h-10 px-4"
                         >
-                          {selectedUsecase?.name || '유즈케이스 선택'}
+                          {selectedUsecase?.name || t('usecase.select_placeholder')}
                           <ChevronDown className="ml-2 h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -395,6 +395,18 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                             {usecase.name}
                           </DropdownMenuItem>
                         ))}
+                        {usecases.length > 0 && (
+                          <>
+                            <div className="h-px bg-gray-200 my-1" />
+                            <DropdownMenuItem
+                              onClick={() => setShowUsecaseModal(true)}
+                              disabled={membership?.role !== 'admin'}
+                              className="text-base py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              {t('usecase.add_new_button')}
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
@@ -410,16 +422,16 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         {showActorModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold mb-4">액터 추가</h3>
+              <h3 className="text-lg font-semibold mb-4">{t('actor.add_modal_title')}</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">액터 이름 *</label>
+                  <label className="block text-sm font-medium mb-1">{t('actor.name_label')}</label>
                   <input
                     type="text"
                     value={actorName}
                     onChange={(e) => setActorName(e.target.value)}
-                    placeholder="예: 일반 사용자, 관리자, 고객, ..."
+                    placeholder={t('actor.name_placeholder')}
                     className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     disabled={actorSaving}
                   />
@@ -435,13 +447,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   }}
                   disabled={actorSaving}
                 >
-                  취소
+                  {t('buttons.cancel')}
                 </Button>
                 <Button 
                   onClick={addActor}
                   disabled={actorSaving || !actorName.trim()}
                 >
-                  {actorSaving ? '추가 중...' : '추가'}
+                  {actorSaving ? t('buttons.adding') : t('buttons.add')}
                 </Button>
               </div>
             </div>
@@ -452,21 +464,21 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         {showUsecaseModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold mb-4">유즈케이스 추가</h3>
+              <h3 className="text-lg font-semibold mb-4">{t('usecase.add_modal_title')}</h3>
               
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    유즈케이스 이름 * 
+                    {t('usecase.name_label')} 
                     <span className="text-xs text-gray-500 font-normal">
-                      (액터: {selectedActor?.name})
+                      {t('usecase.actor_prefix')}{selectedActor?.name})
                     </span>
                   </label>
                   <input
                     type="text"
                     value={usecaseName}
                     onChange={(e) => setUsecaseName(e.target.value)}
-                    placeholder="예: 상품 구매, 로그인, 회원가입, ..."
+                    placeholder={t('usecase.name_placeholder')}
                     className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     disabled={usecaseSaving}
                   />
@@ -482,13 +494,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   }}
                   disabled={usecaseSaving}
                 >
-                  취소
+                  {t('buttons.cancel')}
                 </Button>
                 <Button 
                   onClick={addUsecase}
                   disabled={usecaseSaving || !usecaseName.trim()}
                 >
-                  {usecaseSaving ? '추가 중...' : '추가'}
+                  {usecaseSaving ? t('buttons.adding') : t('buttons.add')}
                 </Button>
               </div>
             </div>

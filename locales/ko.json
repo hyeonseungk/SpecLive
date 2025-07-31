@@ -176,6 +176,37 @@
     "prd_header": "프로젝트 PRD",
     "prd_sub": "프로젝트의 요구사항과 목표를 정의합니다."
   },
+  "actor": {
+    "label": "액터:",
+    "add_button": "+ 액터 추가",
+    "select_placeholder": "액터 선택",
+    "add_new_button": "+ 새 액터 추가",
+    "add_modal_title": "액터 추가",
+    "name_label": "액터 이름 *",
+    "name_placeholder": "예: 일반 사용자, 관리자, 고객, ...",
+    "name_required": "액터 이름을 입력해주세요.",
+    "add_success": "액터가 추가되었습니다.",
+    "add_error_title": "액터 추가 실패",
+    "add_error_desc": "액터를 추가하는 중 오류가 발생했습니다.",
+    "load_error_title": "액터 로드 실패",
+    "load_error_desc": "액터를 불러오는 중 오류가 발생했습니다."
+  },
+  "usecase": {
+    "label": "유즈케이스:",
+    "add_button": "+ 유즈케이스 추가",
+    "select_placeholder": "유즈케이스 선택",
+    "add_new_button": "+ 새 유즈케이스 추가",
+    "add_modal_title": "유즈케이스 추가",
+    "name_label": "유즈케이스 이름 *",
+    "name_placeholder": "예: 상품 구매, 로그인, 회원가입, ...",
+    "actor_prefix": "(액터: ",
+    "name_required": "유즈케이스 이름을 입력해주세요.",
+    "add_success": "유즈케이스가 추가되었습니다.",
+    "add_error_title": "유즈케이스 추가 실패",
+    "add_error_desc": "유즈케이스를 추가하는 중 오류가 발생했습니다.",
+    "load_error_title": "유즈케이스 로드 실패",
+    "load_error_desc": "유즈케이스를 불러오는 중 오류가 발생했습니다."
+  },
   "buttons": {
     "save": "저장",
     "saving": "저장 중...",
@@ -184,7 +215,9 @@
     "send": "전송",
     "back": "대시보드로 돌아가기",
     "ok": "확인",
-    "delete": "삭제"
+    "delete": "삭제",
+    "add": "추가",
+    "adding": "추가 중..."
   },
   "ai": {
     "modal_title": "🤖 AI와의 대화로 PRD 작성",
