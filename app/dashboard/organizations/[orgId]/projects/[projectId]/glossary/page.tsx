@@ -180,7 +180,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const [glossariesLoading, setGlossariesLoading] = useState(false)
 
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState<'name' | 'updated_at' | 'updated_at_old' | 'sequence'>('updated_at')
+  const [sortBy, setSortBy] = useState<'name' | 'updated_at' | 'updated_at_old' | 'sequence'>('sequence')
   
   // 용어 추가 모달 상태
   const [showGlossaryModal, setShowGlossaryModal] = useState(false)
@@ -282,12 +282,11 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
         .select(`
           *,
           glossary_links (
-            url,
-            type
+            url
           )
         `)
         .eq('project_id', projectId)
-        .order('updated_at', { ascending: false })
+        .order('sequence', { ascending: true })
 
       if (error) throw error
 
@@ -357,8 +356,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       if (validUrls.length > 0) {
         const urlData = validUrls.map(url => ({
           glossary_id: glossary.id,
-          url: url.trim(),
-          type: 'github' as const
+          url: url.trim()
         }))
 
         const { error: linksError } = await supabase
@@ -371,7 +369,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       // 용어 목록에 새 용어 추가 (GitHub 링크 포함)
       const glossaryWithLinks = {
         ...glossary,
-        glossary_links: validUrls.map(url => ({ url, type: 'github' }))
+        glossary_links: validUrls.map(url => ({ url }))
       }
       setGlossaries(prev => [glossaryWithLinks, ...prev])
       
@@ -608,8 +606,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       if (validUrls.length > 0) {
         const urlData = validUrls.map(url => ({
           glossary_id: editingGlossary.id,
-          url: url.trim(),
-          type: 'github' as const
+          url: url.trim()
         }))
 
         const { error: insertLinksError } = await supabase
@@ -622,7 +619,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       // 4. 목록에서 업데이트
       const glossaryWithLinks = {
         ...updatedGlossary,
-        glossary_links: validUrls.map(url => ({ url, type: 'github' }))
+        glossary_links: validUrls.map(url => ({ url }))
       }
 
       setGlossaries(prev => prev.map(g => 
@@ -824,7 +821,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                               <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as 'name' | 'updated_at' | 'updated_at_old' | 'sequence')}
-                  className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full p-2 pr-8 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
                   <option value="updated_at">{t('glossary.sort_newest')}</option>
                   <option value="updated_at_old">{t('glossary.sort_oldest')}</option>
