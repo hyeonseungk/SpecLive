@@ -86,6 +86,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [policyCategory, setPolicyCategory] = useState('')
   const [contextLinks, setContextLinks] = useState<string[]>([''])
   const [generalLinks, setGeneralLinks] = useState<string[]>([''])
+  const [selectedGlossaryIds, setSelectedGlossaryIds] = useState<string[]>([])
+  const [glossarySearchTerm, setGlossarySearchTerm] = useState('')
   const [policySaving, setPolicySaving] = useState(false)
   
   // 기능과 정책 관련 상태
@@ -94,6 +96,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [featurePolicies, setFeaturePolicies] = useState<FeaturePolicy[]>([])
   const [featuresLoading, setFeaturesLoading] = useState(false)
   const [policiesLoading, setPoliciesLoading] = useState(false)
+  
+  // 용어 관련 상태
+  const [glossaries, setGlossaries] = useState<Tables<'glossaries'>[]>([])
+  const [glossariesLoading, setGlossariesLoading] = useState(false)
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -157,8 +163,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setMembership(membershipData)
 
-      // 액터 로드
+      // 액터와 용어 로드
       await loadActorsForProject(params.projectId)
+      await loadGlossariesForProject(params.projectId)
 
       setLoading(false)
     }
@@ -344,6 +351,27 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const handleFeatureSelect = async (feature: Feature) => {
     setSelectedFeature(feature)
     await loadPoliciesForFeature(feature.id)
+  }
+
+  // 용어 로드 함수
+  const loadGlossariesForProject = async (projectId: string) => {
+    setGlossariesLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('glossaries')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('name', { ascending: true })
+
+      if (error) throw error
+
+      setGlossaries(data || [])
+    } catch (error) {
+      console.error('Error loading glossaries:', error)
+      showError('용어 로드 실패', '용어를 불러오는 중 오류가 발생했습니다.')
+    } finally {
+      setGlossariesLoading(false)
+    }
   }
 
   // 액터 추가 함수
@@ -568,6 +596,26 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     }
   }
 
+  // 용어 선택 관리 함수들
+  const handleGlossaryToggle = (glossaryId: string) => {
+    setSelectedGlossaryIds(prev => 
+      prev.includes(glossaryId) 
+        ? prev.filter(id => id !== glossaryId)
+        : [...prev, glossaryId]
+    )
+  }
+
+  // 용어 검색 필터링
+  const filteredGlossaries = glossaries.filter(glossary => {
+    if (!glossarySearchTerm.trim()) return true
+    
+    const searchTerm = glossarySearchTerm.toLowerCase().trim()
+    const nameMatches = glossary.name.toLowerCase().includes(searchTerm)
+    const definitionMatches = glossary.definition.toLowerCase().includes(searchTerm)
+    
+    return nameMatches || definitionMatches
+  })
+
   // 정책 추가 함수
   const addPolicy = async () => {
     if (!selectedFeature || !user) return
@@ -635,15 +683,31 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         if (generalLinksError) throw generalLinksError
       }
 
-      // 5. 정책 목록 새로고침
+      // 5. 용어 연결 추가
+      if (selectedGlossaryIds.length > 0) {
+        const { error: policyTermsError } = await supabase
+          .from('policy_terms')
+          .insert(
+            selectedGlossaryIds.map(glossaryId => ({
+              policy_id: policy.id,
+              glossary_id: glossaryId
+            }))
+          )
+
+        if (policyTermsError) throw policyTermsError
+      }
+
+      // 6. 정책 목록 새로고침
       await loadPoliciesForFeature(selectedFeature.id)
 
-      // 6. 모달 초기화 및 닫기
+      // 7. 모달 초기화 및 닫기
       setPolicyTitle('')
       setPolicyBody('')
       setPolicyCategory('')
       setContextLinks([''])
       setGeneralLinks([''])
+      setSelectedGlossaryIds([])
+      setGlossarySearchTerm('')
       setShowPolicyModal(false)
       
       showSimpleSuccess('정책이 성공적으로 추가되었습니다.')
@@ -1392,6 +1456,93 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     + 일반 링크 추가
                   </Button>
                 </div>
+
+                {/* 관련 용어 선택 */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    관련 용어들
+                    <span className="text-xs text-gray-500 font-normal ml-1">
+                      (이 정책과 연관된 용어를 선택하세요)
+                    </span>
+                  </label>
+                  {glossariesLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      <span className="ml-2 text-sm text-gray-500">용어 로딩 중...</span>
+                    </div>
+                  ) : glossaries.length === 0 ? (
+                    <p className="text-sm text-gray-500 py-2">
+                      프로젝트에 용어가 아직 없습니다. 
+                      <br />
+                      <span className="text-xs">용어 관리 페이지에서 먼저 용어를 추가해보세요.</span>
+                    </p>
+                  ) : (
+                    <>
+                      {/* 용어 검색창 */}
+                      <div className="mb-3">
+                        <input
+                          type="text"
+                          value={glossarySearchTerm}
+                          onChange={(e) => setGlossarySearchTerm(e.target.value)}
+                          placeholder="용어 이름이나 정의로 검색..."
+                          className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          disabled={policySaving}
+                        />
+                        {glossarySearchTerm && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            "{glossarySearchTerm}" 검색 결과: {filteredGlossaries.length}개
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 용어 목록 */}
+                      <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50">
+                        {filteredGlossaries.length === 0 ? (
+                          <div className="text-center py-4">
+                            <p className="text-sm text-gray-500">
+                              {glossarySearchTerm ? '검색 결과가 없습니다' : '용어가 없습니다'}
+                            </p>
+                            {glossarySearchTerm && (
+                              <button
+                                onClick={() => setGlossarySearchTerm('')}
+                                className="text-xs text-blue-600 hover:text-blue-700 mt-1"
+                                disabled={policySaving}
+                              >
+                                검색어 초기화
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          filteredGlossaries.map(glossary => (
+                            <label
+                              key={glossary.id}
+                              className="flex items-start gap-2 p-2 hover:bg-white rounded cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedGlossaryIds.includes(glossary.id)}
+                                onChange={() => handleGlossaryToggle(glossary.id)}
+                                disabled={policySaving}
+                                className="mt-0.5 flex-shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-sm font-medium block">{glossary.name}</span>
+                                <span className="text-xs text-gray-600 block truncate">
+                                  {glossary.definition}
+                                </span>
+                              </div>
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    </>
+                  )}
+                  {selectedGlossaryIds.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {selectedGlossaryIds.length}개 용어 선택됨
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
@@ -1404,6 +1555,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     setPolicyCategory('')
                     setContextLinks([''])
                     setGeneralLinks([''])
+                    setSelectedGlossaryIds([])
+                    setGlossarySearchTerm('')
                   }}
                   disabled={policySaving}
                 >
