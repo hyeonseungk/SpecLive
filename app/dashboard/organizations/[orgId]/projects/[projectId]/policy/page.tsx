@@ -75,12 +75,14 @@ function SortableFeatureCard({ feature, onSelect, onEdit, onDelete, isSelected, 
         }`}
         onClick={() => onSelect(feature)}
       >
-        {/* 드래그 핸들 (호버 시에만 표시, 관리자만) */}
-        {isHovered && membership?.role === 'admin' && (
+        {/* 드래그 핸들 (항상 표시, 호버 시 진하게, 관리자만) */}
+        {membership?.role === 'admin' && (
           <div
             {...attributes}
             {...listeners}
-            className="absolute left-1 top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+            className={`absolute left-1 top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition-opacity ${
+              isHovered ? 'opacity-100' : 'opacity-30'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-0.5">
@@ -92,7 +94,7 @@ function SortableFeatureCard({ feature, onSelect, onEdit, onDelete, isSelected, 
         )}
 
         <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-2 flex-1 ${isHovered && membership?.role === 'admin' ? 'ml-4' : ''}`}>
+          <div className={`flex items-center gap-2 flex-1 ${membership?.role === 'admin' ? 'ml-4' : ''}`}>
             {/* 시퀀스 번호 */}
             {feature.sequence && (
               <div className="w-4 h-4 bg-gray-400 text-white rounded-full flex items-center justify-center text-[10px] font-medium flex-shrink-0">
@@ -173,12 +175,14 @@ function SortablePolicyCard({ policy, onEdit, membership }: SortablePolicyCardPr
         className={`p-4 flex-shrink-0 relative ${membership?.role === 'admin' ? 'cursor-pointer hover:bg-gray-50' : ''} transition-colors`}
         onClick={() => membership?.role === 'admin' && onEdit(policy)}
       >
-        {/* 드래그 핸들 (호버 시에만 표시) */}
-        {isHovered && membership?.role === 'admin' && (
+        {/* 드래그 핸들 (항상 표시, 호버 시 진하게, 관리자만) */}
+        {membership?.role === 'admin' && (
           <div
             {...attributes}
             {...listeners}
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+            className={`absolute left-3 top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition-opacity ${
+              isHovered ? 'opacity-100' : 'opacity-30'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-0.5">
@@ -197,7 +201,7 @@ function SortablePolicyCard({ policy, onEdit, membership }: SortablePolicyCardPr
         )}
 
         {/* 정책 내용 */}
-        <div className={`mb-3 pr-8 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+        <div className={`mb-3 pr-8 ${membership?.role === 'admin' ? 'ml-8' : ''}`}>
           <p className="text-2xl font-medium text-black whitespace-pre-line">
             {policy.contents}
           </p>
@@ -205,7 +209,7 @@ function SortablePolicyCard({ policy, onEdit, membership }: SortablePolicyCardPr
 
         {/* 연결된 기능들 */}
         {policy.connected_features && policy.connected_features.length > 0 && (
-          <div className={`mb-3 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+          <div className={`mb-3 ${membership?.role === 'admin' ? 'ml-8' : ''}`}>
             <h5 className="text-xs font-medium text-gray-700 mb-1">연결된 기능</h5>
             <div className="space-y-1">
               {policy.connected_features.map((feature) => (
@@ -222,7 +226,7 @@ function SortablePolicyCard({ policy, onEdit, membership }: SortablePolicyCardPr
 
         {/* 연결된 용어들 */}
         {policy.policy_terms && policy.policy_terms.length > 0 && (
-          <div className={`mb-3 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+          <div className={`mb-3 ${membership?.role === 'admin' ? 'ml-8' : ''}`}>
             <h5 className="text-xs font-medium text-gray-700 mb-1">연결된 용어</h5>
             <div className="flex flex-wrap gap-1">
               {policy.policy_terms.map((term, index) => (
@@ -239,7 +243,7 @@ function SortablePolicyCard({ policy, onEdit, membership }: SortablePolicyCardPr
 
         {/* 컨텍스트 링크들 */}
         {policy.policy_links && policy.policy_links.filter(link => link.type === 'context').length > 0 && (
-          <div className={`mb-3 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+          <div className={`mb-3 ${membership?.role === 'admin' ? 'ml-8' : ''}`}>
             <h5 className="text-xs font-medium text-gray-700 mb-1">컨텍스트 링크</h5>
             <div className="flex flex-wrap gap-1">
               {policy.policy_links
@@ -269,7 +273,7 @@ function SortablePolicyCard({ policy, onEdit, membership }: SortablePolicyCardPr
 
         {/* 일반 링크들 */}
         {policy.policy_links && policy.policy_links.filter(link => link.type === 'general').length > 0 && (
-          <div className={`mb-3 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+          <div className={`mb-3 ${membership?.role === 'admin' ? 'ml-8' : ''}`}>
             <h5 className="text-xs font-medium text-gray-700 mb-1">일반 링크</h5>
             <div className="flex flex-wrap gap-1">
               {policy.policy_links
@@ -298,7 +302,7 @@ function SortablePolicyCard({ policy, onEdit, membership }: SortablePolicyCardPr
         )}
 
         {/* 메타 정보 */}
-        <div className={`pt-2 border-t border-gray-200 ${isHovered && membership?.role === 'admin' ? 'ml-8' : ''}`}>
+        <div className={`pt-2 border-t border-gray-200 ${membership?.role === 'admin' ? 'ml-8' : ''}`}>
           <div className="flex justify-end text-xs text-gray-500">
             <span className="flex-1"></span>
             <span className="text-right">

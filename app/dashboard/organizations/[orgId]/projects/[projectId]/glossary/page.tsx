@@ -40,9 +40,10 @@ interface SortableGlossaryCardProps {
   showSequence: boolean
   t: any
   locale: string
+  membership: Tables<'memberships'> | null
 }
 
-function SortableGlossaryCard({ glossary, onEdit, onCopyUrl, showSequence, t, locale }: SortableGlossaryCardProps) {
+function SortableGlossaryCard({ glossary, onEdit, onCopyUrl, showSequence, t, locale, membership }: SortableGlossaryCardProps) {
   const {
     attributes,
     listeners,
@@ -69,18 +70,17 @@ function SortableGlossaryCard({ glossary, onEdit, onCopyUrl, showSequence, t, lo
       onMouseLeave={() => setIsHovered(false)}
     >
       <Card className="cursor-pointer hover:shadow-md transition-shadow relative group">
-        {/* 드래그 핸들 (시퀀스 정렬일 때만, 호버 시에만 표시) */}
-        {showSequence && isHovered && (
+        {/* 드래그 핸들 (시퀀스 정렬일 때만, 항상 표시, 호버 시 진하게, 관리자만) */}
+        {showSequence && membership?.role === 'admin' && (
           <div
             {...attributes}
             {...listeners}
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+            className={`absolute left-3 top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition-opacity ${
+              isHovered ? 'opacity-100' : 'opacity-30'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-0.5">
-              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
               <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
               <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
               <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
@@ -119,7 +119,7 @@ function SortableGlossaryCard({ glossary, onEdit, onCopyUrl, showSequence, t, lo
           </div>
         )}
 
-        <div onClick={() => onEdit(glossary)} className={showSequence && isHovered ? 'ml-8' : ''}>
+        <div onClick={() => onEdit(glossary)} className={showSequence && membership?.role === 'admin' ? 'ml-8' : ''}>
           <CardHeader>
             <CardTitle className="text-3xl">{glossary.name}</CardTitle>
           </CardHeader>
@@ -1031,6 +1031,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                     showSequence={sortBy === 'sequence'}
                     t={t}
                     locale={locale}
+                    membership={membership}
                   />
                 ))}
               </div>
