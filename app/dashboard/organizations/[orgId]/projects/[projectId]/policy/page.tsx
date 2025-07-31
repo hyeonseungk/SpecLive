@@ -67,6 +67,17 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [showFeatureModal, setShowFeatureModal] = useState(false)
   const [featureName, setFeatureName] = useState('')
   const [featureSaving, setFeatureSaving] = useState(false)
+
+  // 기능 편집 모달 상태
+  const [showEditFeatureModal, setShowEditFeatureModal] = useState(false)
+  const [editingFeature, setEditingFeature] = useState<Feature | null>(null)
+  const [editFeatureName, setEditFeatureName] = useState('')
+  const [editFeatureSaving, setEditFeatureSaving] = useState(false)
+
+  // 기능 삭제 확인 모달 상태
+  const [showDeleteFeatureModal, setShowDeleteFeatureModal] = useState(false)
+  const [deletingFeature, setDeletingFeature] = useState<Feature | null>(null)
+  const [featureDeleting, setFeatureDeleting] = useState(false)
   
   // 기능과 정책 관련 상태
   const [features, setFeatures] = useState<Feature[]>([])
@@ -240,7 +251,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         .from('features')
         .select('*')
         .eq('usecase_id', usecaseId)
-        .order('created_at', { ascending: true })
+        .order('sequence', { ascending: true })
 
       if (error) throw error
 
@@ -420,19 +431,34 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
     setFeatureSaving(true)
     try {
+      // 1. 현재 유즈케이스의 최대 sequence 값 조회
+      const { data: maxSequenceData, error: maxSequenceError } = await supabase
+        .from('features')
+        .select('sequence')
+        .eq('usecase_id', selectedUsecase.id)
+        .order('sequence', { ascending: false })
+        .limit(1)
+
+      if (maxSequenceError) throw maxSequenceError
+
+      // 다음 sequence 값 계산 (최대값 + 1부터 시작)
+      const nextSequence = (maxSequenceData?.[0]?.sequence || 0) + 1
+
+      // 2. 기능 추가 (sequence 값 포함)
       const { data: feature, error } = await supabase
         .from('features')
         .insert({
           usecase_id: selectedUsecase.id,
           name: featureName.trim(),
-          author_id: user.id
+          author_id: user.id,
+          sequence: nextSequence
         })
         .select()
         .single()
 
       if (error) throw error
 
-      setFeatures(prev => [...prev, feature])
+      setFeatures(prev => [...prev, feature].sort((a, b) => a.sequence - b.sequence))
       setFeatureName('')
       setShowFeatureModal(false)
       
@@ -448,6 +474,145 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       showError('기능 추가 실패', '기능을 추가하는 중 오류가 발생했습니다.')
     } finally {
       setFeatureSaving(false)
+    }
+  }
+
+  // 기능 편집 모달 열기
+  const handleEditFeature = (feature: Feature) => {
+    setEditingFeature(feature)
+    setEditFeatureName(feature.name)
+    setShowEditFeatureModal(true)
+  }
+
+  // 기능 편집 함수
+  const updateFeature = async () => {
+    if (!editingFeature || !user) return
+    if (!editFeatureName.trim()) {
+      showSimpleError('기능 이름을 입력해주세요.')
+      return
+    }
+
+    setEditFeatureSaving(true)
+    try {
+      const { data: updatedFeature, error } = await supabase
+        .from('features')
+        .update({
+          name: editFeatureName.trim()
+        })
+        .eq('id', editingFeature.id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // 목록에서 업데이트
+      setFeatures(prev => prev.map(f => 
+        f.id === editingFeature.id ? updatedFeature : f
+      ))
+
+      // 현재 선택된 기능이라면 업데이트
+      if (selectedFeature?.id === editingFeature.id) {
+        setSelectedFeature(updatedFeature)
+      }
+
+      setShowEditFeatureModal(false)
+      setEditingFeature(null)
+      setEditFeatureName('')
+      
+      showSimpleSuccess('기능이 성공적으로 수정되었습니다.')
+    } catch (error) {
+      console.error('Error updating feature:', error)
+      showError('기능 수정 실패', '기능을 수정하는 중 오류가 발생했습니다.')
+    } finally {
+      setEditFeatureSaving(false)
+    }
+  }
+
+  // 기능 삭제 확인 모달 열기
+  const handleDeleteFeature = (feature: Feature) => {
+    setDeletingFeature(feature)
+    setShowDeleteFeatureModal(true)
+  }
+
+  // 기능 삭제 함수
+  const deleteFeature = async () => {
+    if (!deletingFeature || !user) return
+
+    setFeatureDeleting(true)
+    try {
+      // 1. 삭제할 기능의 sequence 값 저장
+      const deletedSequence = deletingFeature.sequence
+
+      // 2. 기능에 연결된 정책 관계 삭제 (feature_policies 테이블)
+      const { error: deletePoliciesError } = await supabase
+        .from('feature_policies')
+        .delete()
+        .eq('feature_id', deletingFeature.id)
+
+      if (deletePoliciesError) throw deletePoliciesError
+
+      // 3. 기능 자체 삭제
+      const { error: deleteFeatureError } = await supabase
+        .from('features')
+        .delete()
+        .eq('id', deletingFeature.id)
+
+      if (deleteFeatureError) throw deleteFeatureError
+
+      // 4. 삭제된 기능보다 큰 sequence를 가진 기능들의 sequence를 -1씩 조정
+      const { data: higherSequenceFeatures, error: updateError } = await supabase
+        .from('features')
+        .select('id, sequence')
+        .eq('usecase_id', selectedUsecase!.id)
+        .gt('sequence', deletedSequence)
+        .order('sequence', { ascending: true })
+
+      if (updateError) throw updateError
+
+      // 5. sequence 업데이트 (배치 처리)
+      if (higherSequenceFeatures && higherSequenceFeatures.length > 0) {
+        const updatePromises = higherSequenceFeatures.map(feature => 
+          supabase
+            .from('features')
+            .update({ sequence: feature.sequence - 1 })
+            .eq('id', feature.id)
+        )
+
+        await Promise.all(updatePromises)
+      }
+
+      // 6. 목록에서 제거하고 sequence 재정렬
+      const updatedFeatures = features
+        .filter(f => f.id !== deletingFeature.id)
+        .map(f => ({
+          ...f,
+          sequence: f.sequence > deletedSequence ? f.sequence - 1 : f.sequence
+        }))
+
+      setFeatures(updatedFeatures)
+
+      // 7. 현재 선택된 기능이 삭제되었다면 다른 기능 선택
+      if (selectedFeature?.id === deletingFeature.id) {
+        if (updatedFeatures.length > 0) {
+          // 첫 번째 기능 선택
+          setSelectedFeature(updatedFeatures[0])
+          await loadPoliciesForFeature(updatedFeatures[0].id)
+        } else {
+          // 기능이 없으면 선택 해제
+          setSelectedFeature(null)
+          setFeaturePolicies([])
+        }
+      }
+
+      setShowDeleteFeatureModal(false)
+      setDeletingFeature(null)
+      
+      showSimpleSuccess('기능이 성공적으로 삭제되었습니다.')
+    } catch (error) {
+      console.error('Error deleting feature:', error)
+      showError('기능 삭제 실패', '기능을 삭제하는 중 오류가 발생했습니다.')
+    } finally {
+      setFeatureDeleting(false)
     }
   }
 
@@ -641,14 +806,46 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       {features.map(feature => (
                         <div
                           key={feature.id}
-                          onClick={() => handleFeatureSelect(feature)}
-                          className={`p-2 rounded cursor-pointer text-sm transition-colors ${
+                          className={`relative group p-2 rounded cursor-pointer text-sm transition-colors ${
                             selectedFeature?.id === feature.id
                               ? 'bg-primary text-primary-foreground'
                               : 'bg-white hover:bg-gray-100'
                           }`}
+                          onClick={() => handleFeatureSelect(feature)}
                         >
-                          {feature.name}
+                          <div className="flex items-center justify-between">
+                            <span className="flex-1">{feature.name}</span>
+                            
+                            {/* 편집/삭제 버튼 (호버 시에만 표시) */}
+                            {membership?.role === 'admin' && (
+                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleEditFeature(feature)
+                                  }}
+                                  className="p-1 hover:bg-gray-200 rounded transition-colors"
+                                  title="기능 편집"
+                                >
+                                  <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleDeleteFeature(feature)
+                                  }}
+                                  className="p-1 hover:bg-red-100 rounded transition-colors"
+                                  title="기능 삭제"
+                                >
+                                  <svg className="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -846,6 +1043,87 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   disabled={featureSaving || !featureName.trim()}
                 >
                   {featureSaving ? '추가 중...' : '추가'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 기능 편집 모달 */}
+        {showEditFeatureModal && editingFeature && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <h3 className="text-lg font-semibold mb-4">기능 편집</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    기능 이름
+                    <span className="text-xs text-gray-500 font-normal">
+                      ({selectedUsecase?.name} 유즈케이스)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editFeatureName}
+                    onChange={(e) => setEditFeatureName(e.target.value)}
+                    placeholder="기능 이름을 입력하세요"
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    disabled={editFeatureSaving}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowEditFeatureModal(false)
+                    setEditingFeature(null)
+                    setEditFeatureName('')
+                  }}
+                  disabled={editFeatureSaving}
+                >
+                  취소
+                </Button>
+                <Button 
+                  onClick={updateFeature}
+                  disabled={editFeatureSaving || !editFeatureName.trim()}
+                >
+                  {editFeatureSaving ? '수정 중...' : '수정'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 기능 삭제 확인 모달 */}
+        {showDeleteFeatureModal && deletingFeature && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+              <h3 className="text-lg font-semibold mb-4">기능 삭제</h3>
+              <p className="text-muted-foreground mb-6">
+                정말로 "{deletingFeature.name}" 기능을 삭제하시겠어요?
+                <br />
+                <span className="text-sm text-red-600">삭제된 기능은 복구할 수 없습니다.<br/>기능 내의 정책들도 모두 삭제됩니다.</span>
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowDeleteFeatureModal(false)
+                    setDeletingFeature(null)
+                  }}
+                  disabled={featureDeleting}
+                >
+                  취소
+                </Button>
+                <Button 
+                  variant="destructive"
+                  onClick={deleteFeature}
+                  disabled={featureDeleting}
+                >
+                  {featureDeleting ? '삭제 중...' : '삭제'}
                 </Button>
               </div>
             </div>
