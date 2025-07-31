@@ -931,7 +931,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium">{t('glossary.github_label')}</label>
+                  <label className="block text-sm font-medium">{t('glossary.related_url_label')}</label>
                   <button
                     type="button"
                     onClick={addGithubUrl}
@@ -941,6 +941,9 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                     {t('glossary.add_url')}
                   </button>
                 </div>
+                <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
+                  {t('glossary.related_url_desc')}
+                </div>
                 <div className="space-y-2">
                   {glossaryGithubUrls.map((url, index) => (
                     <div key={index} className="flex gap-2">
@@ -948,7 +951,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                         type="url"
                         value={url}
                         onChange={(e) => updateGithubUrl(index, e.target.value)}
-                        placeholder={t('glossary.github_placeholder')}
+                        placeholder={t('glossary.related_url_placeholder')}
                         className="flex-1 p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         disabled={glossarySaving}
                       />
@@ -1032,7 +1035,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium">{t('glossary.github_label')}</label>
+                  <label className="block text-sm font-medium">{t('glossary.related_url_label')}</label>
                   <button
                     type="button"
                     onClick={addEditGithubUrl}
@@ -1042,6 +1045,9 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                     {t('glossary.add_url')}
                   </button>
                 </div>
+                <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
+                  {t('glossary.related_url_desc')}
+                </div>
                 <div className="space-y-2">
                   {editGithubUrls.map((url, index) => (
                     <div key={index} className="flex gap-2">
@@ -1049,7 +1055,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                         type="url"
                         value={url}
                         onChange={(e) => updateEditGithubUrl(index, e.target.value)}
-                        placeholder={t('glossary.github_placeholder')}
+                        placeholder={t('glossary.related_url_placeholder')}
                         className="flex-1 p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         disabled={editSaving}
                       />
