@@ -264,7 +264,7 @@ export default function PrdPage({ params }: PrdPageProps) {
                     </div>
                   )}
                   
-                  {prd && (
+                  {prd && prd.updated_at && (
                     <div className="mt-4 text-sm text-muted-foreground text-right">
                       {t('prd.last_updated')}: {new Date(prd.updated_at).toLocaleString(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </div>
