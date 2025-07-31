@@ -385,6 +385,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [selectedActor, setSelectedActor] = useState<Actor | null>(null)
   const [selectedUsecase, setSelectedUsecase] = useState<Usecase | null>(null)
   const [actorsLoading, setActorsLoading] = useState(false)
+  const [actorDropdownOpen, setActorDropdownOpen] = useState(false)
+  const [usecaseDropdownOpen, setUsecaseDropdownOpen] = useState(false)
   
   // 정책 관련 상태 (제거됨)
 
@@ -393,10 +395,32 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [actorName, setActorName] = useState('')
   const [actorSaving, setActorSaving] = useState(false)
 
+  // 액터 편집 모달 상태
+  const [showEditActorModal, setShowEditActorModal] = useState(false)
+  const [editingActor, setEditingActor] = useState<Actor | null>(null)
+  const [editActorName, setEditActorName] = useState('')
+  const [editActorSaving, setEditActorSaving] = useState(false)
+
+  // 액터 삭제 확인 모달 상태
+  const [showDeleteActorModal, setShowDeleteActorModal] = useState(false)
+  const [deletingActor, setDeletingActor] = useState<Actor | null>(null)
+  const [actorDeleting, setActorDeleting] = useState(false)
+
   // 유즈케이스 추가 모달 상태
   const [showUsecaseModal, setShowUsecaseModal] = useState(false)
   const [usecaseName, setUsecaseName] = useState('')
   const [usecaseSaving, setUsecaseSaving] = useState(false)
+
+  // 유즈케이스 편집 모달 상태
+  const [showEditUsecaseModal, setShowEditUsecaseModal] = useState(false)
+  const [editingUsecase, setEditingUsecase] = useState<Usecase | null>(null)
+  const [editUsecaseName, setEditUsecaseName] = useState('')
+  const [editUsecaseSaving, setEditUsecaseSaving] = useState(false)
+
+  // 유즈케이스 삭제 모달 상태
+  const [showDeleteUsecaseModal, setShowDeleteUsecaseModal] = useState(false)
+  const [deletingUsecase, setDeletingUsecase] = useState<Usecase | null>(null)
+  const [usecaseDeleting, setUsecaseDeleting] = useState(false)
 
   // 기능 추가 모달 상태
   const [showFeatureModal, setShowFeatureModal] = useState(false)
@@ -475,6 +499,37 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
+
+  // 액터 편집 모달이 열릴 때 input에 포커스
+  useEffect(() => {
+    if (showEditActorModal) {
+      // requestAnimationFrame을 두 번 사용해서 DOM 렌더링이 완전히 끝난 후 실행
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const input = document.querySelector('#edit-actor-name-input') as HTMLInputElement
+          if (input) {
+            input.focus()
+            input.select()
+          }
+        })
+      })
+    }
+  }, [showEditActorModal])
+
+  // 유즈케이스 편집 모달 포커스
+  useEffect(() => {
+    if (showEditUsecaseModal) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const input = document.querySelector('#edit-usecase-name-input') as HTMLInputElement
+          if (input) {
+            input.focus()
+            input.select()
+          }
+        })
+      })
+    }
+  }, [showEditUsecaseModal])
 
   // URL query parameter 업데이트 함수
   const updateURL = (actorId?: string, usecaseId?: string) => {
@@ -887,6 +942,266 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       showError(t('actor.add_error_title'), t('actor.add_error_desc'))
     } finally {
       setActorSaving(false)
+    }
+  }
+
+  // 액터 편집 함수
+  const handleEditActor = (actor: Actor) => {
+    setActorDropdownOpen(false) // 드롭다운 닫기
+    setEditingActor(actor)
+    setEditActorName(actor.name)
+    setShowEditActorModal(true)
+  }
+
+  const updateActor = async () => {
+    if (!editingActor || !user) return
+    if (!editActorName.trim()) {
+      showSimpleError('액터 이름을 입력해주세요.')
+      return
+    }
+
+    setEditActorSaving(true)
+    try {
+      const { data: updatedActor, error } = await supabase
+        .from('actors')
+        .update({
+          name: editActorName.trim()
+        })
+        .eq('id', editingActor.id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // 액터 목록 업데이트
+      setActors(prev => prev.map(actor => 
+        actor.id === editingActor.id ? updatedActor : actor
+      ))
+
+      // 선택된 액터가 편집된 액터라면 업데이트
+      if (selectedActor?.id === editingActor.id) {
+        setSelectedActor(updatedActor)
+      }
+
+      setShowEditActorModal(false)
+      setEditingActor(null)
+      setEditActorName('')
+      
+      showSimpleSuccess('액터가 성공적으로 수정되었습니다.')
+    } catch (error) {
+      console.error('Error updating actor:', error)
+      showError('액터 수정 실패', '액터를 수정하는 중 오류가 발생했습니다.')
+    } finally {
+      setEditActorSaving(false)
+    }
+  }
+
+  // 액터 삭제 함수
+  const handleDeleteActor = (actor: Actor) => {
+    setActorDropdownOpen(false) // 드롭다운 닫기
+    setDeletingActor(actor)
+    setShowDeleteActorModal(true)
+  }
+
+  const deleteActor = async () => {
+    if (!deletingActor || !user) return
+
+    setActorDeleting(true)
+    try {
+      // 1. 액터에 속한 모든 유즈케이스의 기능들의 정책들을 먼저 삭제
+      const { data: usecasesData, error: usecasesError } = await supabase
+        .from('usecases')
+        .select('id')
+        .eq('actor_id', deletingActor.id)
+
+      if (usecasesError) throw usecasesError
+
+      if (usecasesData && usecasesData.length > 0) {
+        const usecaseIds = usecasesData.map(uc => uc.id)
+
+        // 기능들 조회
+        const { data: featuresData, error: featuresError } = await supabase
+          .from('features')
+          .select('id')
+          .in('usecase_id', usecaseIds)
+
+        if (featuresError) throw featuresError
+
+        if (featuresData && featuresData.length > 0) {
+          const featureIds = featuresData.map(f => f.id)
+
+          // 정책-용어 관계 삭제
+          const { error: policyTermsError } = await supabase
+            .from('policy_terms')
+            .delete()
+            .in('policy_id', featureIds)
+
+          if (policyTermsError) throw policyTermsError
+
+          // 정책 링크 삭제
+          const { error: policyLinksError } = await supabase
+            .from('policy_links')
+            .delete()
+            .in('policy_id', featureIds)
+
+          if (policyLinksError) throw policyLinksError
+
+          // 정책들 삭제
+          const { error: policiesError } = await supabase
+            .from('policies')
+            .delete()
+            .in('feature_id', featureIds)
+
+          if (policiesError) throw policiesError
+
+          // 기능들 삭제
+          const { error: featuresDeleteError } = await supabase
+            .from('features')
+            .delete()
+            .in('id', featureIds)
+
+          if (featuresDeleteError) throw featuresDeleteError
+        }
+
+        // 유즈케이스들 삭제
+        const { error: usecasesDeleteError } = await supabase
+          .from('usecases')
+          .delete()
+          .in('id', usecaseIds)
+
+        if (usecasesDeleteError) throw usecasesDeleteError
+      }
+
+      // 2. 액터 삭제
+      const { error: actorDeleteError } = await supabase
+        .from('actors')
+        .delete()
+        .eq('id', deletingActor.id)
+
+      if (actorDeleteError) throw actorDeleteError
+
+      // 3. 상태 업데이트
+      setActors(prev => prev.filter(actor => actor.id !== deletingActor.id))
+
+      // 삭제된 액터가 선택된 액터라면 선택 해제
+      if (selectedActor?.id === deletingActor.id) {
+        setSelectedActor(null)
+        setSelectedUsecase(null)
+        setUsecases([])
+        setFeatures([])
+        setSelectedFeature(null)
+        setFeaturePolicies([])
+        updateURL()
+      }
+
+      setShowDeleteActorModal(false)
+      setDeletingActor(null)
+      
+      showSimpleSuccess('액터가 성공적으로 삭제되었습니다.')
+    } catch (error) {
+      console.error('Error deleting actor:', error)
+      showError('액터 삭제 실패', '액터를 삭제하는 중 오류가 발생했습니다.')
+    } finally {
+      setActorDeleting(false)
+    }
+  }
+
+// 유즈케이스 편집 함수
+  const handleEditUsecase = (usecase: Usecase) => {
+    setUsecaseDropdownOpen(false)
+    setEditingUsecase(usecase)
+    setEditUsecaseName(usecase.name)
+    setShowEditUsecaseModal(true)
+  }
+
+  const updateUsecase = async () => {
+    if (!editingUsecase || !user) return
+    if (!editUsecaseName.trim()) {
+      showSimpleError('유즈케이스 이름을 입력해주세요.')
+      return
+    }
+
+    setEditUsecaseSaving(true)
+    try {
+      const { data: updatedUsecase, error } = await supabase
+        .from('usecases')
+        .update({ name: editUsecaseName.trim() })
+        .eq('id', editingUsecase.id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setUsecases(prev => prev.map(uc => uc.id === editingUsecase.id ? updatedUsecase : uc))
+      if (selectedUsecase?.id === editingUsecase.id) {
+        setSelectedUsecase(updatedUsecase)
+      }
+
+      setShowEditUsecaseModal(false)
+      setEditingUsecase(null)
+      setEditUsecaseName('')
+      showSimpleSuccess('유즈케이스가 성공적으로 수정되었습니다.')
+    } catch (error) {
+      console.error('Error updating usecase:', error)
+      showError('유즈케이스 수정 실패', '유즈케이스를 수정하는 중 오류가 발생했습니다.')
+    } finally {
+      setEditUsecaseSaving(false)
+    }
+  }
+
+
+  // 유즈케이스 삭제 함수
+  const handleDeleteUsecase = (usecase: Usecase) => {
+    setUsecaseDropdownOpen(false)
+    setDeletingUsecase(usecase)
+    setShowDeleteUsecaseModal(true)
+  }
+
+  const deleteUsecase = async () => {
+    if (!deletingUsecase || !user) return
+    setUsecaseDeleting(true)
+    try {
+      // 기능들 조회
+      const { data: featuresData, error: featuresError } = await supabase
+        .from('features')
+        .select('id')
+        .eq('usecase_id', deletingUsecase.id)
+
+      if (featuresError) throw featuresError
+
+      if (featuresData && featuresData.length > 0) {
+        const featureIds = featuresData.map(f => f.id)
+
+        // 정책-용어 관계 삭제
+        await supabase.from('policy_terms').delete().in('policy_id', featureIds)
+        await supabase.from('policy_links').delete().in('policy_id', featureIds)
+        await supabase.from('policies').delete().in('feature_id', featureIds)
+        await supabase.from('feature_policies').delete().in('feature_id', featureIds)
+        // 기능 삭제
+        await supabase.from('features').delete().in('id', featureIds)
+      }
+
+      // 유즈케이스 삭제
+      await supabase.from('usecases').delete().eq('id', deletingUsecase.id)
+
+      // 상태 업데이트
+      setUsecases(prev => prev.filter(uc => uc.id !== deletingUsecase.id))
+      if (selectedUsecase?.id === deletingUsecase.id) {
+        setSelectedUsecase(null)
+        setFeatures([])
+        setSelectedFeature(null)
+        setFeaturePolicies([])
+        updateURL(selectedActor?.id)
+      }
+
+      setShowDeleteUsecaseModal(false)
+      setDeletingUsecase(null)
+      showSimpleSuccess('유즈케이스가 성공적으로 삭제되었습니다.')
+    } catch (error) {
+      console.error('Error deleting usecase:', error)
+      showError('유즈케이스 삭제 실패', '유즈케이스를 삭제하는 중 오류가 발생했습니다.')
+    } finally {
+      setUsecaseDeleting(false)
     }
   }
 
@@ -1758,7 +2073,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     {t('actor.add_button')}
                   </Button>
                 ) : (
-                  <DropdownMenu>
+                  <DropdownMenu open={actorDropdownOpen} onOpenChange={setActorDropdownOpen}>
                     <DropdownMenuTrigger asChild>
                       <Button 
                         variant="outline" 
@@ -1768,15 +2083,44 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                         <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="min-w-[150px]">
+                    <DropdownMenuContent align="start" className="min-w-[150px]" onCloseAutoFocus={(e) => e.preventDefault()}>
                       {actors.map(actor => (
-                        <DropdownMenuItem
-                          key={actor.id}
-                          onClick={() => handleActorSelect(actor)}
-                          className="text-base py-2"
-                        >
-                          {actor.name}
-                        </DropdownMenuItem>
+                        <div key={actor.id} className="flex items-center group">
+                          <DropdownMenuItem
+                            onClick={() => handleActorSelect(actor)}
+                            className="text-base py-2 flex-1 pr-1"
+                          >
+                            {actor.name}
+                          </DropdownMenuItem>
+                          {membership?.role === 'admin' && (
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pr-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEditActor(actor)
+                                }}
+                                className="p-1 hover:bg-gray-200 rounded transition-colors"
+                                title="액터 편집"
+                              >
+                                <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteActor(actor)
+                                }}
+                                className="p-1 hover:bg-red-100 rounded transition-colors"
+                                title="액터 삭제"
+                              >
+                                <svg className="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       ))}
                       {actors.length > 0 && (
                         <>
@@ -1810,7 +2154,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     {t('usecase.add_button')}
                   </Button>
                 ) : (
-                  <DropdownMenu>
+                  <DropdownMenu open={usecaseDropdownOpen} onOpenChange={setUsecaseDropdownOpen}>
                     <DropdownMenuTrigger asChild>
                       <Button 
                         variant="outline" 
@@ -1820,15 +2164,45 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                         <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="min-w-[170px]">
+                    <DropdownMenuContent align="start" className="min-w-[170px]" onCloseAutoFocus={(e) => e.preventDefault()}>
                       {usecases.map(usecase => (
-                        <DropdownMenuItem
-                          key={usecase.id}
-                          onClick={() => handleUsecaseSelect(usecase)}
-                          className="text-base py-2"
-                        >
-                          {usecase.name}
-                        </DropdownMenuItem>
+                        <div key={usecase.id} className="flex items-center group">
+                          <DropdownMenuItem
+                            onClick={() => handleUsecaseSelect(usecase)}
+                            className="text-base py-2 flex-1 pr-1"
+                          >
+                            {usecase.name}
+                          </DropdownMenuItem>
+                          {membership?.role === 'admin' && (
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pr-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setUsecaseDropdownOpen(false)
+                                                                    handleEditUsecase(usecase)
+                                }}
+                                className="p-1 hover:bg-gray-200 rounded transition-colors"
+                                title="유즈케이스 편집"
+                              >
+                                <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteUsecase(usecase)
+                                }}
+                                className="p-1 hover:bg-red-100 rounded transition-colors"
+                                title="유즈케이스 삭제"
+                              >
+                                <svg className="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       ))}
                       {usecases.length > 0 && (
                         <>
@@ -2926,6 +3300,132 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   disabled={policyDeleting}
                 >
                   {policyDeleting ? '삭제 중...' : '삭제'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 액터 편집 모달 */}
+        {showEditActorModal && editingActor && membership?.role === 'admin' && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <h3 className="text-lg font-semibold mb-4">액터 편집</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">액터 이름</label>
+                  <input
+                    id="edit-actor-name-input"
+                    type="text"
+                    value={editActorName}
+                    onChange={(e) => setEditActorName(e.target.value)}
+                    placeholder="액터 이름을 입력하세요"
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    disabled={editActorSaving}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowEditActorModal(false)
+                    setEditingActor(null)
+                    setEditActorName('')
+                  }}
+                  disabled={editActorSaving}
+                >
+                  취소
+                </Button>
+                <Button 
+                  onClick={updateActor}
+                  disabled={editActorSaving || !editActorName.trim()}
+                >
+                  {editActorSaving ? '수정 중...' : '액터 수정'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 유즈케이스 편집 모달 */}
+        {showEditUsecaseModal && editingUsecase && membership?.role === 'admin' && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <h3 className="text-lg font-semibold mb-4">유즈케이스 편집</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">유즈케이스 이름</label>
+                  <input
+                    id="edit-usecase-name-input"
+                    type="text"
+                    value={editUsecaseName}
+                    onChange={(e) => setEditUsecaseName(e.target.value)}
+                    placeholder="유즈케이스 이름을 입력하세요"
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    disabled={editUsecaseSaving}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 mt-6">
+                <Button variant="outline" onClick={() => { setShowEditUsecaseModal(false); setEditingUsecase(null); setEditUsecaseName(''); }} disabled={editUsecaseSaving}>취소</Button>
+                <Button onClick={updateUsecase} disabled={editUsecaseSaving || !editUsecaseName.trim()}>{editUsecaseSaving ? '수정 중...' : '유즈케이스 수정'}</Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 유즈케이스 삭제 확인 모달 */}
+        {showDeleteUsecaseModal && deletingUsecase && membership?.role === 'admin' && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+              <h3 className="text-lg font-semibold mb-4">유즈케이스 삭제</h3>
+              <p className="text-muted-foreground mb-6">
+                정말로 "{deletingUsecase.name}" 유즈케이스를 삭제하시겠어요?
+                <br />
+                <span className="text-sm text-red-600 font-medium">이 유즈케이스의 모든 기능과 정책이 함께 삭제됩니다.</span>
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => { setShowDeleteUsecaseModal(false); setDeletingUsecase(null); }} disabled={usecaseDeleting}>취소</Button>
+                <Button variant="destructive" onClick={deleteUsecase} disabled={usecaseDeleting}>{usecaseDeleting ? '삭제 중...' : '삭제'}</Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 액터 삭제 확인 모달 */}
+        {showDeleteActorModal && deletingActor && membership?.role === 'admin' && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+              <h3 className="text-lg font-semibold mb-4">액터 삭제</h3>
+              <p className="text-muted-foreground mb-6">
+                정말로 "{deletingActor.name}" 액터를 삭제하시겠어요?
+                <br />
+                <span className="text-sm text-red-600 font-medium">
+                  이 액터에 속한 모든 유즈케이스, 기능, 정책이 함께 삭제됩니다.
+                </span>
+                <br />
+                <span className="text-sm text-red-600">삭제된 데이터는 복구할 수 없습니다.</span>
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowDeleteActorModal(false)
+                    setDeletingActor(null)
+                  }}
+                  disabled={actorDeleting}
+                >
+                  취소
+                </Button>
+                <Button 
+                  variant="destructive"
+                  onClick={deleteActor}
+                  disabled={actorDeleting}
+                >
+                  {actorDeleting ? '삭제 중...' : '삭제'}
                 </Button>
               </div>
             </div>
