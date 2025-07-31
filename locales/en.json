@@ -88,7 +88,11 @@
     "delete_error_desc": "An error occurred while deleting the term.",
     "sequence_updated": "Term sequence updated successfully.",
     "sequence_error_title": "Sequence Update Error",
-    "sequence_error_desc": "An error occurred while updating the term sequence."
+    "sequence_error_desc": "An error occurred while updating the term sequence.",
+    "copy_url": "Copy Link",
+    "url_copied": "Term link has been copied.",
+    "url_copy_error_title": "Failed to copy link",
+    "url_copy_error_desc": "An error occurred while copying the link."
   },
   "management": {
     "header": "Project Management",

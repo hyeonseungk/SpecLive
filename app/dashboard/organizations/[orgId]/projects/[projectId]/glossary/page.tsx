@@ -34,12 +34,13 @@ import { CSS } from '@dnd-kit/utilities'
 interface SortableGlossaryCardProps {
   glossary: Tables<'glossaries'> & { glossary_links?: any[] }
   onEdit: (glossary: Tables<'glossaries'>) => void
+  onCopyUrl: (glossary: Tables<'glossaries'>) => void
   showSequence: boolean
   t: any
   locale: string
 }
 
-function SortableGlossaryCard({ glossary, onEdit, showSequence, t, locale }: SortableGlossaryCardProps) {
+function SortableGlossaryCard({ glossary, onEdit, onCopyUrl, showSequence, t, locale }: SortableGlossaryCardProps) {
   const {
     attributes,
     listeners,
@@ -58,6 +59,7 @@ function SortableGlossaryCard({ glossary, onEdit, showSequence, t, locale }: Sor
 
   return (
     <div 
+      id={`glossary-${glossary.id}`}
       ref={setNodeRef} 
       style={style} 
       className={isDragging ? 'opacity-50' : ''}
@@ -84,8 +86,32 @@ function SortableGlossaryCard({ glossary, onEdit, showSequence, t, locale }: Sor
           </div>
         )}
 
-        {/* 시퀀스 번호 표시 (시퀀스 정렬일 때만) */}
-        {showSequence && glossary.sequence && (
+        {/* 복사 버튼 (호버 시에만 표시) */}
+        {isHovered && (
+          <div className="absolute top-3 right-3 flex items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onCopyUrl(glossary)
+              }}
+              className="w-8 h-8 bg-white shadow-md hover:shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all"
+              title={t('glossary.copy_url')}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+            </button>
+            {/* 시퀀스 번호 표시 (시퀀스 정렬일 때만) */}
+            {showSequence && glossary.sequence && (
+              <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                {glossary.sequence}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 시퀀스 번호만 표시 (호버하지 않았을 때, 시퀀스 정렬일 때만) */}
+        {!isHovered && showSequence && glossary.sequence && (
           <div className="absolute top-3 right-3 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
             {glossary.sequence}
           </div>
@@ -272,6 +298,76 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
     loadProjectData()
   }, [params.projectId, router])
+
+  // 해시태그로 스크롤 처리 함수
+  const scrollToGlossaryByHash = (hash?: string) => {
+    if (glossaries.length === 0) {
+      console.log('스크롤 시도: 용어 목록이 비어있음')
+      return
+    }
+    
+    let targetHash = hash || window.location.hash.replace('#', '')
+    if (!targetHash) {
+      console.log('스크롤 시도: 해시가 없음')
+      return
+    }
+
+    console.log('원본 해시:', targetHash)
+
+    // URL 인코딩된 해시 디코딩
+    try {
+      targetHash = decodeURIComponent(targetHash)
+      console.log('디코딩된 해시:', targetHash)
+    } catch (error) {
+      console.warn('해시 디코딩 실패:', error)
+    }
+
+    // 해시에 해당하는 용어 찾기
+    const targetGlossary = glossaries.find(g => {
+      const glossaryHash = g.name.toLowerCase().replace(/\s+/g, '-')
+      console.log(`용어 비교: "${glossaryHash}" === "${targetHash.toLowerCase()}"`)
+      return glossaryHash === targetHash.toLowerCase()
+    })
+
+    console.log('찾은 용어:', targetGlossary?.name)
+    
+    if (targetGlossary) {
+      // 약간의 지연 후 스크롤 (DOM 렌더링 완료 대기)
+      setTimeout(() => {
+        const element = document.getElementById(`glossary-${targetGlossary.id}`)
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          })
+          // 스크롤 후 강조 효과
+          element.classList.add('ring-2', 'ring-primary', 'ring-opacity-50')
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-primary', 'ring-opacity-50')
+          }, 3000)
+        }
+      }, 300) // 시간을 좀 더 늘림
+    }
+  }
+
+  // 용어 로드 완료 후 해시 처리
+  useEffect(() => {
+    if (glossaries.length > 0) {
+      scrollToGlossaryByHash()
+    }
+  }, [glossaries])
+
+  // 해시 변경 감지 (같은 페이지에서 해시만 변경될 때)
+  useEffect(() => {
+    const handleHashChange = () => {
+      scrollToGlossaryByHash()
+    }
+
+    window.addEventListener('hashchange', handleHashChange)
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+    }
+  }, [glossaries])
 
   // 용어 로드 함수 (project ID를 직접 받는 버전)
   const loadGlossariesForProject = async (projectId: string) => {
@@ -704,6 +800,21 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     }
   }
 
+  // URL 복사 함수
+  const copyGlossaryUrl = async (glossary: Tables<'glossaries'>) => {
+    const glossaryHash = glossary.name.toLowerCase().replace(/\s+/g, '-')
+    const currentUrl = window.location.href.split('#')[0] // 기존 해시 제거
+    const urlWithHash = `${currentUrl}#${encodeURIComponent(glossaryHash)}`
+    
+    try {
+      await navigator.clipboard.writeText(urlWithHash)
+      showSimpleSuccess(t('glossary.url_copied'))
+    } catch (error) {
+      console.error('URL 복사 실패:', error)
+      showError(t('glossary.url_copy_error_title'), t('glossary.url_copy_error_desc'))
+    }
+  }
+
   // 드래그 엔드 핸들러
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
@@ -876,6 +987,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                     key={glossary.id}
                     glossary={glossary}
                     onEdit={handleEditGlossary}
+                    onCopyUrl={copyGlossaryUrl}
                     showSequence={sortBy === 'sequence'}
                     t={t}
                     locale={locale}

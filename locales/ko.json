@@ -129,7 +129,11 @@
     "delete_error_desc": "용어를 삭제하는 중 오류가 발생했습니다.",
     "sequence_updated": "용어 순서가 성공적으로 업데이트되었습니다.",
     "sequence_error_title": "순서 업데이트 오류",
-    "sequence_error_desc": "용어 순서를 업데이트하는 중 오류가 발생했습니다."
+    "sequence_error_desc": "용어 순서를 업데이트하는 중 오류가 발생했습니다.",
+    "copy_url": "링크 복사",
+    "url_copied": "용어 링크가 복사되었습니다.",
+    "url_copy_error_title": "링크 복사 실패",
+    "url_copy_error_desc": "링크를 복사하는 중 오류가 발생했습니다."
   },
   "management": {
     "header": "프로젝트 관리",
