@@ -433,145 +433,150 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   }
 
   return (
-    <div className="p-6">
-        <div>
-          {/* 헤더 영역 */}
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">{t('policy.header')}</h2>
-            <p className="text-muted-foreground">{t('policy.sub')}</p>
-          </div>
+    <div className="h-full flex flex-col">
+      {/* 고정 영역: 헤더와 액터/유즈케이스 선택 */}
+      <div className="flex-shrink-0 p-6 pb-0">
+        {/* 헤더 영역 */}
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold mb-2">{t('policy.header')}</h2>
+          <p className="text-muted-foreground">{t('policy.sub')}</p>
+        </div>
 
-          {/* 액터 및 유즈케이스 선택 영역 */}
-          <div className="mb-6 p-6 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-6">
-                              {/* 액터 선택 */}
-                <div className="flex items-center gap-3">
-                  <span className="text-base font-semibold text-gray-800">{t('actor.label')}</span>
-                  {actors.length === 0 ? (
-                    <Button 
-                      variant="outline" 
-                      size="default"
-                      onClick={() => setShowActorModal(true)}
-                      disabled={membership?.role !== 'admin'}
-                      className="text-base px-4 py-2"
-                    >
-                      {t('actor.add_button')}
-                    </Button>
-                  ) : (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          className="justify-between min-w-[150px] text-base h-10 px-4"
+        {/* 액터 및 유즈케이스 선택 영역 */}
+        <div className="mb-6 p-6 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-6">
+                            {/* 액터 선택 */}
+              <div className="flex items-center gap-3">
+                <span className="text-base font-semibold text-gray-800">{t('actor.label')}</span>
+                {actors.length === 0 ? (
+                  <Button 
+                    variant="outline" 
+                    size="default"
+                    onClick={() => setShowActorModal(true)}
+                    disabled={membership?.role !== 'admin'}
+                    className="text-base px-4 py-2"
+                  >
+                    {t('actor.add_button')}
+                  </Button>
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        className="justify-between min-w-[150px] text-base h-10 px-4"
+                      >
+                        {selectedActor?.name || t('actor.select_placeholder')}
+                        <ChevronDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="min-w-[150px]">
+                      {actors.map(actor => (
+                        <DropdownMenuItem
+                          key={actor.id}
+                          onClick={() => handleActorSelect(actor)}
+                          className="text-base py-2"
                         >
-                          {selectedActor?.name || t('actor.select_placeholder')}
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="min-w-[150px]">
-                        {actors.map(actor => (
+                          {actor.name}
+                        </DropdownMenuItem>
+                      ))}
+                      {actors.length > 0 && (
+                        <>
+                          <div className="h-px bg-gray-200 my-1" />
                           <DropdownMenuItem
-                            key={actor.id}
-                            onClick={() => handleActorSelect(actor)}
-                            className="text-base py-2"
+                            onClick={() => setShowActorModal(true)}
+                            disabled={membership?.role !== 'admin'}
+                            className="text-base py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                           >
-                            {actor.name}
+                            {t('actor.add_new_button')}
                           </DropdownMenuItem>
-                        ))}
-                        {actors.length > 0 && (
-                          <>
-                            <div className="h-px bg-gray-200 my-1" />
-                            <DropdownMenuItem
-                              onClick={() => setShowActorModal(true)}
-                              disabled={membership?.role !== 'admin'}
-                              className="text-base py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            >
-                              {t('actor.add_new_button')}
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-
-              {/* 유즈케이스 선택 */}
-              {selectedActor && (
-                <div className="flex items-center gap-3">
-                  <span className="text-base font-semibold text-gray-800">{t('usecase.label')}</span>
-                  {usecases.length === 0 ? (
-                    <Button 
-                      variant="outline" 
-                      size="default"
-                      onClick={() => setShowUsecaseModal(true)}
-                      disabled={membership?.role !== 'admin'}
-                      className="text-base px-4 py-2"
-                    >
-                      {t('usecase.add_button')}
-                    </Button>
-                  ) : (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          className="justify-between min-w-[170px] text-base h-10 px-4"
-                        >
-                          {selectedUsecase?.name || t('usecase.select_placeholder')}
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="min-w-[170px]">
-                        {usecases.map(usecase => (
-                          <DropdownMenuItem
-                            key={usecase.id}
-                            onClick={() => handleUsecaseSelect(usecase)}
-                            className="text-base py-2"
-                          >
-                            {usecase.name}
-                          </DropdownMenuItem>
-                        ))}
-                        {usecases.length > 0 && (
-                          <>
-                            <div className="h-px bg-gray-200 my-1" />
-                            <DropdownMenuItem
-                              onClick={() => setShowUsecaseModal(true)}
-                              disabled={membership?.role !== 'admin'}
-                              className="text-base py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            >
-                              {t('usecase.add_new_button')}
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 기능과 정책 섹션 */}
-          {selectedUsecase && (
-            <div className="mt-8">
-              <div className="mb-4">
-                <h3 className="text-xl font-semibold">기능 및 정책</h3>
-                <p className="text-muted-foreground text-sm">
-                  {selectedUsecase.name} 유즈케이스의 기능들과 각 기능의 정책을 관리합니다.
-                </p>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
 
-              <div className="grid grid-cols-5 gap-6 h-96">
-                {/* 좌측: 기능 목록 (1/5) */}
-                <div className="col-span-1 bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium">기능</h4>
-                    {membership?.role === 'admin' && (
-                      <Button size="sm" variant="outline">
-                        + 추가
+            {/* 유즈케이스 선택 */}
+            {selectedActor && (
+              <div className="flex items-center gap-3">
+                <span className="text-base font-semibold text-gray-800">{t('usecase.label')}</span>
+                {usecases.length === 0 ? (
+                  <Button 
+                    variant="outline" 
+                    size="default"
+                    onClick={() => setShowUsecaseModal(true)}
+                    disabled={membership?.role !== 'admin'}
+                    className="text-base px-4 py-2"
+                  >
+                    {t('usecase.add_button')}
+                  </Button>
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        className="justify-between min-w-[170px] text-base h-10 px-4"
+                      >
+                        {selectedUsecase?.name || t('usecase.select_placeholder')}
+                        <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
-                    )}
-                  </div>
-                  
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="min-w-[170px]">
+                      {usecases.map(usecase => (
+                        <DropdownMenuItem
+                          key={usecase.id}
+                          onClick={() => handleUsecaseSelect(usecase)}
+                          className="text-base py-2"
+                        >
+                          {usecase.name}
+                        </DropdownMenuItem>
+                      ))}
+                      {usecases.length > 0 && (
+                        <>
+                          <div className="h-px bg-gray-200 my-1" />
+                          <DropdownMenuItem
+                            onClick={() => setShowUsecaseModal(true)}
+                            disabled={membership?.role !== 'admin'}
+                            className="text-base py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            {t('usecase.add_new_button')}
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 스크롤 영역: 기능과 정책 영역 */}
+      <div className="flex-1 px-6 pb-6">
+        {/* 기능과 정책 섹션 */}
+        {selectedUsecase && (
+          <div className="h-full flex flex-col">
+            <div className="mb-4">
+              <h3 className="text-xl font-semibold">기능 및 정책</h3>
+              <p className="text-muted-foreground text-sm">
+                {selectedUsecase.name} 유즈케이스의 기능들과 각 기능의 정책을 관리합니다.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-5 gap-6 flex-1 min-h-0">
+              {/* 좌측: 기능 목록 (1/5) */}
+              <div className="col-span-1 bg-gray-50 rounded-lg p-4 flex flex-col">
+                <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                  <h4 className="font-medium">기능</h4>
+                  {membership?.role === 'admin' && (
+                    <Button size="sm" variant="outline">
+                      + 추가
+                    </Button>
+                  )}
+                </div>
+                
+                <div className="flex-1 overflow-hidden">
                   {featuresLoading ? (
                     <div className="flex items-center justify-center h-32">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -582,7 +587,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       <p>없습니다</p>
                     </div>
                   ) : (
-                    <div className="space-y-2 max-h-72 overflow-y-auto">
+                    <div className="space-y-2 h-full overflow-y-auto">
                       {features.map(feature => (
                         <div
                           key={feature.id}
@@ -599,20 +604,22 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* 우측: 정책 목록 (4/5) */}
-                <div className="col-span-4 bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium">
-                      {selectedFeature ? `${selectedFeature.name} 정책` : '정책'}
-                    </h4>
-                    {selectedFeature && membership?.role === 'admin' && (
-                      <Button size="sm" variant="outline">
-                        + 정책 추가
-                      </Button>
-                    )}
-                  </div>
+              {/* 우측: 정책 목록 (4/5) */}
+              <div className="col-span-4 bg-gray-50 rounded-lg p-4 flex flex-col">
+                <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                  <h4 className="font-medium">
+                    {selectedFeature ? `${selectedFeature.name} 정책` : '정책'}
+                  </h4>
+                  {selectedFeature && membership?.role === 'admin' && (
+                    <Button size="sm" variant="outline">
+                      + 정책 추가
+                    </Button>
+                  )}
+                </div>
 
+                <div className="flex-1 overflow-hidden">
                   {!selectedFeature ? (
                     <div className="flex items-center justify-center h-32">
                       <p className="text-gray-500">기능을 선택해주세요</p>
@@ -629,7 +636,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       )}
                     </div>
                   ) : (
-                    <div className="space-y-3 max-h-72 overflow-y-auto">
+                    <div className="space-y-3 h-full overflow-y-auto">
                       {featurePolicies.map(policy => (
                         <Card key={policy.id} className="p-3">
                           <h5 className="font-medium text-sm mb-2">{policy.title}</h5>
@@ -655,9 +662,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </div>
               </div>
             </div>
-          )}
-
-        </div>
+          </div>
+        )}
+      </div>
 
         {/* 액터 추가 모달 */}
         {showActorModal && (
