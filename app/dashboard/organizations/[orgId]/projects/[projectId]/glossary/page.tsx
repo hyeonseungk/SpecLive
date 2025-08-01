@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ChevronDown } from 'lucide-react'
 import GlossaryEditModal from '@/components/glossary/glossary-edit-modal'
 import GlossaryAiRecommendationModal from '@/components/glossary/glossary-ai-recommendation-modal'
+import GlossaryAddModal from '@/components/glossary/glossary-add-modal'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
 import { useT } from '@/lib/i18n'
@@ -1043,7 +1044,17 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       </div>
 
       {/* 용어 추가 모달 */}
+      {/* OLD ADD MODAL - replaced by GlossaryAddModal */}
+
       {showGlossaryModal && (
+        <GlossaryAddModal
+          projectId={project.id}
+          userId={user!.id}
+          onClose={handleCloseGlossaryModal}
+          onGlossaryAdded={(glossaryWithLinks) => setGlossaries(prev => [glossaryWithLinks, ...prev])}
+        />
+      )}
+{false && showGlossaryModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold mb-4">{t('glossary.add_modal_title')}</h3>
