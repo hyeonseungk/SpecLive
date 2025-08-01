@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase-browser'
 import { Tables } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import ActorAddModal from '@/components/actor/actor-add-modal'
+import UsecaseAddModal from '@/components/usecase/usecase-add-modal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
@@ -2451,51 +2452,18 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         />
 
         {/* 유즈케이스 추가 모달 */}
-        {showUsecaseModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold mb-4">{t('usecase.add_modal_title')}</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    {t('usecase.name_label')} 
-                    <span className="text-xs text-gray-500 font-normal">
-                      {t('usecase.actor_prefix')}{selectedActor?.name})
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    value={usecaseName}
-                    onChange={(e) => setUsecaseName(e.target.value)}
-                    placeholder={t('usecase.name_placeholder')}
-                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    disabled={usecaseSaving}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 mt-6">
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowUsecaseModal(false)
-                    setUsecaseName('')
-                  }}
-                  disabled={usecaseSaving}
-                >
-                  {t('buttons.cancel')}
-                </Button>
-                <Button 
-                  onClick={addUsecase}
-                  disabled={usecaseSaving || !usecaseName.trim()}
-                >
-                  {usecaseSaving ? t('buttons.adding') : t('buttons.add')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <UsecaseAddModal
+          isOpen={showUsecaseModal}
+          onClose={() => {
+            setShowUsecaseModal(false)
+            setUsecaseName('')
+          }}
+          usecaseName={usecaseName}
+          setUsecaseName={setUsecaseName}
+          onAdd={addUsecase}
+          saving={usecaseSaving}
+          selectedActorName={selectedActor?.name}
+        />
 
         {/* 기능 추가 모달 */}
         {showFeatureModal && (
