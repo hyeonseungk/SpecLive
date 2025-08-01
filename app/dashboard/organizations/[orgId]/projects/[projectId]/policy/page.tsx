@@ -2057,47 +2057,44 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </Button>
               )}
             </div>
-            <div className="flex items-center gap-3 flex-wrap">
-              {actors.length === 0 ? (
-                <Button
-                  variant="outline"
-                  size="default"
-                  onClick={() => setShowActorModal(true)}
-                  disabled={membership?.role !== "admin"}
-                  className="text-base px-4 py-2 self-start"
+            {actors.length === 0 ? (
+              <Button
+                variant="outline"
+                size="default"
+                onClick={() => setShowActorModal(true)}
+                disabled={membership?.role !== "admin"}
+                className="text-base px-4 py-2 self-start"
+              >
+                {t("actor.add_button")}
+              </Button>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleActorDragEnd}
+              >
+                <SortableContext
+                  items={actors.map((actor) => actor.id)}
+                  strategy={horizontalListSortingStrategy}
                 >
-                  {t("actor.add_button")}
-                </Button>
-              ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleActorDragEnd}
-                >
-                  <SortableContext
-                    items={actors.map((actor) => actor.id)}
-                    strategy={horizontalListSortingStrategy}
-                  >
-                    <div className="flex flex-wrap gap-2">
-                      {actors
-                        .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
-                        .map((actor) => (
-                          <SortableActorCard
-                            key={actor.id}
-                            actor={actor}
-                            onSelect={handleActorSelect}
-                            onEdit={handleEditActor}
-                            onDelete={handleDeleteActor}
-                            isSelected={selectedActor?.id === actor.id}
-                            membership={membership}
-                          />
-                        ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              )}
-            </div>
-
+                  <div className="flex flex-wrap gap-2">
+                    {actors
+                      .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+                      .map((actor) => (
+                        <SortableActorCard
+                          key={actor.id}
+                          actor={actor}
+                          onSelect={handleActorSelect}
+                          onEdit={handleEditActor}
+                          onDelete={handleDeleteActor}
+                          isSelected={selectedActor?.id === actor.id}
+                          membership={membership}
+                        />
+                      ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
             {/* 유즈케이스 선택 */}
             {selectedActor && (
               <div className="flex flex-col gap-3">
