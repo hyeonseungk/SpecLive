@@ -41,7 +41,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type User = {
   id: string;
@@ -2003,14 +2003,21 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     }
   };
 
-  // Scroll to the selected feature card when selection changes
-  useLayoutEffect(() => {
-    if (selectedFeature) {
-      const el = document.getElementById(`feature-${selectedFeature.id}`);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
+  // Scroll to the selected feature card and highlight it when selection changes (mimicking glossary page)
+  useEffect(() => {
+    if (!selectedFeature) return;
+    // Delay to ensure DOM is ready
+    setTimeout(() => {
+      const element = document.getElementById(`feature-${selectedFeature.id}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        // highlight effect
+        element.classList.add("ring-2", "ring-primary", "ring-opacity-50");
+        setTimeout(() => {
+          element.classList.remove("ring-2", "ring-primary", "ring-opacity-50");
+        }, 3000);
       }
-    }
+    }, 300);
   }, [selectedFeature]);
 
   if (loading) {
