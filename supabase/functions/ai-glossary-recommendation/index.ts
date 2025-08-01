@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 // CORS headers
 const corsHeaders = {
@@ -43,33 +43,27 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     body = await req.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: "Invalid JSON body" }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
-  const { projectId, count = 5, language = 'ko' } = body;
+  const { projectId, count = 5, language = "ko" } = body;
 
   if (!projectId) {
-    return new Response(
-      JSON.stringify({ error: "projectId is required" }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return new Response(JSON.stringify({ error: "projectId is required" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   // ──────────────────────────────────────────────────────────────────
   // 3. Initialize Supabase client
   // ------------------------------------------------------------------
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // ──────────────────────────────────────────────────────────────────
@@ -78,52 +72,52 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     // 프로젝트 정보 조회
     const { data: project, error: projectError } = await supabase
-      .from('projects')
-      .select('id, name')
-      .eq('id', projectId)
+      .from("projects")
+      .select("id, name")
+      .eq("id", projectId)
       .single();
 
     if (projectError || !project) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Project not found",
-          details: projectError?.message 
+          details: projectError?.message,
         }),
         {
           status: 404,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        }
       );
     }
 
     // PRD 정보 조회 (별도 테이블)
     const { data: prd, error: prdError } = await supabase
-      .from('prds')
-      .select('contents')
-      .eq('project_id', projectId)
+      .from("prds")
+      .select("contents")
+      .eq("project_id", projectId)
       .single();
 
     // PRD가 없는 경우는 에러가 아님 (옵션)
-    const prdContents = prd?.contents || '';
+    const prdContents = prd?.contents || "";
 
     // 기존 용어들 조회
     const { data: existingGlossaries, error: glossariesError } = await supabase
-      .from('glossaries')
-      .select('name, definition, examples')
-      .eq('project_id', projectId)
-      .order('updated_at', { ascending: false });
+      .from("glossaries")
+      .select("name, definition, examples")
+      .eq("project_id", projectId)
+      .order("updated_at", { ascending: false });
 
     if (glossariesError) {
-      console.error('Error fetching glossaries:', glossariesError);
+      console.error("Error fetching glossaries:", glossariesError);
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Failed to fetch existing glossaries",
-          details: glossariesError.message 
+          details: glossariesError.message,
         }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        }
       );
     }
 
@@ -133,19 +127,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // ──────────────────────────────────────────────────────────────────
     // 5. Prepare system prompt
     // ------------------------------------------------------------------
-    const existingTermsText = existingTerms.length > 0 
-      ? `\n\n현재 프로젝트에 등록된 용어들:\n${existingTerms.map((g: any) => 
-          `- ${g.name}: ${g.definition}${g.examples ? ` (예시: ${g.examples})` : ''}`
-        ).join('\n')}`
-      : '';
+    const existingTermsText =
+      existingTerms.length > 0
+        ? `\n\n현재 프로젝트에 등록된 용어들:\n${existingTerms
+            .map(
+              (g: any) =>
+                `- ${g.name}: ${g.definition}${
+                  g.examples ? ` (예시: ${g.examples})` : ""
+                }`
+            )
+            .join("\n")}`
+        : "";
 
-    const prdText = prdContents 
+    const prdText = prdContents
       ? `\n\nPRD (Product Requirements Document):\n${prdContents}`
-      : '';
+      : "";
 
     // 언어별 시스템 프롬프트
     const getLanguagePrompt = (lang: string) => {
-      if (lang.includes('en')) {
+      if (lang.includes("en")) {
         return `You are an expert in IT project glossary management.
 
 Please recommend ${count} useful terms in ENGLISH based on the given project information. All term names and definitions should be primarily in English.
@@ -213,7 +213,7 @@ Please recommend practical terms in English that can be used immediately in actu
             },
             {
               role: "user",
-              content: language.includes('en') 
+              content: language.includes("en")
                 ? "Please recommend terms suitable for the above project in English."
                 : "위 프로젝트에 적합한 용어들을 한국어로 추천해주세요.",
             },
@@ -232,46 +232,46 @@ Please recommend practical terms in English that can be used immediately in actu
                       properties: {
                         name: {
                           type: "string",
-                          description: "용어명"
+                          description: "용어명",
                         },
                         definition: {
                           type: "string",
-                          description: "용어 정의"
-                        }
+                          description: "용어 정의",
+                        },
                       },
                       required: ["name", "definition"],
-                      additionalProperties: false
+                      additionalProperties: false,
                     },
                     minItems: 1,
-                    maxItems: 10
-                  }
+                    maxItems: 10,
+                  },
                 },
                 required: ["recommendations"],
-                additionalProperties: false
-              }
-            }
-          }
+                additionalProperties: false,
+              },
+            },
+          },
         }),
-      },
+      }
     );
 
     if (!openaiRes.ok) {
       const errorText = await openaiRes.text();
       console.error("OpenAI API Error:", errorText);
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "OpenAI API request failed",
-          details: errorText
+          details: errorText,
         }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        }
       );
     }
 
     const openaiData = await openaiRes.json();
-    
+
     // ──────────────────────────────────────────────────────────────────
     // 7. Extract and validate response
     // ------------------------------------------------------------------
@@ -282,7 +282,7 @@ Please recommend practical terms in English that can be used immediately in actu
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        }
       );
     }
 
@@ -293,14 +293,17 @@ Please recommend practical terms in English that can be used immediately in actu
     } catch (parseError) {
       console.error("JSON parsing error:", parseError);
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Failed to parse AI response",
-          details: parseError instanceof Error ? parseError.message : String(parseError)
+          details:
+            parseError instanceof Error
+              ? parseError.message
+              : String(parseError),
         }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        }
       );
     }
 
@@ -315,26 +318,25 @@ Please recommend practical terms in English that can be used immediately in actu
           count: recommendations.length,
           projectName,
           existingTermsCount: existingTerms.length,
-          language
-        }
+          language,
+        },
       }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
+      }
     );
-
   } catch (error) {
     console.error("Unexpected error:", error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: "Internal server error",
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
+      }
     );
   }
 });

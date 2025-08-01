@@ -1,57 +1,61 @@
-'use client'
+"use client";
 
-import { useMemo } from 'react'
-import { Button } from '@/components/ui/button'
+import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
 
 interface Feature {
-  id: string
-  name: string
+  id: string;
+  name: string;
   usecase: {
-    name: string
+    name: string;
     actor: {
-      name: string
-    }
-  }
+      name: string;
+    };
+  };
 }
 
 interface Glossary {
-  id: string
-  name: string
-  definition: string
+  id: string;
+  name: string;
+  definition: string;
 }
 
 interface PolicyAddModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onAdd: () => void
-  policySaving: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  onAdd: () => void;
+  policySaving: boolean;
 
   // 정책 내용
-  policyContents: string
-  setPolicyContents: (val: string) => void
+  policyContents: string;
+  setPolicyContents: (val: string) => void;
 
   // 기능 관련
-  allFeaturesLoading: boolean
-  allFeatures: Feature[]
-  featureSearchTerm: string
-  setFeatureSearchTerm: (val: string) => void
-  selectedFeatureIds: string[]
-  handleFeatureToggle: (id: string) => void
+  allFeaturesLoading: boolean;
+  allFeatures: Feature[];
+  featureSearchTerm: string;
+  setFeatureSearchTerm: (val: string) => void;
+  selectedFeatureIds: string[];
+  handleFeatureToggle: (id: string) => void;
 
   // 링크 관련
-  contextLinks: string[]
-  generalLinks: string[]
-  addLinkField: (type: 'context' | 'general') => void
-  removeLinkField: (type: 'context' | 'general', index: number) => void
-  updateLinkField: (type: 'context' | 'general', index: number, value: string) => void
+  contextLinks: string[];
+  generalLinks: string[];
+  addLinkField: (type: "context" | "general") => void;
+  removeLinkField: (type: "context" | "general", index: number) => void;
+  updateLinkField: (
+    type: "context" | "general",
+    index: number,
+    value: string
+  ) => void;
 
   // 용어 관련
-  glossariesLoading: boolean
-  glossaries: Glossary[]
-  glossarySearchTerm: string
-  setGlossarySearchTerm: (val: string) => void
-  selectedGlossaryIds: string[]
-  handleGlossaryToggle: (id: string) => void
+  glossariesLoading: boolean;
+  glossaries: Glossary[];
+  glossarySearchTerm: string;
+  setGlossarySearchTerm: (val: string) => void;
+  selectedGlossaryIds: string[];
+  handleGlossaryToggle: (id: string) => void;
 }
 
 export default function PolicyAddModal({
@@ -82,28 +86,31 @@ export default function PolicyAddModal({
   selectedGlossaryIds,
   handleGlossaryToggle,
 }: PolicyAddModalProps) {
-  if (!isOpen) return null
-
   const filteredFeatures = useMemo(() => {
-    if (!featureSearchTerm.trim()) return allFeatures
-    const term = featureSearchTerm.toLowerCase().trim()
-    return allFeatures.filter(f =>
-      f.name.toLowerCase().includes(term) ||
-      f.usecase.name.toLowerCase().includes(term) ||
-      f.usecase.actor.name.toLowerCase().includes(term)
-    )
-  }, [allFeatures, featureSearchTerm])
+    if (!featureSearchTerm.trim()) return allFeatures;
+    const term = featureSearchTerm.toLowerCase().trim();
+    return allFeatures.filter(
+      (f) =>
+        f.name.toLowerCase().includes(term) ||
+        f.usecase.name.toLowerCase().includes(term) ||
+        f.usecase.actor.name.toLowerCase().includes(term)
+    );
+  }, [allFeatures, featureSearchTerm]);
 
   const filteredGlossaries = useMemo(() => {
-    if (!glossarySearchTerm.trim()) return glossaries
-    const term = glossarySearchTerm.toLowerCase().trim()
-    return glossaries.filter(g =>
-      g.name.toLowerCase().includes(term) ||
-      g.definition.toLowerCase().includes(term)
-    )
-  }, [glossaries, glossarySearchTerm])
+    if (!glossarySearchTerm.trim()) return glossaries;
+    const term = glossarySearchTerm.toLowerCase().trim();
+    return glossaries.filter(
+      (g) =>
+        g.name.toLowerCase().includes(term) ||
+        g.definition.toLowerCase().includes(term)
+    );
+  }, [glossaries, glossarySearchTerm]);
 
-  const addDisabled = policySaving || !policyContents.trim() || selectedFeatureIds.length === 0
+  const addDisabled =
+    policySaving || !policyContents.trim() || selectedFeatureIds.length === 0;
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -137,12 +144,16 @@ export default function PolicyAddModal({
             {allFeaturesLoading ? (
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-                <span className="ml-2 text-sm text-gray-500">기능 로딩 중...</span>
+                <span className="ml-2 text-sm text-gray-500">
+                  기능 로딩 중...
+                </span>
               </div>
             ) : allFeatures.length === 0 ? (
               <p className="text-sm text-gray-500 py-2">
                 프로젝트에 기능이 아직 없습니다. <br />
-                <span className="text-xs">먼저 액터, 유즈케이스, 기능을 추가해보세요.</span>
+                <span className="text-xs">
+                  먼저 액터, 유즈케이스, 기능을 추가해보세요.
+                </span>
               </p>
             ) : (
               <>
@@ -158,7 +169,8 @@ export default function PolicyAddModal({
                   />
                   {featureSearchTerm && (
                     <p className="text-xs text-gray-500 mt-1">
-                      "{featureSearchTerm}" 검색 결과: {filteredFeatures.length}개
+                      "{featureSearchTerm}" 검색 결과: {filteredFeatures.length}
+                      개
                     </p>
                   )}
                 </div>
@@ -168,11 +180,13 @@ export default function PolicyAddModal({
                   {filteredFeatures.length === 0 ? (
                     <div className="text-center py-4">
                       <p className="text-sm text-gray-500">
-                        {featureSearchTerm ? '검색 결과가 없습니다' : '기능이 없습니다'}
+                        {featureSearchTerm
+                          ? "검색 결과가 없습니다"
+                          : "기능이 없습니다"}
                       </p>
                       {featureSearchTerm && (
                         <button
-                          onClick={() => setFeatureSearchTerm('')}
+                          onClick={() => setFeatureSearchTerm("")}
                           className="text-xs text-blue-600 hover:text-blue-700 mt-1"
                           disabled={policySaving}
                         >
@@ -195,7 +209,8 @@ export default function PolicyAddModal({
                         />
                         <div className="min-w-0 flex-1">
                           <span className="text-sm font-medium block">
-                            {feature.usecase.actor.name} &gt; {feature.usecase.name} &gt; {feature.name}
+                            {feature.usecase.actor.name} &gt;{" "}
+                            {feature.usecase.name} &gt; {feature.name}
                           </span>
                         </div>
                       </label>
@@ -211,13 +226,17 @@ export default function PolicyAddModal({
                 </p>
                 <div className="space-y-1">
                   {selectedFeatureIds.map((id) => {
-                    const f = allFeatures.find((x) => x.id === id)
-                    if (!f) return null
+                    const f = allFeatures.find((x) => x.id === id);
+                    if (!f) return null;
                     return (
-                      <div key={id} className="text-sm text-blue-600 font-medium">
-                        {f.usecase.actor.name} &gt; {f.usecase.name} &gt; {f.name}
+                      <div
+                        key={id}
+                        className="text-sm text-blue-600 font-medium"
+                      >
+                        {f.usecase.actor.name} &gt; {f.usecase.name} &gt;{" "}
+                        {f.name}
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -229,13 +248,15 @@ export default function PolicyAddModal({
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium">
                 컨텍스트 링크들
-                <span className="text-xs text-gray-500 font-normal ml-1">(정책 배경: 슬랙, 회의록 등)</span>
+                <span className="text-xs text-gray-500 font-normal ml-1">
+                  (정책 배경: 슬랙, 회의록 등)
+                </span>
               </label>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => addLinkField('context')}
+                onClick={() => addLinkField("context")}
                 disabled={policySaving}
                 className="text-blue-600 hover:text-blue-700 text-sm"
               >
@@ -247,14 +268,16 @@ export default function PolicyAddModal({
                 <input
                   type="url"
                   value={link}
-                  onChange={(e) => updateLinkField('context', i, e.target.value)}
+                  onChange={(e) =>
+                    updateLinkField("context", i, e.target.value)
+                  }
                   placeholder="https://..."
                   className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   disabled={policySaving}
                 />
                 <button
                   type="button"
-                  onClick={() => removeLinkField('context', i)}
+                  onClick={() => removeLinkField("context", i)}
                   disabled={policySaving || contextLinks.length === 1}
                   className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
                   title="링크 삭제"
@@ -270,13 +293,15 @@ export default function PolicyAddModal({
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium">
                 일반 링크들
-                <span className="text-xs text-gray-500 font-normal ml-1">(UI/UX 설계, 구현 코드 등)</span>
+                <span className="text-xs text-gray-500 font-normal ml-1">
+                  (UI/UX 설계, 구현 코드 등)
+                </span>
               </label>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => addLinkField('general')}
+                onClick={() => addLinkField("general")}
                 disabled={policySaving}
                 className="text-blue-600 hover:text-blue-700 text-sm"
               >
@@ -288,14 +313,16 @@ export default function PolicyAddModal({
                 <input
                   type="url"
                   value={link}
-                  onChange={(e) => updateLinkField('general', i, e.target.value)}
+                  onChange={(e) =>
+                    updateLinkField("general", i, e.target.value)
+                  }
                   placeholder="https://..."
                   className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   disabled={policySaving}
                 />
                 <button
                   type="button"
-                  onClick={() => removeLinkField('general', i)}
+                  onClick={() => removeLinkField("general", i)}
                   disabled={policySaving || generalLinks.length === 1}
                   className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
                   title="링크 삭제"
@@ -310,17 +337,23 @@ export default function PolicyAddModal({
           <div>
             <label className="block text-sm font-medium mb-2">
               관련 용어들
-              <span className="text-xs text-gray-500 font-normal ml-1">(이 정책과 연관된 용어를 선택하세요)</span>
+              <span className="text-xs text-gray-500 font-normal ml-1">
+                (이 정책과 연관된 용어를 선택하세요)
+              </span>
             </label>
             {glossariesLoading ? (
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-                <span className="ml-2 text-sm text-gray-500">용어 로딩 중...</span>
+                <span className="ml-2 text-sm text-gray-500">
+                  용어 로딩 중...
+                </span>
               </div>
             ) : glossaries.length === 0 ? (
               <p className="text-sm text-gray-500 py-2">
                 프로젝트에 용어가 아직 없습니다. <br />
-                <span className="text-xs">용어 관리 페이지에서 먼저 용어를 추가해보세요.</span>
+                <span className="text-xs">
+                  용어 관리 페이지에서 먼저 용어를 추가해보세요.
+                </span>
               </p>
             ) : (
               <>
@@ -336,7 +369,8 @@ export default function PolicyAddModal({
                   />
                   {glossarySearchTerm && (
                     <p className="text-xs text-gray-500 mt-1">
-                      "{glossarySearchTerm}" 검색 결과: {filteredGlossaries.length}개
+                      "{glossarySearchTerm}" 검색 결과:{" "}
+                      {filteredGlossaries.length}개
                     </p>
                   )}
                 </div>
@@ -346,11 +380,13 @@ export default function PolicyAddModal({
                   {filteredGlossaries.length === 0 ? (
                     <div className="text-center py-4">
                       <p className="text-sm text-gray-500">
-                        {glossarySearchTerm ? '검색 결과가 없습니다' : '용어가 없습니다'}
+                        {glossarySearchTerm
+                          ? "검색 결과가 없습니다"
+                          : "용어가 없습니다"}
                       </p>
                       {glossarySearchTerm && (
                         <button
-                          onClick={() => setGlossarySearchTerm('')}
+                          onClick={() => setGlossarySearchTerm("")}
                           className="text-xs text-blue-600 hover:text-blue-700 mt-1"
                           disabled={policySaving}
                         >
@@ -372,8 +408,12 @@ export default function PolicyAddModal({
                           className="mt-0.5 flex-shrink-0"
                         />
                         <div className="min-w-0 flex-1">
-                          <span className="text-sm font-medium block">{g.name}</span>
-                          <span className="text-xs text-gray-600 block truncate">{g.definition}</span>
+                          <span className="text-sm font-medium block">
+                            {g.name}
+                          </span>
+                          <span className="text-xs text-gray-600 block truncate">
+                            {g.definition}
+                          </span>
                         </div>
                       </label>
                     ))
@@ -388,16 +428,22 @@ export default function PolicyAddModal({
                 </p>
                 <div className="space-y-1">
                   {selectedGlossaryIds.map((id) => {
-                    const g = glossaries.find((x) => x.id === id)
-                    if (!g) return null
+                    const g = glossaries.find((x) => x.id === id);
+                    if (!g) return null;
                     return (
-                      <div key={id} className="text-sm text-blue-600 font-medium">
+                      <div
+                        key={id}
+                        className="text-sm text-blue-600 font-medium"
+                      >
                         {g.name}
                         <span className="text-xs text-gray-500 ml-2">
-                          - {g.definition.length > 50 ? `${g.definition.substring(0, 50)}...` : g.definition}
+                          -{" "}
+                          {g.definition.length > 50
+                            ? `${g.definition.substring(0, 50)}...`
+                            : g.definition}
                         </span>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -410,10 +456,10 @@ export default function PolicyAddModal({
             취소
           </Button>
           <Button onClick={onAdd} disabled={addDisabled}>
-            {policySaving ? '추가 중...' : '정책 추가'}
+            {policySaving ? "추가 중..." : "정책 추가"}
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }

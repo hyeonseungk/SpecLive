@@ -1,20 +1,22 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Tables } from '@/types/database'
-import { supabase } from '@/lib/supabase-browser'
-import { Button } from '@/components/ui/button'
-import { showError } from '@/lib/error-store'
-import { showSimpleSuccess } from '@/lib/success-store'
-import { useT } from '@/lib/i18n'
-import { useLangStore } from '@/lib/i18n-store'
+import { useState } from "react";
+import { Tables } from "@/types/database";
+import { supabase } from "@/lib/supabase-browser";
+import { Button } from "@/components/ui/button";
+import { showError } from "@/lib/error-store";
+import { showSimpleSuccess } from "@/lib/success-store";
+import { useT } from "@/lib/i18n";
+import { useLangStore } from "@/lib/i18n-store";
 
 interface GlossaryEditModalProps {
-  glossary: Tables<'glossaries'>
-  projectId: string
-  onClose: () => void
-  onGlossaryUpdated: (glossaryWithLinks: Tables<'glossaries'> & { glossary_links?: any[] }) => void
-  onGlossaryDeleted: (glossaryId: string, deletedSequence: number) => void
+  glossary: Tables<"glossaries">;
+  projectId: string;
+  onClose: () => void;
+  onGlossaryUpdated: (
+    glossaryWithLinks: Tables<"glossaries"> & { glossary_links?: any[] }
+  ) => void;
+  onGlossaryDeleted: (glossaryId: string, deletedSequence: number) => void;
 }
 
 export default function GlossaryEditModal({
@@ -24,142 +26,165 @@ export default function GlossaryEditModal({
   onGlossaryUpdated,
   onGlossaryDeleted,
 }: GlossaryEditModalProps) {
-  const t = useT()
-  const { locale } = useLangStore()
+  const t = useT();
+  const { locale } = useLangStore();
 
   // local states for edit form
-  const [editName, setEditName] = useState(glossary.name)
-  const [editDefinition, setEditDefinition] = useState(glossary.definition)
-  const [editExamples, setEditExamples] = useState(glossary.examples || '')
+  const [editName, setEditName] = useState(glossary.name);
+  const [editDefinition, setEditDefinition] = useState(glossary.definition);
+  const [editExamples, setEditExamples] = useState(glossary.examples || "");
   const [editGithubUrls, setEditGithubUrls] = useState<string[]>(
-    ((glossary as any).glossary_links || []).map((l: any) => l.url) || [''],
-  )
-  const [editSaving, setEditSaving] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    ((glossary as any).glossary_links || []).map((l: any) => l.url) || [""]
+  );
+  const [editSaving, setEditSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const addEditGithubUrl = () => setEditGithubUrls((prev) => [...prev, ''])
+  const addEditGithubUrl = () => setEditGithubUrls((prev) => [...prev, ""]);
   const removeEditGithubUrl = (index: number) =>
-    setEditGithubUrls((prev) => prev.filter((_, i) => i !== index))
+    setEditGithubUrls((prev) => prev.filter((_, i) => i !== index));
   const updateEditGithubUrl = (index: number, value: string) =>
-    setEditGithubUrls((prev) => prev.map((url, i) => (i === index ? value : url)))
+    setEditGithubUrls((prev) =>
+      prev.map((url, i) => (i === index ? value : url))
+    );
 
   /* ----------------------------- Update glossary ---------------------------- */
   const updateGlossary = async () => {
     if (!editName.trim() || !editDefinition.trim()) {
-      showError(t('glossary.input_error_title'), t('glossary.input_error_desc'))
-      return
+      showError(
+        t("glossary.input_error_title"),
+        t("glossary.input_error_desc")
+      );
+      return;
     }
 
-    setEditSaving(true)
+    setEditSaving(true);
     try {
       // 1. update main glossary row
       const { data: updatedGlossary, error: updateError } = await supabase
-        .from('glossaries')
+        .from("glossaries")
         .update({
           name: editName.trim(),
           definition: editDefinition.trim(),
           examples: editExamples.trim() || null,
         })
-        .eq('id', glossary.id)
+        .eq("id", glossary.id)
         .select()
-        .single()
+        .single();
 
-      if (updateError) throw updateError
+      if (updateError) throw updateError;
 
       // 2. delete existing links
       const { error: deleteLinksError } = await supabase
-        .from('glossary_links')
+        .from("glossary_links")
         .delete()
-        .eq('glossary_id', glossary.id)
-      if (deleteLinksError) throw deleteLinksError
+        .eq("glossary_id", glossary.id);
+      if (deleteLinksError) throw deleteLinksError;
 
       // 3. insert new links (non-empty)
-      const validUrls = editGithubUrls.filter((u) => u.trim())
+      const validUrls = editGithubUrls.filter((u) => u.trim());
       if (validUrls.length) {
-        const urlRows = validUrls.map((url) => ({ glossary_id: glossary.id, url: url.trim() }))
-        const { error: insertErr } = await supabase.from('glossary_links').insert(urlRows)
-        if (insertErr) throw insertErr
+        const urlRows = validUrls.map((url) => ({
+          glossary_id: glossary.id,
+          url: url.trim(),
+        }));
+        const { error: insertErr } = await supabase
+          .from("glossary_links")
+          .insert(urlRows);
+        if (insertErr) throw insertErr;
       }
 
       const glossaryWithLinks = {
         ...updatedGlossary,
         glossary_links: validUrls.map((url) => ({ url })),
-      }
+      };
 
-      onGlossaryUpdated(glossaryWithLinks)
-      showSimpleSuccess(t('glossary.update_success'))
-      onClose()
+      onGlossaryUpdated(glossaryWithLinks);
+      showSimpleSuccess(t("glossary.update_success"));
+      onClose();
     } catch (err) {
-      console.error('Error updating glossary:', err)
-      showError(t('glossary.update_error_title'), t('glossary.update_error_desc'))
+      console.error("Error updating glossary:", err);
+      showError(
+        t("glossary.update_error_title"),
+        t("glossary.update_error_desc")
+      );
     } finally {
-      setEditSaving(false)
+      setEditSaving(false);
     }
-  }
+  };
 
   /* ----------------------------- Delete glossary ---------------------------- */
   const deleteGlossary = async () => {
-    setEditSaving(true)
+    setEditSaving(true);
     try {
-      const deletedSequence = glossary.sequence
+      const deletedSequence = glossary.sequence;
 
       // 1. delete links
       const { error: delLinksErr } = await supabase
-        .from('glossary_links')
+        .from("glossary_links")
         .delete()
-        .eq('glossary_id', glossary.id)
-      if (delLinksErr) throw delLinksErr
+        .eq("glossary_id", glossary.id);
+      if (delLinksErr) throw delLinksErr;
 
       // 2. delete glossary itself
       const { error: delGlossaryErr } = await supabase
-        .from('glossaries')
+        .from("glossaries")
         .delete()
-        .eq('id', glossary.id)
-      if (delGlossaryErr) throw delGlossaryErr
+        .eq("id", glossary.id);
+      if (delGlossaryErr) throw delGlossaryErr;
 
       // 3. shift sequences for following glossaries
       const { data: higherSeq, error: fetchErr } = await supabase
-        .from('glossaries')
-        .select('id, sequence')
-        .eq('project_id', projectId)
-        .gt('sequence', deletedSequence)
-        .order('sequence', { ascending: true })
-      if (fetchErr) throw fetchErr
+        .from("glossaries")
+        .select("id, sequence")
+        .eq("project_id", projectId)
+        .gt("sequence", deletedSequence)
+        .order("sequence", { ascending: true });
+      if (fetchErr) throw fetchErr;
 
       if (higherSeq && higherSeq.length) {
         const promises = higherSeq.map((g) =>
-          supabase.from('glossaries').update({ sequence: g.sequence - 1 }).eq('id', g.id),
-        )
-        await Promise.all(promises)
+          supabase
+            .from("glossaries")
+            .update({ sequence: g.sequence - 1 })
+            .eq("id", g.id)
+        );
+        await Promise.all(promises);
       }
 
-      onGlossaryDeleted(glossary.id, deletedSequence)
-      showSimpleSuccess(t('glossary.delete_success'))
-      onClose()
+      onGlossaryDeleted(glossary.id, deletedSequence);
+      showSimpleSuccess(t("glossary.delete_success"));
+      onClose();
     } catch (err) {
-      console.error('Error deleting glossary:', err)
-      showError(t('glossary.delete_error_title'), t('glossary.delete_error_desc'))
+      console.error("Error deleting glossary:", err);
+      showError(
+        t("glossary.delete_error_title"),
+        t("glossary.delete_error_desc")
+      );
     } finally {
-      setEditSaving(false)
-      setShowDeleteConfirm(false)
+      setEditSaving(false);
+      setShowDeleteConfirm(false);
     }
-  }
+  };
 
   /* ---------------------------------- JSX ---------------------------------- */
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h3 className="text-lg font-semibold mb-4">{t('glossary.edit_modal_title')}</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          {t("glossary.edit_modal_title")}
+        </h3>
 
         <div className="space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">{t('glossary.name_label')}</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("glossary.name_label")}
+            </label>
             <input
               type="text"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              placeholder={t('glossary.name_placeholder')}
+              placeholder={t("glossary.name_placeholder")}
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               disabled={editSaving}
             />
@@ -167,11 +192,13 @@ export default function GlossaryEditModal({
 
           {/* Definition */}
           <div>
-            <label className="block text-sm font-medium mb-1">{t('glossary.definition_label')}</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("glossary.definition_label")}
+            </label>
             <textarea
               value={editDefinition}
               onChange={(e) => setEditDefinition(e.target.value)}
-              placeholder={t('glossary.definition_placeholder')}
+              placeholder={t("glossary.definition_placeholder")}
               className="w-full p-2 border rounded-md h-24 resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               disabled={editSaving}
             />
@@ -179,12 +206,14 @@ export default function GlossaryEditModal({
 
           {/* Examples */}
           <div>
-            <label className="block text-sm font-medium mb-1">{t('glossary.examples_label')}</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("glossary.examples_label")}
+            </label>
             <input
               type="text"
               value={editExamples}
               onChange={(e) => setEditExamples(e.target.value)}
-              placeholder={t('glossary.examples_placeholder')}
+              placeholder={t("glossary.examples_placeholder")}
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               disabled={editSaving}
             />
@@ -193,18 +222,20 @@ export default function GlossaryEditModal({
           {/* GitHub URLs */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium">{t('glossary.related_url_label')}</label>
+              <label className="block text-sm font-medium">
+                {t("glossary.related_url_label")}
+              </label>
               <button
                 type="button"
                 onClick={addEditGithubUrl}
                 disabled={editSaving}
                 className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-400"
               >
-                {t('glossary.add_url')}
+                {t("glossary.add_url")}
               </button>
             </div>
             <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
-              {t('glossary.related_url_desc')}
+              {t("glossary.related_url_desc")}
             </div>
             <div className="space-y-2">
               {editGithubUrls.map((url, index) => (
@@ -213,7 +244,7 @@ export default function GlossaryEditModal({
                     type="url"
                     value={url}
                     onChange={(e) => updateEditGithubUrl(index, e.target.value)}
-                    placeholder={t('glossary.related_url_placeholder')}
+                    placeholder={t("glossary.related_url_placeholder")}
                     className="flex-1 p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     disabled={editSaving}
                   />
@@ -223,7 +254,7 @@ export default function GlossaryEditModal({
                       onClick={() => removeEditGithubUrl(index)}
                       disabled={editSaving}
                       className="px-2 py-1 text-red-600 hover:text-red-800 disabled:text-gray-400"
-                      title={t('glossary.remove_url')}
+                      title={t("glossary.remove_url")}
                     >
                       ×
                     </button>
@@ -241,17 +272,19 @@ export default function GlossaryEditModal({
             onClick={() => setShowDeleteConfirm(true)}
             disabled={editSaving}
           >
-            {t('buttons.delete')}
+            {t("buttons.delete")}
           </Button>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose} disabled={editSaving}>
-              {t('buttons.cancel')}
+              {t("buttons.cancel")}
             </Button>
             <Button
               onClick={updateGlossary}
-              disabled={editSaving || !editName.trim() || !editDefinition.trim()}
+              disabled={
+                editSaving || !editName.trim() || !editDefinition.trim()
+              }
             >
-              {editSaving ? t('glossary.updating') : t('glossary.update')}
+              {editSaving ? t("glossary.updating") : t("glossary.update")}
             </Button>
           </div>
         </div>
@@ -261,19 +294,26 @@ export default function GlossaryEditModal({
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
-            <h3 className="text-lg font-semibold mb-4">{t('glossary.delete_confirm_title')}</h3>
-            <p className="text-muted-foreground mb-6">{t('glossary.delete_confirm_desc')}</p>
+            <h3 className="text-lg font-semibold mb-4">
+              {t("glossary.delete_confirm_title")}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {t("glossary.delete_confirm_desc")}
+            </p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
-                {t('buttons.cancel')}
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                {t("buttons.cancel")}
               </Button>
               <Button variant="destructive" onClick={deleteGlossary}>
-                {t('buttons.delete')}
+                {t("buttons.delete")}
               </Button>
             </div>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

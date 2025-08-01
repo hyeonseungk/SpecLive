@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   AlertDialog,
@@ -8,20 +8,20 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { useErrorStore } from '@/lib/error-store'
-import { useT } from '@/lib/i18n'
+} from "@/components/ui/alert-dialog";
+import { useErrorStore } from "@/lib/error-store";
+import { useT } from "@/lib/i18n";
 
 export function ErrorModal() {
-  const { isOpen, title, message, onConfirm, hideError } = useErrorStore()
-  const t = useT()
+  const { isOpen, title, message, onConfirm, hideError } = useErrorStore();
+  const t = useT();
 
   const handleConfirm = () => {
     if (onConfirm) {
-      onConfirm()
+      onConfirm();
     }
-    hideError()
-  }
+    hideError();
+  };
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && hideError()}>
@@ -37,10 +37,10 @@ export function ErrorModal() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction onClick={handleConfirm}>
-            {t('buttons.ok')}
+            {t("buttons.ok")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
-} 
+  );
+}

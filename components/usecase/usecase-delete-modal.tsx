@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 
 interface UsecaseDeleteModalProps {
-  isOpen: boolean
-  usecaseName: string
-  onClose: () => void
-  onDelete: () => void
-  deleting: boolean
+  isOpen: boolean;
+  usecaseName: string;
+  onClose: () => void;
+  onDelete: () => void;
+  deleting: boolean;
 }
 
 export default function UsecaseDeleteModal({
@@ -17,7 +17,7 @@ export default function UsecaseDeleteModal({
   onDelete,
   deleting,
 }: UsecaseDeleteModalProps) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -35,10 +35,10 @@ export default function UsecaseDeleteModal({
             취소
           </Button>
           <Button variant="destructive" onClick={onDelete} disabled={deleting}>
-            {deleting ? '삭제 중...' : '삭제'}
+            {deleting ? "삭제 중..." : "삭제"}
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }

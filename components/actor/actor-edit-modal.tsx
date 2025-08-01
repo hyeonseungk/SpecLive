@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button'
-import { useT } from '@/lib/i18n'
+import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 interface ActorEditModalProps {
-  isOpen: boolean
-  onClose: () => void
-  editActorName: string
-  setEditActorName: (name: string) => void
-  onUpdate: () => void
-  saving: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  editActorName: string;
+  setEditActorName: (name: string) => void;
+  onUpdate: () => void;
+  saving: boolean;
 }
 
 export default function ActorEditModal({
@@ -20,9 +20,9 @@ export default function ActorEditModal({
   onUpdate,
   saving,
 }: ActorEditModalProps) {
-  const t = useT()
+  const t = useT();
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -46,13 +46,13 @@ export default function ActorEditModal({
 
         <div className="flex justify-end gap-2 mt-6">
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            {t('buttons.cancel')}
+            {t("buttons.cancel")}
           </Button>
           <Button onClick={onUpdate} disabled={saving || !editActorName.trim()}>
-            {saving ? '수정 중...' : '액터 수정'}
+            {saving ? "수정 중..." : "액터 수정"}
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }

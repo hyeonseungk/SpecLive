@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   AlertDialog,
@@ -8,20 +8,20 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { useSuccessStore } from '@/lib/success-store'
-import { useT } from '@/lib/i18n'
+} from "@/components/ui/alert-dialog";
+import { useSuccessStore } from "@/lib/success-store";
+import { useT } from "@/lib/i18n";
 
 export function SuccessModal() {
-  const { isOpen, title, message, onConfirm, hideSuccess } = useSuccessStore()
-  const t = useT()
+  const { isOpen, title, message, onConfirm, hideSuccess } = useSuccessStore();
+  const t = useT();
 
   const handleConfirm = () => {
     if (onConfirm) {
-      onConfirm()
+      onConfirm();
     }
-    hideSuccess()
-  }
+    hideSuccess();
+  };
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && hideSuccess()}>
@@ -36,11 +36,14 @@ export function SuccessModal() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={handleConfirm} className="bg-green-600 hover:bg-green-700">
-            {t('buttons.ok')}
+          <AlertDialogAction
+            onClick={handleConfirm}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            {t("buttons.ok")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
-} 
+  );
+}

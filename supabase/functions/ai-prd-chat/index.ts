@@ -31,16 +31,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     body = await req.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: "Invalid JSON body" }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
-  const { messages, language = 'ko' } = body as {
+  const { messages, language = "ko" } = body as {
     messages?: Array<{ role: string; content: string }>;
     language?: string;
   };
@@ -50,7 +47,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
+      }
     );
   }
 
@@ -58,7 +55,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   // 3. Generate language-specific system prompt
   // ------------------------------------------------------------------
   const getLanguagePrompt = (lang: string) => {
-    if (lang.includes('en')) {
+    if (lang.includes("en")) {
       return `1. You are an excellent PM and PRD (Product Requirements Document) writing expert in the IT industry.
 2. Based on the conversation with the user, derive a clear, specific, and detailed PRD.
 3. Ask the user between 10 to 20 questions (judge the number of questions according to the service the user wants to create), and ask only one question at a time. Don't tell them which question number it is. And it's good to respond to user answers from time to time and ask additional questions about those answers.
@@ -89,30 +86,27 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   let openaiRes: Response;
   try {
-    openaiRes = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          stream: true,
-          temperature: 0.7,
-          max_tokens: 10240,
-          messages: [
-            {
-              role: "system",
-              content: getLanguagePrompt(language),
-            },
-            ...messages,
-          ],
-        }),
-        signal: abortController.signal,
+    openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
       },
-    );
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 10240,
+        messages: [
+          {
+            role: "system",
+            content: getLanguagePrompt(language),
+          },
+          ...messages,
+        ],
+      }),
+      signal: abortController.signal,
+    });
     clearTimeout(timeoutId);
   } catch (error) {
     clearTimeout(timeoutId);
@@ -122,18 +116,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
+      }
     );
   }
 
   if (!openaiRes.ok || !openaiRes.body) {
-    return new Response(
-      JSON.stringify({ error: "Failed to call OpenAI" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return new Response(JSON.stringify({ error: "Failed to call OpenAI" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   // ──────────────────────────────────────────────────────────────────
@@ -144,45 +135,47 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const decoder = new TextDecoder();
       const encoder = new TextEncoder();
       const reader = openaiRes.body!.getReader();
-      let buffer = '';
+      let buffer = "";
       let lastActivity = Date.now();
       const startTime = Date.now();
-      
+
       // Keep-alive mechanism to prevent connection timeout
       const keepAliveInterval = setInterval(() => {
         const now = Date.now();
         const timeSinceLastActivity = now - lastActivity;
         const totalRuntime = now - startTime;
-        
+
         // Log progress every 30 seconds
         if (totalRuntime % 30000 < 1000) {
-          console.log(`Streaming progress: ${Math.floor(totalRuntime / 1000)}s`);
+          console.log(
+            `Streaming progress: ${Math.floor(totalRuntime / 1000)}s`
+          );
         }
-        
+
         // If no activity for 30 seconds, send a heartbeat
         if (timeSinceLastActivity > 30000) {
           try {
-            controller.enqueue(encoder.encode(''));
+            controller.enqueue(encoder.encode(""));
             lastActivity = now;
           } catch (e) {
-            console.log('Keep-alive failed, connection may be closed:', e);
+            console.log("Keep-alive failed, connection may be closed:", e);
             clearInterval(keepAliveInterval);
           }
         }
-        
+
         // Safety: Close after 130 seconds (before Edge Function timeout)
         if (totalRuntime > 130000) {
-          console.log('Approaching timeout limit, closing stream gracefully');
+          console.log("Approaching timeout limit, closing stream gracefully");
           clearInterval(keepAliveInterval);
           controller.close();
         }
       }, 5000); // Check every 5 seconds
-      
+
       try {
         while (true) {
           const { value, done } = await reader.read();
           if (done) {
-            console.log('OpenAI stream completed normally');
+            console.log("OpenAI stream completed normally");
             break;
           }
 
@@ -190,13 +183,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
           // Decode and append to buffer
           buffer += decoder.decode(value, { stream: true });
-          
+
           // Process complete lines
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || ''; // Keep incomplete line in buffer
-          
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || ""; // Keep incomplete line in buffer
+
           let shouldClose = false;
-          
+
           for (const line of lines) {
             if (!line.startsWith("data: ")) {
               console.log('Line not starting with "data: "', line);
@@ -204,9 +197,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
             }
             const json = line.replace(/^data: /, "");
             if (json === "[DONE]") {
-              console.log('Received [DONE] from OpenAI');
+              console.log("Received [DONE] from OpenAI");
               // Send end-of-stream marker to client instead of closing immediately
-              controller.enqueue(encoder.encode('\n__STREAM_END__\n'));
+              controller.enqueue(encoder.encode("\n__STREAM_END__\n"));
               shouldClose = true;
               break; // Stop processing more lines
             }
@@ -217,13 +210,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
                 // Immediately enqueue content for faster streaming
                 controller.enqueue(encoder.encode(content));
               } else {
-                console.log('No content in payload', payload);
+                console.log("No content in payload", payload);
               }
             } catch (parseError) {
-              console.warn('Failed to parse SSE line:', json, parseError);
+              console.warn("Failed to parse SSE line:", json, parseError);
             }
           }
-          
+
           // After sending end marker, let client handle stream termination
           if (shouldClose) {
             clearInterval(keepAliveInterval);
@@ -239,19 +232,19 @@ Deno.serve(async (req: Request): Promise<Response> => {
           }
         }
       } catch (err) {
-        console.error('Streaming error occurred:', err);
+        console.error("Streaming error occurred:", err);
         clearInterval(keepAliveInterval);
         // Try to send error info to client if possible
         try {
-          controller.enqueue(encoder.encode('\n\n[Connection interrupted]'));
+          controller.enqueue(encoder.encode("\n\n[Connection interrupted]"));
         } catch (e) {
-          console.log('Could not send error message to client:', e);
+          console.log("Could not send error message to client:", e);
         }
       } finally {
         clearInterval(keepAliveInterval);
         reader.releaseLock();
         controller.close();
-        console.log('Stream cleanup completed');
+        console.log("Stream cleanup completed");
       }
     },
   });
@@ -264,10 +257,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
       ...corsHeaders,
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-store, must-revalidate",
-      "Connection": "keep-alive",
+      Connection: "keep-alive",
       "Keep-Alive": "timeout=300, max=1000",
       "X-Accel-Buffering": "no", // Disable nginx buffering
       "Transfer-Encoding": "chunked",
     },
   });
-}); 
+});

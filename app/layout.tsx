@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import type { Metadata } from 'next'
-import './globals.css'
-import { ErrorModal } from '@/components/common/error-modal'
-import { SuccessModal } from '@/components/common/success-modal'
+import type { Metadata } from "next";
+import "./globals.css";
+import { ErrorModal } from "@/components/common/error-modal";
+import { SuccessModal } from "@/components/common/success-modal";
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="ko">
@@ -21,12 +21,10 @@ export default function RootLayout({
         />
       </head>
       <body className="font-pretendard">
-        <div className="min-h-screen bg-background">
-          {children}
-        </div>
+        <div className="min-h-screen bg-background">{children}</div>
         <ErrorModal />
         <SuccessModal />
       </body>
     </html>
-  )
-} 
+  );
+}

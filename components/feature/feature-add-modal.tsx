@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 
 interface FeatureAddModalProps {
-  isOpen: boolean
-  featureName: string
-  setFeatureName: (val: string) => void
-  onClose: () => void
-  onAdd: () => void
-  saving: boolean
-  selectedUsecaseName?: string
+  isOpen: boolean;
+  featureName: string;
+  setFeatureName: (val: string) => void;
+  onClose: () => void;
+  onAdd: () => void;
+  saving: boolean;
+  selectedUsecaseName?: string;
 }
 
 export default function FeatureAddModal({
@@ -21,7 +21,7 @@ export default function FeatureAddModal({
   saving,
   selectedUsecaseName,
 }: FeatureAddModalProps) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -30,9 +30,11 @@ export default function FeatureAddModal({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              기능 이름{' '}
+              기능 이름{" "}
               {selectedUsecaseName && (
-                <span className="text-xs text-gray-500 font-normal">({selectedUsecaseName} 유즈케이스)</span>
+                <span className="text-xs text-gray-500 font-normal">
+                  ({selectedUsecaseName} 유즈케이스)
+                </span>
               )}
             </label>
             <input
@@ -50,10 +52,10 @@ export default function FeatureAddModal({
             취소
           </Button>
           <Button onClick={onAdd} disabled={saving || !featureName.trim()}>
-            {saving ? '추가 중...' : '추가'}
+            {saving ? "추가 중..." : "추가"}
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
