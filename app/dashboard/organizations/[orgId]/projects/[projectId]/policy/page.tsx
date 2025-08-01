@@ -24,7 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Link as LinkIcon } from "lucide-react";
 import { showError, showSimpleError } from "@/lib/error-store";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { useT } from "@/lib/i18n";
@@ -132,7 +132,7 @@ function SortableFeatureCard({
 
           {/* 편집/삭제 버튼 (호버 시에만 표시) */}
           {membership?.role === "admin" && (
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1 flex-1 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -176,6 +176,17 @@ function SortableFeatureCard({
                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                   />
                 </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(window.location.href);
+                  showSimpleSuccess("링크가 복사되었습니다.");
+                }}
+                className="p-1 hover:bg-gray-200 rounded transition-colors ml-auto"
+                title="링크 복사"
+              >
+                <LinkIcon className="w-3 h-3 text-gray-600" />
               </button>
             </div>
           )}
