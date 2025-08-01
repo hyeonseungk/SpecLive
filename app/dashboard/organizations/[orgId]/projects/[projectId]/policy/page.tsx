@@ -7,6 +7,7 @@ import { Tables } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import ActorAddModal from '@/components/actor/actor-add-modal'
 import UsecaseAddModal from '@/components/usecase/usecase-add-modal'
+import ActorEditModal from '@/components/actor/actor-edit-modal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
@@ -3261,7 +3262,19 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         )}
 
         {/* 액터 편집 모달 */}
-        {showEditActorModal && editingActor && membership?.role === 'admin' && (
+        <ActorEditModal
+          isOpen={showEditActorModal && !!editingActor && membership?.role === 'admin'}
+          onClose={() => {
+            setShowEditActorModal(false)
+            setEditingActor(null)
+            setEditActorName('')
+          }}
+          editActorName={editActorName}
+          setEditActorName={setEditActorName}
+          onUpdate={updateActor}
+          saving={editActorSaving}
+        />
+        {/*
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
               <h3 className="text-lg font-semibold mb-4">액터 편집</h3>
@@ -3302,7 +3315,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </div>
             </div>
           </div>
-        )}
+        */}
 
         {/* 유즈케이스 편집 모달 */}
         {showEditUsecaseModal && editingUsecase && membership?.role === 'admin' && (
