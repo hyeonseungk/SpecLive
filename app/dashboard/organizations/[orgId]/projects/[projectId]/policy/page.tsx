@@ -3,6 +3,7 @@
 import ActorAddModal from "@/components/actor/actor-add-modal";
 import ActorDeleteModal from "@/components/actor/actor-delete-modal";
 import ActorEditModal from "@/components/actor/actor-edit-modal";
+import SortableActorCard from "@/components/actor/sortable-actor-card";
 import FeatureAddModal from "@/components/feature/feature-add-modal";
 import FeatureDeleteModal from "@/components/feature/feature-delete-modal";
 import FeatureEditModal from "@/components/feature/feature-edit-modal";
@@ -13,12 +14,6 @@ import PolicyEditModal from "@/components/policy/policy-edit-modal";
 import SortablePolicyCard from "@/components/policy/sortable-policy-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import SortableUsecaseCard from "@/components/usecase/sortable-usecase-card";
 import UsecaseAddModal from "@/components/usecase/usecase-add-modal";
 import UsecaseDeleteModal from "@/components/usecase/usecase-delete-modal";
@@ -45,7 +40,6 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -377,7 +371,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         .from("actors")
         .select("*")
         .eq("project_id", projectId)
-        .order("created_at", { ascending: true });
+        .order("sequence", { ascending: true });
 
       if (error) throw error;
 
@@ -718,12 +712,22 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
     setActorSaving(true);
     try {
+      // Determine next sequence value
+      const { data: maxSequenceData, error: maxSequenceError } = await supabase
+        .from("actors")
+        .select("sequence")
+        .eq("project_id", project.id)
+        .order("sequence", { ascending: false })
+        .limit(1);
+      if (maxSequenceError) throw maxSequenceError;
+      const nextSequence = (maxSequenceData?.[0]?.sequence || 0) + 1;
       const { data: actor, error } = await supabase
         .from("actors")
         .insert({
           project_id: project.id,
           name: actorName.trim(),
           author_id: user.id,
+          sequence: nextSequence,
         })
         .select()
         .single();
@@ -1962,6 +1966,43 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     return contentMatches || termMatches;
   });
 
+  // Add handleActorDragEnd next to other drag handlers
+  /**
+   * 드래그 엔드 핸들러 (액터 순서 변경)
+   */
+  const handleActorDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!project || !over || active.id === over.id) return;
+    const oldIndex = actors.findIndex((item) => item.id === active.id);
+    const newIndex = actors.findIndex((item) => item.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    // Update local sequence
+    const newActors = arrayMove(actors, oldIndex, newIndex).map(
+      (actor, idx) => ({
+        ...actor,
+        sequence: idx + 1,
+      })
+    );
+    setActors(newActors);
+    // Persist to Supabase
+    try {
+      const updatePromises = newActors.map((actor, idx) =>
+        supabase
+          .from("actors")
+          .update({ sequence: idx + 1 })
+          .eq("id", actor.id)
+      );
+      await Promise.all(updatePromises);
+    } catch (err) {
+      console.error("Error updating actor sequence:", err);
+      showError(
+        "액터 순서 변경 실패",
+        "액터 순서를 변경하는 중 오류가 발생했습니다."
+      );
+      await loadActorsForProject(params.projectId);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -2016,98 +2057,44 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   {t("actor.add_button")}
                 </Button>
               ) : (
-                <DropdownMenu
-                  open={actorDropdownOpen}
-                  onOpenChange={setActorDropdownOpen}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleActorDragEnd}
                 >
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="justify-between min-w-[150px] text-base h-10 px-4"
-                    >
-                      {selectedActor?.name || t("actor.select_placeholder")}
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="min-w-[150px]"
-                    onCloseAutoFocus={(e) => e.preventDefault()}
+                  <SortableContext
+                    items={actors.map((actor) => actor.id)}
+                    strategy={horizontalListSortingStrategy}
                   >
-                    {actors.map((actor) => (
-                      <div key={actor.id} className="flex items-center group">
-                        <DropdownMenuItem
-                          onClick={() => handleActorSelect(actor)}
-                          className="text-base py-2 flex-1 pr-1"
-                        >
-                          {actor.name}
-                        </DropdownMenuItem>
-                        {membership?.role === "admin" && (
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pr-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditActor(actor);
-                              }}
-                              className="p-1 hover:bg-gray-200 rounded transition-colors"
-                              title="액터 편집"
-                            >
-                              <svg
-                                className="w-3 h-3 text-gray-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteActor(actor);
-                              }}
-                              className="p-1 hover:bg-red-100 rounded transition-colors"
-                              title="액터 삭제"
-                            >
-                              <svg
-                                className="w-3 h-3 text-red-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    {actors.length > 0 && (
-                      <>
-                        <div className="h-px bg-gray-200 my-1" />
-                        <DropdownMenuItem
-                          onClick={() => setShowActorModal(true)}
-                          disabled={membership?.role !== "admin"}
-                          className="text-base py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        >
-                          {t("actor.add_new_button")}
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    <div className="flex flex-wrap gap-2">
+                      {actors
+                        .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+                        .map((actor) => (
+                          <SortableActorCard
+                            key={actor.id}
+                            actor={actor}
+                            onSelect={handleActorSelect}
+                            onEdit={handleEditActor}
+                            onDelete={handleDeleteActor}
+                            isSelected={selectedActor?.id === actor.id}
+                            membership={membership}
+                          />
+                        ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               )}
             </div>
+            {membership?.role === "admin" && actors.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowActorModal(true)}
+                className="text-sm px-3 py-1"
+              >
+                {t("actor.add_new_button")}
+              </Button>
+            )}
 
             {/* 유즈케이스 선택 */}
             {selectedActor && (
