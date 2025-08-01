@@ -2029,12 +2029,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       const el = document.getElementById(`policy-${policyId}`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
+        // highlight effect
         el.classList.add("ring-2", "ring-primary", "ring-opacity-50");
         setTimeout(() => {
           el.classList.remove("ring-2", "ring-primary", "ring-opacity-50");
         }, 3000);
       }
-    }, 300);
+    }, 600);
   }, [featurePolicies, searchParams]);
 
   if (loading) {
