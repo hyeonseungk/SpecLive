@@ -2042,17 +2042,29 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         <div className="mb-6 p-6 bg-gray-200 rounded-lg">
           <div className="flex flex-col gap-6">
             {/* 액터 선택 */}
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center justify-between">
               <span className="text-base font-semibold text-gray-800">
                 {t("actor.label")}
               </span>
+              {membership?.role === "admin" && actors.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowActorModal(true)}
+                  className="text-sm px-3 py-1"
+                >
+                  {t("actor.add_new_button")}
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
               {actors.length === 0 ? (
                 <Button
                   variant="outline"
                   size="default"
                   onClick={() => setShowActorModal(true)}
                   disabled={membership?.role !== "admin"}
-                  className="text-base px-4 py-2"
+                  className="text-base px-4 py-2 self-start"
                 >
                   {t("actor.add_button")}
                 </Button>
@@ -2085,16 +2097,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </DndContext>
               )}
             </div>
-            {membership?.role === "admin" && actors.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowActorModal(true)}
-                className="text-sm px-3 py-1"
-              >
-                {t("actor.add_new_button")}
-              </Button>
-            )}
 
             {/* 유즈케이스 선택 */}
             {selectedActor && (
