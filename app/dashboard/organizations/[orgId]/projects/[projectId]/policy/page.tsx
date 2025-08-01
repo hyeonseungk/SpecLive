@@ -16,6 +16,7 @@ import FeatureEditModal from "@/components/feature/feature-edit-modal";
 import FeatureDeleteModal from "@/components/feature/feature-delete-modal";
 import PolicyAddModal from "@/components/policy/policy-add-modal";
 import PolicyEditModal from "@/components/policy/policy-edit-modal";
+import GlossaryViewModal from "@/components/glossary/glossary-view-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -189,12 +190,14 @@ interface SortablePolicyCardProps {
   policy: FeaturePolicy;
   onEdit: (policy: FeaturePolicy) => void;
   membership: Membership | null;
+  onGlossaryClick: (glossaryId: string) => void;
 }
 
 function SortablePolicyCard({
   policy,
   onEdit,
   membership,
+  onGlossaryClick,
 }: SortablePolicyCardProps) {
   const {
     attributes,
@@ -290,7 +293,11 @@ function SortablePolicyCard({
               {policy.policy_terms.map((term, index) => (
                 <span
                   key={index}
-                  className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onGlossaryClick(term.glossary_id);
+                  }}
+                  className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md cursor-pointer hover:bg-blue-200"
                 >
                   {term.glossaries?.name}
                 </span>
@@ -571,6 +578,11 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   // 용어 관련 상태
   const [glossaries, setGlossaries] = useState<Tables<"glossaries">[]>([]);
   const [glossariesLoading, setGlossariesLoading] = useState(false);
+  // glossary view modal state
+  const [showGlossaryModal, setShowGlossaryModal] = useState(false);
+  const [viewingGlossaryId, setViewingGlossaryId] = useState<string | null>(
+    null
+  );
 
   // 모든 기능 관련 상태 (정책 모달용)
   const [allFeatures, setAllFeatures] = useState<
@@ -2674,6 +2686,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                               policy={policy}
                               onEdit={handleEditPolicy}
                               membership={membership}
+                              onGlossaryClick={(gid) => {
+                                setViewingGlossaryId(gid);
+                                setShowGlossaryModal(true);
+                              }}
                             />
                           ))}
                         </div>
@@ -2890,6 +2906,15 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         }}
         onUpdate={updateUsecase}
         saving={editUsecaseSaving}
+      />
+
+      <GlossaryViewModal
+        isOpen={showGlossaryModal}
+        glossaryId={viewingGlossaryId}
+        onClose={() => {
+          setShowGlossaryModal(false);
+          setViewingGlossaryId(null);
+        }}
       />
 
       <UsecaseDeleteModal
