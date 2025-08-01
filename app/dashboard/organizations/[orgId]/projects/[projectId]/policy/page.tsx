@@ -2003,6 +2003,16 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     }
   };
 
+  // Scroll to the selected feature card when selection changes
+  useEffect(() => {
+    if (selectedFeature) {
+      const el = document.getElementById(`feature-${selectedFeature.id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [selectedFeature]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
