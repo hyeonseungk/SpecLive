@@ -44,12 +44,12 @@ export default function SortableActorCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={isDragging ? "opacity-50" : ""}
+      className={`${isDragging ? "opacity-50" : ""} w-fit`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`relative group p-2 rounded cursor-pointer text-sm transition-colors ${
+        className={`relative group p-2 rounded cursor-pointer text-sm transition-colors w-fit max-w-[560px] whitespace-normal ${
           isSelected
             ? "bg-primary text-primary-foreground"
             : "bg-white hover:bg-gray-100"
@@ -76,7 +76,7 @@ export default function SortableActorCard({
 
         <div className="flex items-center justify-between">
           <div
-            className={`flex items-center gap-2 flex-1 ${
+            className={`flex items-center gap-2 w-fit ${
               membership?.role === "admin" ? "ml-4" : ""
             }`}
           >
@@ -86,7 +86,7 @@ export default function SortableActorCard({
                 {actor.sequence}
               </div>
             )}
-            <span className="flex-1 text-base">{actor.name}</span>
+            <span className="text-base">{actor.name}</span>
           </div>
 
           {/* Edit/Delete/Copy buttons (admin only) */}
