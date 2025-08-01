@@ -11,6 +11,9 @@ import ActorEditModal from '@/components/actor/actor-edit-modal'
 import ActorDeleteModal from '@/components/actor/actor-delete-modal'
 import UsecaseEditModal from '@/components/usecase/usecase-edit-modal'
 import UsecaseDeleteModal from '@/components/usecase/usecase-delete-modal'
+import FeatureAddModal from '@/components/feature/feature-add-modal'
+import FeatureEditModal from '@/components/feature/feature-edit-modal'
+import FeatureDeleteModal from '@/components/feature/feature-delete-modal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
@@ -2470,7 +2473,16 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         />
 
         {/* 기능 추가 모달 */}
-        {showFeatureModal && (
+        <FeatureAddModal
+          isOpen={showFeatureModal}
+          featureName={featureName}
+          setFeatureName={setFeatureName}
+          onClose={() => { setShowFeatureModal(false); setFeatureName(''); }}
+          onAdd={addFeature}
+          saving={featureSaving}
+          selectedUsecaseName={selectedUsecase?.name}
+        />
+        {/*
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
               <h3 className="text-lg font-semibold mb-4">기능 추가</h3>
@@ -2517,7 +2529,16 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         )}
 
         {/* 기능 편집 모달 */}
-        {showEditFeatureModal && editingFeature && (
+        <FeatureEditModal
+          isOpen={showEditFeatureModal && !!editingFeature}
+          featureName={editFeatureName}
+          setFeatureName={setEditFeatureName}
+          onClose={() => { setShowEditFeatureModal(false); setEditingFeature(null); setEditFeatureName(''); }}
+          onUpdate={updateFeature}
+          saving={editFeatureSaving}
+          selectedUsecaseName={selectedUsecase?.name}
+        />
+        {/*
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
               <h3 className="text-lg font-semibold mb-4">기능 편집</h3>
@@ -2565,7 +2586,14 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         )}
 
         {/* 기능 삭제 확인 모달 */}
-        {showDeleteFeatureModal && deletingFeature && (
+        <FeatureDeleteModal
+          isOpen={showDeleteFeatureModal && !!deletingFeature}
+          featureName={deletingFeature?.name ?? ''}
+          onClose={() => { setShowDeleteFeatureModal(false); setDeletingFeature(null); }}
+          onDelete={deleteFeature}
+          deleting={featureDeleting}
+        />
+        {/*
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
               <h3 className="text-lg font-semibold mb-4">기능 삭제</h3>
