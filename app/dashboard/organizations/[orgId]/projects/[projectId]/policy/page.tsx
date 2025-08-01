@@ -282,13 +282,15 @@ function SortablePolicyCard({
             </h5>
             <div className="space-y-1">
               {policy.connected_features.map((feature) => (
-                <div
+                <a
                   key={feature.id}
-                  className="text-sm text-blue-600 font-medium"
+                  href={`?actorId=${feature.usecase.actor_id}&usecaseId=${feature.usecase.id}&featureId=${feature.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-sm text-blue-600 font-medium hover:underline"
                 >
                   {feature.usecase.actor.name} &gt; {feature.usecase.name} &gt;{" "}
                   {feature.name}
-                </div>
+                </a>
               ))}
             </div>
           </div>
@@ -457,8 +459,11 @@ type FeaturePolicy = Tables<"policies"> & {
     id: string;
     name: string;
     usecase: {
+      id: string;
       name: string;
+      actor_id: string;
       actor: {
+        id: string;
         name: string;
       };
     };
@@ -820,7 +825,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         setSelectedUsecase(usecaseToSelect);
         updateURL(actorId, usecaseToSelect.id);
         // 선택된 유즈케이스의 기능들 로드
-        await loadFeaturesForUsecase(usecaseToSelect.id);
+        await loadFeaturesForUsecase(usecaseToSelect.id, actorId);
       } else {
         setSelectedUsecase(null);
         updateURL(actorId); // usecaseId 제거
@@ -836,7 +841,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   };
 
   // 기능 로드 함수
-  const loadFeaturesForUsecase = async (usecaseId: string) => {
+  const loadFeaturesForUsecase = async (
+    usecaseId: string,
+    actorId: string | undefined
+  ) => {
     setFeaturesLoading(true);
     try {
       const { data, error } = await supabase
@@ -859,12 +867,12 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         if (!featureToSelect) featureToSelect = data[0];
 
         setSelectedFeature(featureToSelect);
-        updateURL(selectedActor?.id, usecaseId, featureToSelect.id);
+        updateURL(actorId, usecaseId, featureToSelect.id);
         await loadPoliciesForFeature(featureToSelect.id);
       } else {
         setSelectedFeature(null);
         setFeaturePolicies([]);
-        updateURL(selectedActor?.id, usecaseId); // featureId 제거
+        updateURL(actorId, usecaseId); // featureId 제거
       }
     } catch (error) {
       console.error("Error loading features:", error);
@@ -931,9 +939,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               features (
                 id,
                 name,
+                usecase_id,
                 usecase:usecases (
+                  id,
                   name,
+                  actor_id,
                   actor:actors (
+                    id,
                     name
                   )
                 )
@@ -953,8 +965,17 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 id: item.features?.id || "",
                 name: item.features?.name || "",
                 usecase: {
+                  id: item.features?.usecase?.id || "",
                   name: item.features?.usecase?.name || "",
+                  actor_id:
+                    item.features?.usecase?.actor_id ||
+                    item.features?.usecase?.actor?.id ||
+                    "",
                   actor: {
+                    id:
+                      item.features?.usecase?.actor?.id ||
+                      item.features?.usecase?.actor_id ||
+                      "",
                     name: item.features?.usecase?.actor?.name || "",
                   },
                 },
@@ -997,7 +1018,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     // 유즈케이스 선택 시 URL 업데이트
     updateURL(selectedActor?.id, usecase.id);
     // 선택된 유즈케이스의 기능들 로드
-    await loadFeaturesForUsecase(usecase.id);
+    await loadFeaturesForUsecase(usecase.id, selectedActor?.id);
   };
 
   // 기능 선택 핸들러
@@ -2187,7 +2208,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       );
       // 에러 발생 시 원래 상태로 복원
       if (selectedUsecase) {
-        await loadFeaturesForUsecase(selectedUsecase.id);
+        await loadFeaturesForUsecase(selectedUsecase.id, selectedActor?.id);
       }
     }
   };
