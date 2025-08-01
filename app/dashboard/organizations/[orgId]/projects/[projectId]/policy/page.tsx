@@ -40,6 +40,7 @@ import {
 } from "@dnd-kit/core";
 import {
   arrayMove,
+  horizontalListSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
@@ -1998,9 +1999,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
         {/* 액터 및 유즈케이스 선택 영역 */}
         <div className="mb-6 p-6 bg-gray-200 rounded-lg">
-          <div className="flex items-center gap-6">
+          <div className="grid grid-cols-5 gap-6">
             {/* 액터 선택 */}
-            <div className="flex items-center gap-3">
+            <div className="col-span-1 flex items-center gap-3 flex-wrap">
               <span className="text-base font-semibold text-gray-800">
                 {t("actor.label")}
               </span>
@@ -2110,7 +2111,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
             {/* 유즈케이스 선택 */}
             {selectedActor && (
-              <div className="flex flex-col gap-3">
+              <div className="col-span-4 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <span className="text-base font-semibold text-gray-800">
                     {t("usecase.label")}
@@ -2144,9 +2145,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   >
                     <SortableContext
                       items={usecases.map((uc) => uc.id)}
-                      strategy={verticalListSortingStrategy}
+                      strategy={horizontalListSortingStrategy}
                     >
-                      <div className="space-y-2 max-w-md">
+                      <div className="flex flex-wrap gap-2">
                         {usecases
                           .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
                           .map((usecase) => (
