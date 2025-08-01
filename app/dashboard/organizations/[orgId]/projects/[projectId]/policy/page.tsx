@@ -41,7 +41,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 type User = {
   id: string;
@@ -2004,7 +2004,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   };
 
   // Scroll to the selected feature card when selection changes
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (selectedFeature) {
       const el = document.getElementById(`feature-${selectedFeature.id}`);
       if (el) {
@@ -2168,7 +2168,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       </div>
 
       {/* 스크롤 영역: 기능과 정책 영역 */}
-      <div className="flex-1 px-6 pb-6">
+      <div className="flex-1 px-6 pb-6 overflow-y-auto min-h-0">
         {/* 기능과 정책 섹션 */}
         {selectedUsecase && (
           <div className="h-full flex flex-col">
@@ -2180,7 +2180,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </p>
             </div>
 
-            <div className="grid grid-cols-4 gap-6 h-[700px]">
+            <div className="flex-1 grid grid-cols-4 gap-6 min-h-0">
               {/* 좌측: 기능 목록 (1/3) */}
               <div className="col-span-1 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
