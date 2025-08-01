@@ -655,7 +655,11 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   }, [showEditUsecaseModal]);
 
   // URL query parameter 업데이트 함수
-  const updateURL = (actorId?: string, usecaseId?: string) => {
+  const updateURL = (
+    actorId?: string,
+    usecaseId?: string,
+    featureId?: string
+  ) => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (actorId) {
@@ -668,6 +672,12 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       params.set("usecaseId", usecaseId);
     } else {
       params.delete("usecaseId");
+    }
+
+    if (featureId) {
+      params.set("featureId", featureId);
+    } else {
+      params.delete("featureId");
     }
 
     const newUrl = `${window.location.pathname}?${params.toString()}`;
@@ -828,13 +838,22 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setFeatures(data || []);
 
-      // 첫 번째 기능을 자동 선택
+      // featureId URL 파라미터 확인 → 우선 선택, 없으면 sequence 가장 작은 것
       if (data && data.length > 0) {
-        setSelectedFeature(data[0]);
-        await loadPoliciesForFeature(data[0].id);
+        const urlFeatureId = searchParams.get("featureId");
+        let featureToSelect: Feature | null = null;
+        if (urlFeatureId) {
+          featureToSelect = data.find((f) => f.id === urlFeatureId) || null;
+        }
+        if (!featureToSelect) featureToSelect = data[0];
+
+        setSelectedFeature(featureToSelect);
+        updateURL(selectedActor?.id, usecaseId, featureToSelect.id);
+        await loadPoliciesForFeature(featureToSelect.id);
       } else {
         setSelectedFeature(null);
         setFeaturePolicies([]);
+        updateURL(selectedActor?.id, usecaseId); // featureId 제거
       }
     } catch (error) {
       console.error("Error loading features:", error);
@@ -973,6 +992,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   // 기능 선택 핸들러
   const handleFeatureSelect = async (feature: Feature) => {
     setSelectedFeature(feature);
+    updateURL(selectedActor?.id, selectedUsecase?.id, feature.id);
     await loadPoliciesForFeature(feature.id);
   };
 
