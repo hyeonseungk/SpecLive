@@ -15,6 +15,7 @@ import FeatureAddModal from '@/components/feature/feature-add-modal'
 import FeatureEditModal from '@/components/feature/feature-edit-modal'
 import FeatureDeleteModal from '@/components/feature/feature-delete-modal'
 import PolicyAddModal from '@/components/policy/policy-add-modal'
+import PolicyEditModal from '@/components/policy/policy-edit-modal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
@@ -3008,8 +3009,60 @@ export default function PolicyPage({ params }: PolicyPageProps) {
           handleFeatureToggle={handleFeatureToggle}
         />
 
+        <PolicyEditModal
+          isOpen={showEditPolicyModal && !!editingPolicy && membership?.role === 'admin'}
+          editingPolicy={editingPolicy}
+          onClose={() => {
+            setShowEditPolicyModal(false)
+            setEditingPolicy(null)
+            setEditPolicyContents('')
+            setEditContextLinks([''])
+            setEditGeneralLinks([''])
+            setEditSelectedGlossaryIds([])
+            setEditGlossarySearchTerm('')
+            setEditSelectedFeatureIds([])
+            setEditFeatureSearchTerm('')
+          }}
+          onUpdate={updatePolicy}
+          onDelete={() => {
+            setShowEditPolicyModal(false)
+            if (editingPolicy) handleDeletePolicy(editingPolicy!)
+          }}
+          policySaving={editPolicySaving}
+          policyContents={editPolicyContents}
+          setPolicyContents={setEditPolicyContents}
+          allFeaturesLoading={allFeaturesLoading}
+          allFeatures={allFeatures}
+          featureSearchTerm={editFeatureSearchTerm}
+          setFeatureSearchTerm={setEditFeatureSearchTerm}
+          selectedFeatureIds={editSelectedFeatureIds}
+          handleFeatureToggle={handleEditFeatureToggle}
+          editFeatureSearchTerm={editFeatureSearchTerm}
+          setEditFeatureSearchTerm={setEditFeatureSearchTerm}
+          editSelectedFeatureIds={editSelectedFeatureIds}
+          handleEditFeatureToggle={handleEditFeatureToggle}
+          addLinkField={addEditLinkField}
+          removeLinkField={removeEditLinkField}
+          updateLinkField={updateEditLinkField}
+          editContextLinks={editContextLinks}
+          editGeneralLinks={editGeneralLinks}
+          addEditLinkField={addEditLinkField}
+          removeEditLinkField={removeEditLinkField}
+          updateEditLinkField={updateEditLinkField}
+          glossariesLoading={glossariesLoading}
+          glossaries={glossaries}
+          glossarySearchTerm={editGlossarySearchTerm}
+          setGlossarySearchTerm={setEditGlossarySearchTerm}
+          selectedGlossaryIds={editSelectedGlossaryIds}
+          handleGlossaryToggle={handleEditGlossaryToggle}
+          editGlossarySearchTerm={editGlossarySearchTerm}
+          setEditGlossarySearchTerm={setEditGlossarySearchTerm}
+          editSelectedGlossaryIds={editSelectedGlossaryIds}
+          handleEditGlossaryToggle={handleEditGlossaryToggle}
+        />
+
         {/* 정책 편집 모달 */}
-        {showEditPolicyModal && editingPolicy && membership?.role === 'admin' && (
+        {false && showEditPolicyModal && editingPolicy && membership?.role === 'admin' && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-4">
@@ -3020,7 +3073,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     size="sm"
                     onClick={() => {
                       setShowEditPolicyModal(false)
-                      handleDeletePolicy(editingPolicy)
+                      handleDeletePolicy(editingPolicy!)
                     }}
                     disabled={editPolicySaving}
                   >
