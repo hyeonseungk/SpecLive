@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase-browser";
-import { Tables } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
-import { showSimpleSuccess } from "@/lib/success-store";
 import { useT } from "@/lib/i18n";
+import { showSimpleSuccess } from "@/lib/success-store";
+import { supabase } from "@/lib/supabase-browser";
+import { Tables } from "@/types/database";
+import { useState } from "react";
 
 interface GlossaryAddModalProps {
   projectId: string;
