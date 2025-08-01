@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SortableUsecaseCard from "@/components/usecase/sortable-usecase-card";
 import UsecaseAddModal from "@/components/usecase/usecase-add-modal";
 import UsecaseDeleteModal from "@/components/usecase/usecase-delete-modal";
 import UsecaseEditModal from "@/components/usecase/usecase-edit-modal";
@@ -413,7 +414,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         .from("usecases")
         .select("*")
         .eq("actor_id", actorId)
-        .order("created_at", { ascending: true });
+        .order("sequence", { ascending: true });
 
       if (error) throw error;
 
@@ -916,7 +917,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
   // 유즈케이스 편집 함수
   const handleEditUsecase = (usecase: Usecase) => {
-    setUsecaseDropdownOpen(false);
     setEditingUsecase(usecase);
     setEditUsecaseName(usecase.name);
     setShowEditUsecaseModal(true);
@@ -964,7 +964,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
   // 유즈케이스 삭제 함수
   const handleDeleteUsecase = (usecase: Usecase) => {
-    setUsecaseDropdownOpen(false);
     setDeletingUsecase(usecase);
     setShowDeleteUsecaseModal(true);
   };
@@ -973,7 +972,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     if (!deletingUsecase || !user) return;
     setUsecaseDeleting(true);
     try {
-      // 기능들 조회
+      // 1. 삭제할 유즈케이스의 sequence 값 저장
+      const deletedSequence = deletingUsecase.sequence || 0;
+
+      // 2. 기능들 조회
       const { data: featuresData, error: featuresError } = await supabase
         .from("features")
         .select("id")
@@ -1002,17 +1004,63 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         await supabase.from("features").delete().in("id", featureIds);
       }
 
-      // 유즈케이스 삭제
+      // 3. 유즈케이스 삭제
       await supabase.from("usecases").delete().eq("id", deletingUsecase.id);
 
-      // 상태 업데이트
-      setUsecases((prev) => prev.filter((uc) => uc.id !== deletingUsecase.id));
+      // 4. 삭제된 유즈케이스보다 큰 sequence를 가진 유즈케이스들의 sequence를 -1씩 조정
+      const { data: higherSequenceUsecases, error: updateError } =
+        await supabase
+          .from("usecases")
+          .select("id, sequence")
+          .eq("actor_id", selectedActor!.id)
+          .gt("sequence", deletedSequence)
+          .order("sequence", { ascending: true });
+
+      if (updateError) throw updateError;
+
+      // 5. sequence 업데이트 (배치 처리)
+      if (higherSequenceUsecases && higherSequenceUsecases.length > 0) {
+        const updatePromises = higherSequenceUsecases.map((usecase) =>
+          supabase
+            .from("usecases")
+            .update({ sequence: (usecase.sequence || 0) - 1 })
+            .eq("id", usecase.id)
+        );
+
+        await Promise.all(updatePromises);
+      }
+
+      // 6. 목록에서 제거하고 sequence 재정렬
+      const updatedUsecases = usecases
+        .filter((uc) => uc.id !== deletingUsecase.id)
+        .map((uc) => ({
+          ...uc,
+          sequence:
+            (uc.sequence || 0) > deletedSequence
+              ? (uc.sequence || 0) - 1
+              : uc.sequence || 0,
+        }));
+
+      setUsecases(updatedUsecases);
+
+      // 7. 현재 선택된 유즈케이스가 삭제되었다면 다른 유즈케이스 선택
       if (selectedUsecase?.id === deletingUsecase.id) {
-        setSelectedUsecase(null);
-        setFeatures([]);
-        setSelectedFeature(null);
-        setFeaturePolicies([]);
-        updateURL(selectedActor?.id);
+        if (updatedUsecases.length > 0) {
+          // 첫 번째 유즈케이스 선택
+          setSelectedUsecase(updatedUsecases[0]);
+          updateURL(selectedActor?.id, updatedUsecases[0].id);
+          await loadFeaturesForUsecase(
+            updatedUsecases[0].id,
+            selectedActor?.id
+          );
+        } else {
+          // 유즈케이스가 없으면 선택 해제
+          setSelectedUsecase(null);
+          setFeatures([]);
+          setSelectedFeature(null);
+          setFeaturePolicies([]);
+          updateURL(selectedActor?.id);
+        }
       }
 
       setShowDeleteUsecaseModal(false);
@@ -1039,12 +1087,25 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
     setUsecaseSaving(true);
     try {
+      // 현재 액터에서 가장 높은 sequence 값 가져오기
+      const { data: maxSequenceData, error: maxSequenceError } = await supabase
+        .from("usecases")
+        .select("sequence")
+        .eq("actor_id", selectedActor.id)
+        .order("sequence", { ascending: false })
+        .limit(1);
+
+      if (maxSequenceError) throw maxSequenceError;
+
+      const nextSequence = (maxSequenceData?.[0]?.sequence || 0) + 1;
+
       const { data: usecase, error } = await supabase
         .from("usecases")
         .insert({
           actor_id: selectedActor.id,
           name: usecaseName.trim(),
           author_id: user.id,
+          sequence: nextSequence,
         })
         .select()
         .single();
@@ -1740,6 +1801,51 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     );
   };
 
+  // 드래그 엔드 핸들러 (유즈케이스 순서 변경)
+  const handleUsecaseDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!selectedActor || !over || active.id === over.id) return;
+
+    const oldIndex = usecases.findIndex((item) => item.id === active.id);
+    const newIndex = usecases.findIndex((item) => item.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    // 로컬 상태를 시퀀스와 함께 한 번에 업데이트
+    const newUsecases = arrayMove(usecases, oldIndex, newIndex).map(
+      (usecase, index) => ({
+        ...usecase,
+        sequence: index + 1,
+      })
+    );
+
+    setUsecases(newUsecases);
+
+    // 백그라운드에서 Supabase 업데이트 (UI 블로킹 없이)
+    try {
+      // 배치 업데이트를 위한 Promise 배열
+      const updatePromises = newUsecases.map((usecase, index) =>
+        supabase
+          .from("usecases")
+          .update({ sequence: index + 1 })
+          .eq("id", usecase.id)
+      );
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error updating usecase sequence:", error);
+      showError(
+        "유즈케이스 순서 변경 실패",
+        "유즈케이스 순서를 변경하는 중 오류가 발생했습니다."
+      );
+      // 에러 발생 시 원래 상태로 복원
+      if (selectedActor) {
+        await loadUsecasesForActor(selectedActor.id);
+      }
+    }
+  };
+
   // 드래그 엔드 핸들러 (기능 순서 변경)
   const handleFeatureDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -2004,116 +2110,59 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
             {/* 유즈케이스 선택 */}
             {selectedActor && (
-              <div className="flex items-center gap-3">
-                <span className="text-base font-semibold text-gray-800">
-                  {t("usecase.label")}
-                </span>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-base font-semibold text-gray-800">
+                    {t("usecase.label")}
+                  </span>
+                  {usecases.length > 0 && membership?.role === "admin" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowUsecaseModal(true)}
+                      className="text-sm px-3 py-1"
+                    >
+                      {t("usecase.add_new_button")}
+                    </Button>
+                  )}
+                </div>
                 {usecases.length === 0 ? (
                   <Button
                     variant="outline"
                     size="default"
                     onClick={() => setShowUsecaseModal(true)}
                     disabled={membership?.role !== "admin"}
-                    className="text-base px-4 py-2"
+                    className="text-base px-4 py-2 self-start"
                   >
                     {t("usecase.add_button")}
                   </Button>
                 ) : (
-                  <DropdownMenu
-                    open={usecaseDropdownOpen}
-                    onOpenChange={setUsecaseDropdownOpen}
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleUsecaseDragEnd}
                   >
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="justify-between min-w-[170px] text-base h-10 px-4"
-                      >
-                        {selectedUsecase?.name ||
-                          t("usecase.select_placeholder")}
-                        <ChevronDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="min-w-[170px]"
-                      onCloseAutoFocus={(e) => e.preventDefault()}
+                    <SortableContext
+                      items={usecases.map((uc) => uc.id)}
+                      strategy={verticalListSortingStrategy}
                     >
-                      {usecases.map((usecase) => (
-                        <div
-                          key={usecase.id}
-                          className="flex items-center group"
-                        >
-                          <DropdownMenuItem
-                            onClick={() => handleUsecaseSelect(usecase)}
-                            className="text-base py-2 flex-1 pr-1"
-                          >
-                            {usecase.name}
-                          </DropdownMenuItem>
-                          {membership?.role === "admin" && (
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pr-2">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setUsecaseDropdownOpen(false);
-                                  handleEditUsecase(usecase);
-                                }}
-                                className="p-1 hover:bg-gray-200 rounded transition-colors"
-                                title="유즈케이스 편집"
-                              >
-                                <svg
-                                  className="w-3 h-3 text-gray-600"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                  />
-                                </svg>
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteUsecase(usecase);
-                                }}
-                                className="p-1 hover:bg-red-100 rounded transition-colors"
-                                title="유즈케이스 삭제"
-                              >
-                                <svg
-                                  className="w-3 h-3 text-red-600"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                      {usecases.length > 0 && (
-                        <>
-                          <div className="h-px bg-gray-200 my-1" />
-                          <DropdownMenuItem
-                            onClick={() => setShowUsecaseModal(true)}
-                            disabled={membership?.role !== "admin"}
-                            className="text-base py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          >
-                            {t("usecase.add_new_button")}
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                      <div className="space-y-2 max-w-md">
+                        {usecases
+                          .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+                          .map((usecase) => (
+                            <SortableUsecaseCard
+                              key={usecase.id}
+                              usecase={usecase}
+                              onSelect={handleUsecaseSelect}
+                              onEdit={handleEditUsecase}
+                              onDelete={handleDeleteUsecase}
+                              isSelected={selectedUsecase?.id === usecase.id}
+                              membership={membership}
+                            />
+                          ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
                 )}
               </div>
             )}
