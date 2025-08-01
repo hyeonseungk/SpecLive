@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-browser'
 import { Tables } from '@/types/database'
 import { Button } from '@/components/ui/button'
+import ActorAddModal from '@/components/actor/actor-add-modal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
@@ -2437,47 +2438,17 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       </div>
 
         {/* 액터 추가 모달 */}
-        {showActorModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold mb-4">{t('actor.add_modal_title')}</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">{t('actor.name_label')}</label>
-                  <input
-                    id="add-actor-name-input"
-                    type="text"
-                    value={actorName}
-                    onChange={(e) => setActorName(e.target.value)}
-                    placeholder={t('actor.name_placeholder')}
-                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    disabled={actorSaving}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 mt-6">
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowActorModal(false)
-                    setActorName('')
-                  }}
-                  disabled={actorSaving}
-                >
-                  {t('buttons.cancel')}
-                </Button>
-                <Button 
-                  onClick={addActor}
-                  disabled={actorSaving || !actorName.trim()}
-                >
-                  {actorSaving ? t('buttons.adding') : t('buttons.add')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <ActorAddModal
+          isOpen={showActorModal}
+          onClose={() => {
+            setShowActorModal(false)
+            setActorName('')
+          }}
+          actorName={actorName}
+          setActorName={setActorName}
+          onAdd={addActor}
+          saving={actorSaving}
+        />
 
         {/* 유즈케이스 추가 모달 */}
         {showUsecaseModal && (
