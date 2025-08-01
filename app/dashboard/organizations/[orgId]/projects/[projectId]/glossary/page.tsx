@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
+import GlossaryEditModal from '@/components/glossary/glossary-edit-modal'
 import { showError, showSimpleError } from '@/lib/error-store'
 import { showSimpleSuccess } from '@/lib/success-store'
 import { useT } from '@/lib/i18n'
@@ -1145,7 +1146,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       )}
 
       {/* 용어 편집 모달 */}
-      {showEditModal && editingGlossary && (
+      {/* OLD INLINE EDIT MODAL - DEPRECATED, replaced by GlossaryEditModal component */}
+{false && showEditModal && editingGlossary && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold mb-4">{t('glossary.edit_modal_title')}</h3>
@@ -1258,7 +1260,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       )}
 
       {/* 삭제 확인 모달 */}
-      {showDeleteConfirm && (
+      {/* OLD DELETE CONFIRM MODAL - replaced by GlossaryEditModal */}
+{false && showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
             <h3 className="text-lg font-semibold mb-4">{t('glossary.delete_confirm_title')}</h3>
@@ -1279,6 +1282,28 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* New GlossaryEditModal */}
+      {showEditModal && editingGlossary && (
+        <GlossaryEditModal
+          glossary={editingGlossary}
+          projectId={project.id}
+          onClose={handleCloseEditModal}
+          onGlossaryUpdated={(glossaryWithLinks) => {
+            setGlossaries(prev => prev.map(g => g.id === glossaryWithLinks.id ? glossaryWithLinks : g))
+          }}
+          onGlossaryDeleted={(glossaryId, deletedSequence) => {
+            setGlossaries(prev => 
+              prev
+                .filter(g => g.id !== glossaryId)
+                .map(g => ({
+                  ...g,
+                  sequence: g.sequence > deletedSequence ? g.sequence - 1 : g.sequence
+                }))
+            )
+          }}
+        />
       )}
 
       {/* AI 추천 모달 */}
