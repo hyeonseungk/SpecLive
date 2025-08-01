@@ -2173,8 +2173,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </p>
             </div>
 
-            <div className="grid grid-cols-5 gap-6 h-[700px]">
-              {/* 좌측: 기능 목록 (1/5) */}
+            <div className="grid grid-cols-4 gap-6 h-[700px]">
+              {/* 좌측: 기능 목록 (1/3) */}
               <div className="col-span-1 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">기능</h4>
@@ -2259,8 +2259,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </div>
               </div>
 
-              {/* 우측: 정책 목록 (4/5) */}
-              <div className="col-span-4 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
+              {/* 우측: 정책 목록 (2/3) */}
+              <div className="col-span-3 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">
                     {selectedFeature ? `${selectedFeature.name} 정책` : "정책"}
