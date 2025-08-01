@@ -139,7 +139,11 @@ export default function SortableUsecaseCard({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigator.clipboard.writeText(window.location.href);
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("actorId", usecase.actor_id!);
+                  url.searchParams.set("usecaseId", usecase.id);
+                  url.searchParams.delete("featureId");
+                  navigator.clipboard.writeText(url.toString());
                   showSimpleSuccess("링크가 복사되었습니다.");
                 }}
                 className="p-1 hover:bg-gray-200 rounded transition-colors ml-auto"
