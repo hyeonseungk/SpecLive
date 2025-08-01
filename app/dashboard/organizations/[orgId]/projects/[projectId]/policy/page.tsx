@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import ActorAddModal from '@/components/actor/actor-add-modal'
 import UsecaseAddModal from '@/components/usecase/usecase-add-modal'
 import ActorEditModal from '@/components/actor/actor-edit-modal'
+import ActorDeleteModal from '@/components/actor/actor-delete-modal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
@@ -3363,6 +3364,17 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         )}
 
         {/* 액터 삭제 확인 모달 */}
+        <ActorDeleteModal
+          isOpen={showDeleteActorModal && !!deletingActor && membership?.role === 'admin'}
+          actorName={deletingActor?.name ?? ''}
+          onClose={() => {
+            setShowDeleteActorModal(false)
+            setDeletingActor(null)
+          }}
+          onDelete={deleteActor}
+          deleting={actorDeleting}
+        />
+        {/*
         {showDeleteActorModal && deletingActor && membership?.role === 'admin' && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
@@ -3397,7 +3409,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </div>
             </div>
           </div>
-        )}
+        )*/}
     </div>
   )
 } 
