@@ -21,6 +21,7 @@ export type Database = {
           id: string;
           name: string;
           project_id: string | null;
+          sequence: number;
           updated_at: string | null;
         };
         Insert: {
@@ -29,6 +30,7 @@ export type Database = {
           id?: string;
           name: string;
           project_id?: string | null;
+          sequence?: number;
           updated_at?: string | null;
         };
         Update: {
@@ -37,6 +39,7 @@ export type Database = {
           id?: string;
           name?: string;
           project_id?: string | null;
+          sequence?: number;
           updated_at?: string | null;
         };
         Relationships: [
