@@ -311,6 +311,24 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     router.replace(newUrl, { scroll: false });
   };
 
+  // 정책 링크 복사 함수
+  const copyPolicyUrl = async (policy: FeaturePolicy) => {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    params.set("policyId", policy.id);
+    url.search = params.toString();
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      showSimpleSuccess(t("glossary.url_copied"));
+    } catch (error) {
+      console.error("URL 복사 실패:", error);
+      showError(
+        t("glossary.url_copy_error_title"),
+        t("glossary.url_copy_error_desc")
+      );
+    }
+  };
+
   useEffect(() => {
     const loadProjectData = async () => {
       const {
@@ -2367,6 +2385,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                                 setViewingGlossaryId(gid);
                                 setShowGlossaryModal(true);
                               }}
+                              onCopyUrl={copyPolicyUrl}
                             />
                           ))}
                         </div>

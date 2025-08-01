@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { useT } from "@/lib/i18n";
 import { Tables } from "@/types/database";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -31,6 +32,7 @@ interface SortablePolicyCardProps<P = FeaturePolicy> {
   onEdit: (policy: P) => any;
   membership: Tables<"memberships"> | null;
   onGlossaryClick: (glossaryId: string) => void;
+  onCopyUrl: (policy: P) => void;
 }
 
 export default function SortablePolicyCard<P = FeaturePolicy>({
@@ -38,7 +40,9 @@ export default function SortablePolicyCard<P = FeaturePolicy>({
   onEdit,
   membership,
   onGlossaryClick,
+  onCopyUrl,
 }: SortablePolicyCardProps<P>) {
+  const t = useT();
   const {
     attributes,
     listeners,
@@ -92,6 +96,32 @@ export default function SortablePolicyCard<P = FeaturePolicy>({
           <div className="absolute top-3 right-3 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
             {policy.sequence}
           </div>
+        )}
+
+        {/* Copy URL button on hover */}
+        {isHovered && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onCopyUrl(policy);
+            }}
+            className="absolute top-3 right-10 transform -translate-y-1 w-8 h-8 bg-white shadow-md hover:shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all"
+            title={t("glossary.copy_url")}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+              />
+            </svg>
+          </button>
         )}
 
         {/* Contents */}
