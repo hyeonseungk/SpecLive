@@ -2,19 +2,25 @@
 
 import { Card } from "@/components/ui/card";
 import { useT } from "@/lib/i18n";
+import { showSimpleSuccess } from "@/lib/success-store";
 import { Tables } from "@/types/database";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useState } from "react";
 
-// 최소한의 필드만 타입화해서 재정의
-export interface FeaturePolicy {
-  id: string;
-  contents: string;
-  sequence?: number | null;
-  updated_at?: string | null;
-  policy_links?: { url: string; type: string }[];
-  policy_terms?: { glossary_id: string; glossaries?: { name: string } }[];
+type FeaturePolicy = Tables<"policies"> & {
+  sequence?: number;
+  policy_links?: {
+    id: string;
+    url: string;
+    type: string;
+  }[];
+  policy_terms?: {
+    glossary_id: string;
+    glossaries?: {
+      name: string;
+    };
+  }[];
   connected_features?: {
     id: string;
     name: string;
@@ -22,26 +28,33 @@ export interface FeaturePolicy {
       id: string;
       name: string;
       actor_id: string;
-      actor: { id: string; name: string };
+      actor: {
+        id: string;
+        name: string;
+      };
     };
   }[];
-}
+};
 
-interface SortablePolicyCardProps<P = FeaturePolicy> {
-  policy: P;
-  onEdit: (policy: P) => any;
+interface SortablePolicyCardProps {
+  actor: Tables<"actors">;
+  usecase: Tables<"usecases">;
+  feature: Tables<"features">;
+  policy: FeaturePolicy;
+  onEdit: (policy: FeaturePolicy) => Promise<void>;
   membership: Tables<"memberships"> | null;
-  onGlossaryClick: (glossaryId: string) => void;
-  onCopyUrl: (policy: P) => void;
+  onGlossaryClick: (glossaryId: string) => Promise<void>;
 }
 
-export default function SortablePolicyCard<P = FeaturePolicy>({
+export default function SortablePolicyCard({
+  actor,
+  usecase,
+  feature,
   policy,
   onEdit,
   membership,
   onGlossaryClick,
-  onCopyUrl,
-}: SortablePolicyCardProps<P>) {
+}: SortablePolicyCardProps) {
   const t = useT();
   const {
     attributes,
@@ -61,6 +74,7 @@ export default function SortablePolicyCard<P = FeaturePolicy>({
 
   return (
     <div
+      id={`policy-${policy.id}`}
       ref={setNodeRef}
       style={style}
       className={isDragging ? "opacity-50" : ""}
@@ -103,7 +117,13 @@ export default function SortablePolicyCard<P = FeaturePolicy>({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onCopyUrl(policy);
+              const url = new URL(window.location.href);
+              url.searchParams.set("actorId", actor.id);
+              url.searchParams.set("usecaseId", usecase.id);
+              url.searchParams.set("featureId", feature.id);
+              url.searchParams.set("policyId", policy.id);
+              navigator.clipboard.writeText(url.toString());
+              showSimpleSuccess("링크가 복사되었습니다.");
             }}
             className="absolute top-3 right-10 transform -translate-y-1 w-8 h-8 bg-white shadow-md hover:shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all"
             title={t("glossary.copy_url")}

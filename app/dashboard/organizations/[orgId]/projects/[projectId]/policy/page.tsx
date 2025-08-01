@@ -311,24 +311,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     router.replace(newUrl, { scroll: false });
   };
 
-  // 정책 링크 복사 함수
-  const copyPolicyUrl = async (policy: FeaturePolicy) => {
-    const url = new URL(window.location.href);
-    const params = url.searchParams;
-    params.set("policyId", policy.id);
-    url.search = params.toString();
-    try {
-      await navigator.clipboard.writeText(url.toString());
-      showSimpleSuccess(t("glossary.url_copied"));
-    } catch (error) {
-      console.error("URL 복사 실패:", error);
-      showError(
-        t("glossary.url_copy_error_title"),
-        t("glossary.url_copy_error_desc")
-      );
-    }
-  };
-
   useEffect(() => {
     const loadProjectData = async () => {
       const {
@@ -492,7 +474,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
         setSelectedFeature(featureToSelect);
         updateURL(actorId, usecaseId, featureToSelect.id);
-        await loadPoliciesForFeature(featureToSelect.id);
+        await loadPoliciesForTheFeature(featureToSelect.id);
       } else {
         setSelectedFeature(null);
         setFeaturePolicies([]);
@@ -508,7 +490,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   };
 
   // 정책 로드 함수
-  const loadPoliciesForFeature = async (featureId: string) => {
+  const loadPoliciesForTheFeature = async (featureId: string) => {
     setPoliciesLoading(true);
     try {
       const { data, error } = await supabase
@@ -649,7 +631,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const handleFeatureSelect = async (feature: Feature) => {
     setSelectedFeature(feature);
     updateURL(selectedActor?.id, selectedUsecase?.id, feature.id);
-    await loadPoliciesForFeature(feature.id);
+    await loadPoliciesForTheFeature(feature.id);
   };
 
   // 용어 로드 함수
@@ -1200,7 +1182,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       // 첫 번째 기능이라면 자동 선택
       if (features.length === 0) {
         setSelectedFeature(feature);
-        await loadPoliciesForFeature(feature.id);
+        await loadPoliciesForTheFeature(feature.id);
       }
 
       showSimpleSuccess("기능이 성공적으로 추가되었습니다.");
@@ -1425,7 +1407,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       // 6. 정책 목록 새로고침 (현재 선택된 기능이 있는 경우에만)
       if (selectedFeature && selectedFeature.id) {
-        await loadPoliciesForFeature(selectedFeature.id);
+        await loadPoliciesForTheFeature(selectedFeature.id);
       }
 
       // 7. 모달 초기화 및 닫기
@@ -1513,7 +1495,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         if (updatedFeatures.length > 0) {
           // 첫 번째 기능 선택
           setSelectedFeature(updatedFeatures[0]);
-          await loadPoliciesForFeature(updatedFeatures[0].id);
+          await loadPoliciesForTheFeature(updatedFeatures[0].id);
         } else {
           // 기능이 없으면 선택 해제
           setSelectedFeature(null);
@@ -1697,7 +1679,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       // 7. 정책 목록 새로고침
       if (selectedFeature && selectedFeature.id) {
-        await loadPoliciesForFeature(selectedFeature.id);
+        await loadPoliciesForTheFeature(selectedFeature.id);
       }
 
       // 8. 모달 초기화 및 닫기
@@ -1760,7 +1742,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       // 5. 정책 목록 새로고침
       if (selectedFeature && selectedFeature.id) {
-        await loadPoliciesForFeature(selectedFeature.id);
+        await loadPoliciesForTheFeature(selectedFeature.id);
       }
 
       setDeletingPolicy(null);
@@ -1955,7 +1937,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       );
       // 에러 발생 시 원래 상태로 복원
       if (selectedFeature) {
-        await loadPoliciesForFeature(selectedFeature.id);
+        await loadPoliciesForTheFeature(selectedFeature.id);
       }
     }
   };
@@ -2037,6 +2019,23 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       }
     }, 300);
   }, [selectedFeature]);
+
+  // Scroll to the policy card if policyId exists in URL
+  useEffect(() => {
+    const policyId = searchParams.get("policyId");
+    if (!policyId) return;
+    if (featurePolicies.length === 0) return;
+    setTimeout(() => {
+      const el = document.getElementById(`policy-${policyId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-2", "ring-primary", "ring-opacity-50");
+        setTimeout(() => {
+          el.classList.remove("ring-2", "ring-primary", "ring-opacity-50");
+        }, 3000);
+      }
+    }, 300);
+  }, [featurePolicies, searchParams]);
 
   if (loading) {
     return (
@@ -2174,6 +2173,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                           .map((usecase) => (
                             <SortableUsecaseCard
                               key={usecase.id}
+                              actor={selectedActor}
                               usecase={usecase}
                               onSelect={handleUsecaseSelect}
                               onEdit={handleEditUsecase}
@@ -2195,7 +2195,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       {/* 스크롤 영역: 기능과 정책 영역 */}
       <div className="flex-1 px-6 pb-6 overflow-y-auto min-h-0">
         {/* 기능과 정책 섹션 */}
-        {selectedUsecase && (
+        {selectedActor && selectedUsecase && (
           <div className="h-full flex flex-col">
             <div className="mb-4">
               <h3 className="text-xl font-semibold">기능 및 정책</h3>
@@ -2276,6 +2276,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                           {filteredFeatureList.map((feature) => (
                             <SortableFeatureCard
                               key={feature.id}
+                              actor={selectedActor!}
+                              usecase={selectedUsecase!}
                               feature={feature}
                               onSelect={handleFeatureSelect}
                               onEdit={handleEditFeature}
@@ -2315,24 +2317,29 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </div>
 
                 {/* 정책 검색창 */}
-                {selectedFeature && featurePolicies.length > 0 && (
-                  <div className="mb-3 flex-shrink-0">
-                    <input
-                      type="text"
-                      value={policyListSearchTerm}
-                      onChange={(e) => setPolicyListSearchTerm(e.target.value)}
-                      placeholder="정책 내용이나 연결된 용어로 검색..."
-                      className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      disabled={policiesLoading}
-                    />
-                    {policyListSearchTerm && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {policyListSearchTerm} 검색 결과:{" "}
-                        {filteredPolicyList.length}개
-                      </p>
-                    )}
-                  </div>
-                )}
+                {selectedActor &&
+                  selectedUsecase &&
+                  selectedFeature &&
+                  featurePolicies.length > 0 && (
+                    <div className="mb-3 flex-shrink-0">
+                      <input
+                        type="text"
+                        value={policyListSearchTerm}
+                        onChange={(e) =>
+                          setPolicyListSearchTerm(e.target.value)
+                        }
+                        placeholder="정책 내용이나 연결된 용어로 검색..."
+                        className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        disabled={policiesLoading}
+                      />
+                      {policyListSearchTerm && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {policyListSearchTerm} 검색 결과:{" "}
+                          {filteredPolicyList.length}개
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                 <div className="flex-1 overflow-y-auto min-h-0">
                   {!selectedFeature ? (
@@ -2378,14 +2385,16 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                           {filteredPolicyList.map((policy) => (
                             <SortablePolicyCard
                               key={policy.id}
+                              actor={selectedActor}
+                              usecase={selectedUsecase}
+                              feature={selectedFeature}
                               policy={policy}
                               onEdit={handleEditPolicy}
                               membership={membership}
-                              onGlossaryClick={(gid) => {
+                              onGlossaryClick={async (gid) => {
                                 setViewingGlossaryId(gid);
                                 setShowGlossaryModal(true);
                               }}
-                              onCopyUrl={copyPolicyUrl}
                             />
                           ))}
                         </div>

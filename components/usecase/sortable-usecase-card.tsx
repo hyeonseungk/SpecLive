@@ -8,6 +8,7 @@ import { Link as LinkIcon } from "lucide-react";
 import { useState } from "react";
 
 interface SortableUsecaseCardProps {
+  actor: Tables<"actors">;
   usecase: Tables<"usecases">;
   onSelect: (usecase: Tables<"usecases">) => void;
   onEdit: (usecase: Tables<"usecases">) => void;
@@ -17,6 +18,7 @@ interface SortableUsecaseCardProps {
 }
 
 export default function SortableUsecaseCard({
+  actor,
   usecase,
   onSelect,
   onEdit,
@@ -140,9 +142,10 @@ export default function SortableUsecaseCard({
                 onClick={(e) => {
                   e.stopPropagation();
                   const url = new URL(window.location.href);
-                  url.searchParams.set("actorId", usecase.actor_id!);
+                  url.searchParams.set("actorId", actor.id);
                   url.searchParams.set("usecaseId", usecase.id);
                   url.searchParams.delete("featureId");
+                  url.searchParams.delete("policyId");
                   navigator.clipboard.writeText(url.toString());
                   showSimpleSuccess("링크가 복사되었습니다.");
                 }}

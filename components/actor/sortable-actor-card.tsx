@@ -143,6 +143,7 @@ export default function SortableActorCard({
                   url.searchParams.set("actorId", actor.id);
                   url.searchParams.delete("usecaseId");
                   url.searchParams.delete("featureId");
+                  url.searchParams.delete("policyId");
                   navigator.clipboard.writeText(url.toString());
                   showSimpleSuccess("링크가 복사되었습니다.");
                 }}

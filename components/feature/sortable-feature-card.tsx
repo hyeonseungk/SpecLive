@@ -8,6 +8,8 @@ import { Link as LinkIcon } from "lucide-react";
 import { useState } from "react";
 
 interface SortableFeatureCardProps {
+  actor: Tables<"actors">;
+  usecase: Tables<"usecases">;
   feature: Tables<"features">;
   onSelect: (feature: Tables<"features">) => void;
   onEdit: (feature: Tables<"features">) => void;
@@ -17,6 +19,8 @@ interface SortableFeatureCardProps {
 }
 
 export default function SortableFeatureCard({
+  actor,
+  usecase,
   feature,
   onSelect,
   onEdit,
@@ -141,7 +145,13 @@ export default function SortableFeatureCard({
                 onClick={(e) => {
                   e.stopPropagation();
                   const url = new URL(window.location.href);
+                  // Remove any existing policyId so only actorId, usecaseId, featureId remain
+                  url.searchParams.delete("policyId");
+                  url.searchParams.set("actorId", actor.id);
+                  url.searchParams.set("usecaseId", usecase.id);
                   url.searchParams.set("featureId", feature.id);
+                  url.searchParams.delete("policyId");
+
                   navigator.clipboard.writeText(url.toString());
                   showSimpleSuccess("링크가 복사되었습니다.");
                 }}
