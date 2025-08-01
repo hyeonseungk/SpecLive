@@ -1998,8 +1998,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   };
 
   // 정책 삭제 함수
-  const deletePolicy = async () => {
-    if (!deletingPolicy || !user) return;
+  const deletePolicy = async (policyParam?: FeaturePolicy) => {
+    const targetPolicy = policyParam ?? deletingPolicy;
+    if (!targetPolicy || !user) return;
 
     setPolicyDeleting(true);
     try {
@@ -2007,7 +2008,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       const { error: deleteLinksError } = await supabase
         .from("policy_links")
         .delete()
-        .eq("policy_id", deletingPolicy.id);
+        .eq("policy_id", targetPolicy.id);
 
       if (deleteLinksError) throw deleteLinksError;
 
@@ -2015,7 +2016,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       const { error: deleteTermsError } = await supabase
         .from("policy_terms")
         .delete()
-        .eq("policy_id", deletingPolicy.id);
+        .eq("policy_id", targetPolicy.id);
 
       if (deleteTermsError) throw deleteTermsError;
 
@@ -2023,7 +2024,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       const { error: deleteFeaturePoliciesError } = await supabase
         .from("feature_policies")
         .delete()
-        .eq("policy_id", deletingPolicy.id);
+        .eq("policy_id", targetPolicy.id);
 
       if (deleteFeaturePoliciesError) throw deleteFeaturePoliciesError;
 
@@ -2031,7 +2032,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       const { error: deletePolicyError } = await supabase
         .from("policies")
         .delete()
-        .eq("id", deletingPolicy.id);
+        .eq("id", targetPolicy.id);
 
       if (deletePolicyError) throw deletePolicyError;
 
@@ -2838,8 +2839,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         onUpdate={updatePolicy}
         onDelete={(policy) => {
           setShowEditPolicyModal(false);
-          setDeletingPolicy(policy as any);
-          deletePolicy();
+          deletePolicy(policy as any);
         }}
         policySaving={editPolicySaving}
         policyContents={editPolicyContents}
