@@ -2040,7 +2040,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
         {/* 액터 및 유즈케이스 선택 영역 */}
         <div className="mb-6 p-6 bg-gray-200 rounded-lg">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
             {/* 액터 선택 */}
             <div className="flex items-center justify-between">
               <span className="text-base font-semibold text-gray-800">
@@ -2097,7 +2097,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             )}
             {/* 유즈케이스 선택 */}
             {selectedActor && (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 mt-8">
                 <div className="flex items-center justify-between">
                   <span className="text-base font-semibold text-gray-800">
                     {t("usecase.label")}
