@@ -14,6 +14,7 @@ import UsecaseDeleteModal from '@/components/usecase/usecase-delete-modal'
 import FeatureAddModal from '@/components/feature/feature-add-modal'
 import FeatureEditModal from '@/components/feature/feature-edit-modal'
 import FeatureDeleteModal from '@/components/feature/feature-delete-modal'
+import PolicyAddModal from '@/components/policy/policy-add-modal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
@@ -2626,7 +2627,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         )}
 
         {/* 정책 추가 모달 */}
-        {showPolicyModal && (
+        {false && showPolicyModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-semibold mb-4">정책 추가</h3>
@@ -2971,6 +2972,41 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             </div>
           </div>
         )}
+
+        <PolicyAddModal
+          isOpen={showPolicyModal}
+          onClose={() => {
+            setShowPolicyModal(false)
+            setPolicyContents('')
+            setContextLinks([''])
+            setGeneralLinks([''])
+            setSelectedGlossaryIds([])
+            setGlossarySearchTerm('')
+            setSelectedFeatureIds([])
+            setFeatureSearchTerm('')
+          }}
+          policyContents={policyContents}
+          setPolicyContents={setPolicyContents}
+          policySaving={policySaving}
+          onAdd={addPolicy}
+          contextLinks={contextLinks}
+          generalLinks={generalLinks}
+          addLinkField={addLinkField}
+          removeLinkField={removeLinkField}
+          updateLinkField={updateLinkField}
+          glossariesLoading={glossariesLoading}
+          glossaries={glossaries}
+          glossarySearchTerm={glossarySearchTerm}
+          setGlossarySearchTerm={setGlossarySearchTerm}
+          selectedGlossaryIds={selectedGlossaryIds}
+          handleGlossaryToggle={handleGlossaryToggle}
+          allFeaturesLoading={allFeaturesLoading}
+          allFeatures={allFeatures}
+          featureSearchTerm={featureSearchTerm}
+          setFeatureSearchTerm={setFeatureSearchTerm}
+          selectedFeatureIds={selectedFeatureIds}
+          handleFeatureToggle={handleFeatureToggle}
+        />
 
         {/* 정책 편집 모달 */}
         {showEditPolicyModal && editingPolicy && membership?.role === 'admin' && (
