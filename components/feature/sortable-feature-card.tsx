@@ -91,7 +91,7 @@ export default function SortableFeatureCard({
 
           {/* Edit / Delete / Copy URL buttons (visible on hover, admin only) */}
           {membership?.role === "admin" && (
-            <div className="flex items-center gap-1 flex-1 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -142,7 +142,7 @@ export default function SortableFeatureCard({
                   navigator.clipboard.writeText(window.location.href);
                   showSimpleSuccess("링크가 복사되었습니다.");
                 }}
-                className="p-1 hover:bg-gray-200 rounded transition-colors ml-auto"
+                className="p-1 hover:bg-gray-200 rounded transition-colors"
                 title="링크 복사"
               >
                 <LinkIcon className="w-3 h-3 text-gray-600" />
