@@ -176,7 +176,8 @@
     "ok": "OK",
     "delete": "Delete",
     "add": "Add",
-    "adding": "Adding..."
+    "adding": "Adding...",
+    "close": "Close"
   },
   "ai": {
     "modal_title": "Write PRD via Chat with AI",

@@ -144,15 +144,6 @@ export default function SortablePolicyCard({
           </button>
         )}
 
-        {/* Contents */}
-        <div
-          className={`mb-3 pr-8 ${membership?.role === "admin" ? "ml-8" : ""}`}
-        >
-          <p className="text-2xl font-medium text-black whitespace-pre-line">
-            {policy.contents}
-          </p>
-        </div>
-
         {/* Connected features */}
         {policy.connected_features && policy.connected_features.length > 0 && (
           <div className={`mb-3 ${membership?.role === "admin" ? "ml-8" : ""}`}>
@@ -174,6 +165,15 @@ export default function SortablePolicyCard({
             </div>
           </div>
         )}
+
+        {/* Contents */}
+        <div
+          className={`mb-3 pr-8 ${membership?.role === "admin" ? "ml-8" : ""}`}
+        >
+          <p className="text-2xl font-medium text-black whitespace-pre-line">
+            {policy.contents}
+          </p>
+        </div>
 
         {/* Connected glossaries */}
         {policy.policy_terms && policy.policy_terms.length > 0 && (
@@ -259,11 +259,7 @@ export default function SortablePolicyCard({
           )}
 
         {/* Meta info */}
-        <div
-          className={`pt-2 border-t border-gray-200 ${
-            membership?.role === "admin" ? "ml-8" : ""
-          }`}
-        >
+        <div className={`pt-2 ${membership?.role === "admin" ? "ml-8" : ""}`}>
           <div className="flex justify-end text-xs text-gray-500">
             <span className="flex-1" />
             <span className="text-right">

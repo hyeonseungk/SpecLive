@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase-browser";
-import { Tables } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
-import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { useT } from "@/lib/i18n";
+import { supabase } from "@/lib/supabase-browser";
+import { Tables } from "@/types/database";
+import { useEffect, useState } from "react";
 
 interface GlossaryViewModalProps {
   glossaryId: string | null;
@@ -69,7 +68,7 @@ export default function GlossaryViewModal({
       <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
         {loading || !glossary ? (
           <div className="flex items-center justify-center py-12">
-            <FullScreenLoading />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         ) : (
           <>
