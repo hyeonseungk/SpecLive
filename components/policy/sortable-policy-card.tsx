@@ -156,10 +156,10 @@ export default function SortablePolicyCard({
                 <a
                   key={feature.id}
                   href={`?actorId=${feature.usecase.actor_id}&usecaseId=${feature.usecase.id}&featureId=${feature.id}`}
-                  className="block text-xs text-blue-600 hover:underline"
+                  className="group block text-xs text-blue-600"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="inline-flex items-center">
+                  <span className="inline-flex items-center border-b border-transparent group-hover:border-blue-600">
                     <span>{feature.usecase.actor.name}</span>
                     <ChevronRight className="w-3 h-3 mx-1 text-gray-500" />
                     <span>{feature.usecase.name}</span>
