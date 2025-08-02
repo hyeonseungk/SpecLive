@@ -121,7 +121,18 @@
     "first_policy_sub": "Add your first policy to create your team's guidelines.",
     "first_policy_button": "Add First Policy",
     "load_error_title": "Failed to load policies",
-    "load_error_desc": "An error occurred while loading policies."
+    "load_error_desc": "An error occurred while loading policies.",
+    "ai_recommendation": "🤖 AI Policy Recommendations",
+    "ai_modal_title": "AI Policy Recommendations",
+    "ai_modal_desc": "We can recommend additional policies based on your existing PRD, terms, actors, use cases, features, and policies. Would you like to get recommendations?",
+    "ai_get_recommendations": "Get recommendations",
+    "ai_loading": "AI is preparing policy recommendations",
+    "ai_error": "An error occurred while getting recommendations.",
+    "ai_no_recommendations": "No policies to recommend.",
+    "ai_select_policies": "Select policies to add",
+    "ai_add_selected": "Add selected policies",
+    "ai_retry": "Retry",
+    "ai_policies_added": " policies have been added."
   },
   "sidebar": {
     "project": "Project",

@@ -162,7 +162,18 @@
     "first_policy_sub": "첫 번째 정책을 추가하여 팀의 가이드라인을 만들어보세요.",
     "first_policy_button": "첫 번째 정책 추가하기",
     "load_error_title": "정책 로드 실패",
-    "load_error_desc": "정책을 불러오는 중 오류가 발생했습니다."
+    "load_error_desc": "정책을 불러오는 중 오류가 발생했습니다.",
+    "ai_recommendation": "🤖 AI에게 정책 추천받기",
+    "ai_modal_title": "AI 정책 추천",
+    "ai_modal_desc": "기존의 PRD, 용어, 액터, 유즈케이스, 기능, 정책을 기반으로 추가할 정책을 추천받을 수 있어요, 추천받아보시겠어요?",
+    "ai_get_recommendations": "추천받기",
+    "ai_loading": "AI가 추천할 정책을 준비하고 있어요",
+    "ai_error": "추천을 받는 중 오류가 발생했습니다.",
+    "ai_no_recommendations": "추천할 정책이 없습니다.",
+    "ai_select_policies": "추가할 정책을 선택하세요",
+    "ai_add_selected": "선택한 정책 추가하기",
+    "ai_retry": "다시 시도",
+    "ai_policies_added": "개의 정책이 추가되었습니다."
   },
   "sidebar": {
     "project": "프로젝트",

@@ -10,6 +10,7 @@ import FeatureEditModal from "@/components/feature/feature-edit-modal";
 import SortableFeatureCard from "@/components/feature/sortable-feature-card";
 import GlossaryViewModal from "@/components/glossary/glossary-view-modal";
 import PolicyAddModal from "@/components/policy/policy-add-modal";
+import PolicyAiRecommendationModal from "@/components/policy/policy-ai-recommendation-modal";
 import PolicyEditModal from "@/components/policy/policy-edit-modal";
 import SortablePolicyCard from "@/components/policy/sortable-policy-card";
 import { Button } from "@/components/ui/button";
@@ -159,6 +160,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
   // 정책 추가 모달 상태
   const [showPolicyModal, setShowPolicyModal] = useState(false);
+  const [showPolicyAiModal, setShowPolicyAiModal] = useState(false);
   const [policyContents, setPolicyContents] = useState("");
   const [contextLinks, setContextLinks] = useState<string[]>([""]);
   const [generalLinks, setGeneralLinks] = useState<string[]>([""]);
@@ -2301,19 +2303,27 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     {selectedFeature ? `${selectedFeature.name} 정책` : "정책"}
                   </h4>
                   {selectedFeature && membership?.role === "admin" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        // 현재 선택된 기능을 자동으로 포함
-                        if (selectedFeature) {
-                          setSelectedFeatureIds([selectedFeature.id]);
-                        }
-                        setShowPolicyModal(true);
-                      }}
-                    >
-                      + 정책 추가
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowPolicyAiModal(true)}
+                      >
+                        {t("policy.ai_recommendation")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (selectedFeature) {
+                            setSelectedFeatureIds([selectedFeature.id]);
+                          }
+                          setShowPolicyModal(true);
+                        }}
+                      >
+                        + 정책 추가
+                      </Button>
+                    </div>
                   )}
                 </div>
 
@@ -2540,6 +2550,16 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         setFeatureSearchTerm={setFeatureSearchTerm}
         selectedFeatureIds={selectedFeatureIds}
         handleFeatureToggle={handleFeatureToggle}
+      />
+
+      <PolicyAiRecommendationModal
+        projectId={params.projectId}
+        userId={user!.id}
+        onClose={() => setShowPolicyAiModal(false)}
+        onPoliciesAdded={(newPolicies) => {
+          if (selectedFeature) loadPoliciesForTheFeature(selectedFeature.id);
+          setShowPolicyAiModal(false);
+        }}
       />
 
       <PolicyEditModal
