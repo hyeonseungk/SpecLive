@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
+import { useMemo } from "react";
 
 interface Feature {
   id: string;
@@ -117,13 +117,16 @@ export default function PolicyAddModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">{t("policyAddModal.header")}</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          {t("policyAddModal.header")}
+        </h3>
 
         <div className="space-y-4">
           {/* 정책 내용 */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              {t("policyAddModal.contentsLabel")} <span className="text-red-500">*</span>
+              {t("policyAddModal.contentsLabel")}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <textarea
               value={policyContents}
@@ -138,7 +141,8 @@ export default function PolicyAddModal({
           {/* 관련 기능 선택 */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              {t("policyAddModal.featuresLabel")} <span className="text-red-500">*</span>
+              {t("policyAddModal.featuresLabel")}{" "}
+              <span className="text-red-500">*</span>
               <span className="text-xs text-gray-500 font-normal ml-1">
                 {t("policyAddModal.featuresHint")}
               </span>
@@ -146,11 +150,19 @@ export default function PolicyAddModal({
             {allFeaturesLoading ? (
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-                <span className="ml-2 text-sm text-gray-500">{t("policyAddModal.loadingFeatures")}</span>
+                <span className="ml-2 text-sm text-gray-500">
+                  {t("policyAddModal.loadingFeatures")}
+                </span>
               </div>
             ) : allFeatures.length === 0 ? (
-              <p className="text-sm text-gray-500 py-2">{t("policyAddModal.noFeatures")}</p>
-              <span className="text-xs">{t("policyAddModal.noFeaturesHint")}</span>
+              <>
+                <p className="text-sm text-gray-500 py-2">
+                  {t("policyAddModal.noFeatures")}
+                </p>
+                <span className="text-xs">
+                  {t("policyAddModal.noFeaturesHint")}
+                </span>
+              </>
             ) : (
               <>
                 {/* 기능 검색창 */}
@@ -165,7 +177,10 @@ export default function PolicyAddModal({
                   />
                   {featureSearchTerm && (
                     <p className="text-xs text-gray-500 mt-1">
-                      {t("policyAddModal.searchResults", { term: featureSearchTerm, count: filteredFeatures.length })}
+                      {t("policyAddModal.searchResults", {
+                        term: featureSearchTerm,
+                        count: filteredFeatures.length,
+                      })}
                     </p>
                   )}
                 </div>

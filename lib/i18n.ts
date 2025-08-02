@@ -15,10 +15,22 @@ function getNested(obj: any, path: string[]): string | undefined {
 
 export function useT() {
   const { lang } = useLangStore();
-  return (key: keyof TranslationMap | string): string => {
+  return (
+    key: keyof TranslationMap | string,
+    vars?: Record<string, string | number>
+  ): string => {
     const parts = key.split(".");
     const res =
       getNested(resources[lang], parts) || getNested(resources["en"], parts);
-    return typeof res === "string" ? res : key;
+    let str = typeof res === "string" ? res : key;
+    if (vars && typeof str === "string") {
+      for (const [varKey, value] of Object.entries(vars)) {
+        str = str.replace(
+          new RegExp(`\\{\\{${varKey}\\}}`, "g"),
+          String(value)
+        );
+      }
+    }
+    return str;
   };
 }
