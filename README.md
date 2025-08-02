@@ -115,16 +115,6 @@ CREATE TABLE policy_terms (
   UNIQUE(policy_id, glossary_id)
 );
 
--- 용어 간 관계 테이블
-CREATE TABLE glossary_relations (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  glossary_id UUID REFERENCES glossaries(id) ON DELETE CASCADE,
-  related_id UUID REFERENCES glossaries(id) ON DELETE CASCADE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(glossary_id, related_id),
-  CHECK (glossary_id != related_id)
-);
-
 -- 이메일 이벤트 로그 테이블
 CREATE TABLE email_events (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -143,7 +133,6 @@ ALTER TABLE policies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE policy_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE glossary_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE policy_terms ENABLE ROW LEVEL SECURITY;
-ALTER TABLE glossary_relations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE email_events ENABLE ROW LEVEL SECURITY;
 
 -- RLS 정책 예시 (기본적인 멤버십 기반 접근)
@@ -153,7 +142,7 @@ CREATE POLICY "Users can view their memberships" ON memberships
 CREATE POLICY "Users can view projects they're members of" ON projects
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM memberships 
+      SELECT 1 FROM memberships
       WHERE project_id = projects.id AND user_id = auth.uid()
     )
   );
@@ -182,33 +171,29 @@ npm run dev
 #### 에러 모달 사용법
 
 ```typescript
-import { showError, showSimpleError } from '@/lib/error-store'
+import { showError, showSimpleError } from "@/lib/error-store";
 
 // 간단한 에러 메시지
-showSimpleError('오류가 발생했습니다.')
+showSimpleError("오류가 발생했습니다.");
 
 // 상세한 에러 메시지 (제목, 내용, 콜백)
 showError(
-  '데이터 저장 오류',
-  '데이터를 저장하는 중 오류가 발생했습니다.\n다시 시도해주세요.',
+  "데이터 저장 오류",
+  "데이터를 저장하는 중 오류가 발생했습니다.\n다시 시도해주세요.",
   () => {
-    console.log('사용자가 확인 버튼을 클릭했습니다.')
+    console.log("사용자가 확인 버튼을 클릭했습니다.");
   }
-)
+);
 ```
 
 #### 성공 모달 사용법
 
 ```typescript
-import { showSuccess } from '@/lib/success-store'
+import { showSuccess } from "@/lib/success-store";
 
-showSuccess(
-  '저장 완료',
-  '데이터가 성공적으로 저장되었습니다.',
-  () => {
-    // 성공 후 콜백 (선택사항)
-  }
-)
+showSuccess("저장 완료", "데이터가 성공적으로 저장되었습니다.", () => {
+  // 성공 후 콜백 (선택사항)
+});
 ```
 
 #### 컴포넌트에서 훅 사용
@@ -224,7 +209,7 @@ function MyComponent() {
       () => api.saveData(data),
       '데이터 저장 실패'
     )
-    
+
     if (result) {
       // 성공 처리
     }
@@ -247,25 +232,27 @@ function MyComponent() {
 ## 프로젝트 구조
 
 ```
+
 /app
- ├─ layout.tsx              # 루트 레이아웃
- ├─ page.tsx                # 홈/로그인 페이지
- ├─ dashboard/
- │   ├─ page.tsx            # 대시보드 메인
- │   └─ [projectId]/
- │        ├─ glossary/      # 용어 관리
- │        └─ policy/        # 정책 관리
- ├─ components/
- │   ├─ glossary/           # 용어 관련 컴포넌트
- │   ├─ policy/             # 정책 관련 컴포넌트
- │   ├─ common/             # 공통 컴포넌트
- │   └─ ui/                 # shadcn/ui 컴포넌트
- ├─ lib/
- │   ├─ supabase-browser.ts # Supabase 클라이언트
- │   └─ hooks/              # 커스텀 훅
- ├─ types/
- │   └─ database.ts         # 데이터베이스 타입 정의
- └─ utils/                  # 유틸리티 함수
+├─ layout.tsx # 루트 레이아웃
+├─ page.tsx # 홈/로그인 페이지
+├─ dashboard/
+│ ├─ page.tsx # 대시보드 메인
+│ └─ [projectId]/
+│ ├─ glossary/ # 용어 관리
+│ └─ policy/ # 정책 관리
+├─ components/
+│ ├─ glossary/ # 용어 관련 컴포넌트
+│ ├─ policy/ # 정책 관련 컴포넌트
+│ ├─ common/ # 공통 컴포넌트
+│ └─ ui/ # shadcn/ui 컴포넌트
+├─ lib/
+│ ├─ supabase-browser.ts # Supabase 클라이언트
+│ └─ hooks/ # 커스텀 훅
+├─ types/
+│ └─ database.ts # 데이터베이스 타입 정의
+└─ utils/ # 유틸리티 함수
+
 ```
 
 ## 배포
@@ -284,4 +271,5 @@ function MyComponent() {
 
 ## 라이선스
 
-MIT License 
+MIT License
+```

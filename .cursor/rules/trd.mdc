@@ -1,17 +1,18 @@
 ---
 alwaysApply: true
 ---
+
 # TRD: UbiLang – Glossary & Policy Management SaaS
 
 ## 1. 기술 스택 요약
 
-| 레이어 | 기술 | 비고 |
-| --- | --- | --- |
-| **프론트엔드** | Next.js (App Router, **클라이언트 컴포넌트만**)<br/>TypeScript, Tailwind CSS, Radix UI / shadcn | 서버 컴포넌트 및 API Route 금지 |
-| **백엔드** | Supabase (PostgreSQL + Auth + Edge Functions + Realtime + Storage) | Supabase JS v2 |
-| **이메일 발송** | Supabase Edge Functions + Resend API | DB 트리거 → Edge Function → Resend |
-| **배포** | Vercel (프론트) / Supabase (백엔드) | Supabase Project URL 및 anon key 환경변수 |
-| **모니터링** | Vercel Analytics, Supabase Logs + Logflare, Sentry |  |
+| 레이어          | 기술                                                                                            | 비고                                      |
+| --------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| **프론트엔드**  | Next.js (App Router, **클라이언트 컴포넌트만**)<br/>TypeScript, Tailwind CSS, Radix UI / shadcn | 서버 컴포넌트 및 API Route 금지           |
+| **백엔드**      | Supabase (PostgreSQL + Auth + Edge Functions + Realtime + Storage)                              | Supabase JS v2                            |
+| **이메일 발송** | Supabase Edge Functions + Resend API                                                            | DB 트리거 → Edge Function → Resend        |
+| **배포**        | Vercel (프론트) / Supabase (백엔드)                                                             | Supabase Project URL 및 anon key 환경변수 |
+| **모니터링**    | Vercel Analytics, Supabase Logs + Logflare, Sentry                                              |                                           |
 
 ---
 
@@ -39,35 +40,34 @@ Resend API
 
 ### 3.1 조직·프로젝트
 
-| 테이블 | 주요 컬럼 | 설명 |
-| --- | --- | --- |
-| organizations | id, name, created_at | 조직 |
-| projects | id, organization_id, name, created_at | 조직 1‑N 프로젝트 |
-| memberships | id, project_id, user_id, role (`admin`/`member`), receive_emails (bool) | 알림 토글 포함 |
+| 테이블        | 주요 컬럼                                                               | 설명              |
+| ------------- | ----------------------------------------------------------------------- | ----------------- |
+| organizations | id, name, created_at                                                    | 조직              |
+| projects      | id, organization_id, name, created_at                                   | 조직 1‑N 프로젝트 |
+| memberships   | id, project_id, user_id, role (`admin`/`member`), receive_emails (bool) | 알림 토글 포함    |
 
 ### 3.2 Glossary / Policy
 
-| 테이블 | 주요 컬럼 | 설명 |
-| --- | --- | --- |
-| glossaries | id, project_id, name, definition, author_id, updated_at | 용어 정의 |
-| policies | id, project_id, contents, author_id, updated_at | 정책 |
-| policy_links | id, policy_id, url, type (`context`/`general`) | 다중 URL |
-| glossary_links | id, glossary_id, url |  |
-| 관계 매핑 | policy_terms (`policy_id`, `glossary_id`)<br/>glossary_relations (`glossary_id`, `related_id`) | 정책‑용어 / 용어‑용어 |
+| 테이블         | 주요 컬럼                                               | 설명      |
+| -------------- | ------------------------------------------------------- | --------- |
+| glossaries     | id, project_id, name, definition, author_id, updated_at | 용어 정의 |
+| policies       | id, project_id, contents, author_id, updated_at         | 정책      |
+| policy_links   | id, policy_id, url, type (`context`/`general`)          | 다중 URL  |
+| glossary_links | id, glossary_id, url                                    |           |
 
 ### 3.3 알림 로그 (옵션)
 
-| 테이블 | 주요 컬럼 | 설명 |
-| --- | --- | --- |
+| 테이블       | 주요 컬럼                                            | 설명      |
+| ------------ | ---------------------------------------------------- | --------- |
 | email_events | id, target_user_id, event_type, resource_id, sent_at | 전송 기록 |
 
 ### 3.4 RLS 정책 요약
 
-| 테이블 | 정책 |
-| --- | --- |
-| memberships | `user_id = auth.uid()` |
-| projects, glossaries, policies | 조직‑멤버십 존재 시 SELECT |
-| insert/update/delete | `role = 'admin'` 또는 작성자 본인 항목 수정만 |
+| 테이블                         | 정책                                          |
+| ------------------------------ | --------------------------------------------- |
+| memberships                    | `user_id = auth.uid()`                        |
+| projects, glossaries, policies | 조직‑멤버십 존재 시 SELECT                    |
+| insert/update/delete           | `role = 'admin'` 또는 작성자 본인 항목 수정만 |
 
 ---
 
@@ -82,42 +82,46 @@ Resend API
 
 ## 5. 기능별 구현
 
-| 기능 | 구현 |
-| --- | --- |
-| 용어·정책 CRUD | Supabase JS mutations → SWR mutate / Realtime |
-| 컨텍스트·일반 링크 | URL 필드 + 외부 링크 컴포넌트 |
-| 검색·필터 | 클라이언트 Fuse.js + PostgREST `ilike` |
-| 제안 흐름 | `status` (`draft`/`pending`/`approved`) |
-| 알림 토글 | `memberships.receive_emails` |
-| 이메일 발송 | PG Trigger → Edge Function → Resend |
-| 온보딩 템플릿 | `templates_*` → INSERT … SELECT |
+| 기능               | 구현                                          |
+| ------------------ | --------------------------------------------- |
+| 용어·정책 CRUD     | Supabase JS mutations → SWR mutate / Realtime |
+| 컨텍스트·일반 링크 | URL 필드 + 외부 링크 컴포넌트                 |
+| 검색·필터          | 클라이언트 Fuse.js + PostgREST `ilike`        |
+| 제안 흐름          | `status` (`draft`/`pending`/`approved`)       |
+| 알림 토글          | `memberships.receive_emails`                  |
+| 이메일 발송        | PG Trigger → Edge Function → Resend           |
+| 온보딩 템플릿      | `templates_*` → INSERT … SELECT               |
 
 ---
 
 ## 5.1 전역 모달 시스템 (⚠️ 필수 준수)
 
 ### 모달 구조
+
 - **ErrorModal**: `components/common/error-modal.tsx`
 - **SuccessModal**: `components/common/success-modal.tsx`
 - **전역 렌더링**: `app/layout.tsx`에서만 렌더링
 
 ### 핵심 규칙
+
 1. **절대 중복 렌더링 금지**: 각 페이지에서 `<ErrorModal />`이나 `<SuccessModal />`을 추가로 렌더링하지 말 것
 2. **Store 함수 사용**: 모달 제어는 반드시 store 함수를 통해서만 수행
 3. **Import 규칙**: 모달 컴포넌트 자체는 import하지 말고, store 함수만 import
 
 ### 사용 방법
+
 ```typescript
 // ✅ 올바른 사용법
-import { showError, showSimpleError } from '@/lib/error-store'
-import { showSuccess } from '@/lib/success-store'
+import { showError, showSimpleError } from "@/lib/error-store";
+import { showSuccess } from "@/lib/success-store";
 
 // ❌ 잘못된 사용법 - 절대 금지
-import { ErrorModal } from '@/components/common/error-modal'
+import { ErrorModal } from "@/components/common/error-modal";
 // return <div>...<ErrorModal /></div>  // 이렇게 하면 안됨
 ```
 
 ### 위반 시 발생 문제
+
 - 메모리 누수
 - 중복 모달 표시
 - 성능 저하
@@ -171,13 +175,13 @@ sequenceDiagram
 
 ## 8. 품질 & 테스트
 
-| 범주 | 도구 |
-| --- | --- |
-| 유닛 | Jest, RTL |
-| E2E | Playwright |
-| 마이그레이션 | Supabase CLI `db push` |
-| CI/CD | GitHub Actions + Vercel Preview |
-| 정적 분석 | ESLint, Prettier, TS strict |
+| 범주         | 도구                            |
+| ------------ | ------------------------------- |
+| 유닛         | Jest, RTL                       |
+| E2E          | Playwright                      |
+| 마이그레이션 | Supabase CLI `db push`          |
+| CI/CD        | GitHub Actions + Vercel Preview |
+| 정적 분석    | ESLint, Prettier, TS strict     |
 
 ---
 
@@ -193,11 +197,11 @@ sequenceDiagram
 
 ## 10. 오픈 이슈
 
-| # | 이슈 | 비고 |
-| --- | --- | --- |
-| 1 | 버전 관리 | `history_*` 테이블, soft delete |
-| 2 | 대규모 Realtime 부하 | Channel sharding |
-| 3 | SSO | Supabase Enterprise SAML |
+| #   | 이슈                 | 비고                            |
+| --- | -------------------- | ------------------------------- |
+| 1   | 버전 관리            | `history_*` 테이블, soft delete |
+| 2   | 대규모 Realtime 부하 | Channel sharding                |
+| 3   | SSO                  | Supabase Enterprise SAML        |
 
 ---
 

@@ -226,42 +226,6 @@ export type Database = {
           }
         ];
       };
-      glossary_relations: {
-        Row: {
-          created_at: string | null;
-          glossary_id: string | null;
-          id: string;
-          related_id: string | null;
-        };
-        Insert: {
-          created_at?: string | null;
-          glossary_id?: string | null;
-          id?: string;
-          related_id?: string | null;
-        };
-        Update: {
-          created_at?: string | null;
-          glossary_id?: string | null;
-          id?: string;
-          related_id?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "glossary_relations_glossary_id_fkey";
-            columns: ["glossary_id"];
-            isOneToOne: false;
-            referencedRelation: "glossaries";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "glossary_relations_related_id_fkey";
-            columns: ["related_id"];
-            isOneToOne: false;
-            referencedRelation: "glossaries";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
       memberships: {
         Row: {
           created_at: string | null;
