@@ -2236,10 +2236,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         {selectedActor && selectedUsecase && (
           <div className="h-full flex flex-col">
             <div className="mb-4">
-              <h3 className="text-xl font-semibold">기능 및 정책</h3>
+              <h3 className="text-xl font-semibold">
+                {t("policy.features_and_policies")}
+              </h3>
               <p className="text-muted-foreground text-sm">
-                {selectedUsecase.name} 유즈케이스의 기능들과 각 기능의 정책을
-                관리합니다.
+                {t("policy.features_and_policies_desc", {
+                  usecaseName: selectedUsecase.name,
+                })}
               </p>
             </div>
 
@@ -2247,14 +2250,14 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               {/* 좌측: 기능 목록 (1/3) */}
               <div className="col-span-1 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
-                  <h4 className="font-medium">기능</h4>
+                  <h4 className="font-medium">{t("policy.features_header")}</h4>
                   {membership?.role === "admin" && (
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setShowFeatureModal(true)}
                     >
-                      + 추가
+                      {t("feature.add_new_button")}
                     </Button>
                   )}
                 </div>
@@ -2265,7 +2268,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     type="text"
                     value={featureListSearchTerm}
                     onChange={(e) => setFeatureListSearchTerm(e.target.value)}
-                    placeholder="기능 이름으로 검색..."
+                    placeholder={t("placeholders.search_features")}
                     className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     disabled={featuresLoading}
                   />
@@ -2335,7 +2338,11 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               <div className="col-span-3 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">
-                    {selectedFeature ? `${selectedFeature.name} 정책` : "정책"}
+                    {selectedFeature
+                      ? `${selectedFeature.name} ${t(
+                          "policy.policies_with_feature"
+                        )}`
+                      : t("policy.policies_header")}
                   </h4>
                   {membership?.role === "admin" && (
                     <div className="flex gap-2">
@@ -2358,7 +2365,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                           setShowPolicyModal(true);
                         }}
                       >
-                        + 정책 추가
+                        {t("policy.add_new_policy_button")}
                       </Button>
                     </div>
                   )}
@@ -2376,7 +2383,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                         onChange={(e) =>
                           setPolicyListSearchTerm(e.target.value)
                         }
-                        placeholder="정책 내용이나 연결된 용어로 검색..."
+                        placeholder={t("placeholders.search_policies")}
                         className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         disabled={policiesLoading}
                       />

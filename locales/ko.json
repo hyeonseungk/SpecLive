@@ -167,6 +167,8 @@
     "search_placeholder": "정책 검색...",
     "all_categories": "모든 카테고리",
     "add_button": "정책 추가",
+    "add_new_policy_button": "+ 새 정책 추가",
+    "policies_with_feature": "정책",
     "loading": "정책을 불러오는 중...",
     "no_results": "검색 결과가 없습니다.",
     "no_policies": "아직 등록된 정책이 없습니다.",
@@ -200,16 +202,14 @@
     "content_required": "정책 내용을 입력해주세요.",
     "feature_required": "정책은 최소 1개의 기능과 연결되어야 합니다.",
     "features_and_policies": "기능 및 정책",
-    "features_and_policies_desc": "유즈케이스의 기능들과 각 기능의 정책을 관리합니다.",
+    "features_and_policies_desc": "{{usecaseName}} 유즈케이스의 기능들과 각 기능의 정책을 관리합니다.",
     "features_header": "기능",
     "policies_header": "정책",
     "policy_header_with_feature": "정책",
     "select_feature": "기능을 선택해주세요",
     "no_features": "아직 기능이 없습니다",
     "no_terms": "용어가 없습니다",
-    "first_policy_hint": "첫 번째 정책을 추가해보세요",
-    "sequence_error_title": "정책 순서 변경 실패",
-    "sequence_error_desc": "정책 순서를 변경하는 중 오류가 발생했습니다."
+    "first_policy_hint": "첫 번째 정책을 추가해보세요"
   },
   "policyAddModal": {
     "header": "새 정책 추가",

@@ -126,6 +126,8 @@
     "search_placeholder": "Search policies...",
     "all_categories": "All categories",
     "add_button": "Add Policy",
+    "add_new_policy_button": "+ Add New Policy",
+    "policies_with_feature": "Policies",
     "loading": "Loading policies...",
     "no_results": "No results found.",
     "no_policies": "No policies added yet.",
@@ -159,16 +161,14 @@
     "content_required": "Please enter policy content.",
     "feature_required": "Policy must be connected to at least one feature.",
     "features_and_policies": "Features & Policies",
-    "features_and_policies_desc": "Manage features of the use case and policies for each feature.",
+    "features_and_policies_desc": "Manage features of the {{usecaseName}} use case and policies for each feature.",
     "features_header": "Features",
     "policies_header": "Policies",
     "policy_header_with_feature": "Policies",
     "select_feature": "Please select a feature",
     "no_features": "No features yet",
     "no_terms": "No terms available",
-    "first_policy_hint": "Add your first policy",
-    "sequence_error_title": "Failed to Change Policy Order",
-    "sequence_error_desc": "An error occurred while changing the policy order."
+    "first_policy_hint": "Add your first policy"
   },
   "policyAddModal": {
     "header": "Add New Policy",
