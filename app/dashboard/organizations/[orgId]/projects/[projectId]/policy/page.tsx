@@ -2302,15 +2302,17 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   <h4 className="font-medium">
                     {selectedFeature ? `${selectedFeature.name} 정책` : "정책"}
                   </h4>
-                  {selectedFeature && membership?.role === "admin" && (
+                  {membership?.role === "admin" && (
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowPolicyAiModal(true)}
-                      >
-                        {t("policy.ai_recommendation")}
-                      </Button>
+                      {selectedFeature && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowPolicyAiModal(true)}
+                        >
+                          {t("policy.ai_recommendation")}
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
@@ -2552,15 +2554,17 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         handleFeatureToggle={handleFeatureToggle}
       />
 
-      <PolicyAiRecommendationModal
-        projectId={params.projectId}
-        userId={user!.id}
-        onClose={() => setShowPolicyAiModal(false)}
-        onPoliciesAdded={(newPolicies) => {
-          if (selectedFeature) loadPoliciesForTheFeature(selectedFeature.id);
-          setShowPolicyAiModal(false);
-        }}
-      />
+      {showPolicyAiModal && (
+        <PolicyAiRecommendationModal
+          projectId={params.projectId}
+          userId={user!.id}
+          onClose={() => setShowPolicyAiModal(false)}
+          onPoliciesAdded={(newPolicies) => {
+            if (selectedFeature) loadPoliciesForTheFeature(selectedFeature.id);
+            setShowPolicyAiModal(false);
+          }}
+        />
+      )}
 
       <PolicyEditModal
         isOpen={
