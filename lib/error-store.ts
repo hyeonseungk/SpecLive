@@ -40,7 +40,9 @@ export const showError = (
 };
 
 export const showSimpleError = (message: string) => {
-  useErrorStore.getState().showError("오류", message);
+  // 다국어 지원을 위해 컴포넌트에서 t() 함수로 제목을 전달하도록 변경
+  // 임시로 영어 제목 사용, 실제로는 컴포넌트에서 t("common.error_title")를 전달해야 함
+  useErrorStore.getState().showError("Error", message);
 };
 
 export const hideError = () => {

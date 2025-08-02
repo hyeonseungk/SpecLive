@@ -1,23 +1,23 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/lib/supabase-browser";
-import { showError } from "@/lib/error-store";
 import {
   AlertDialog,
-  AlertDialogTrigger,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { CardTitle } from "@/components/ui/card";
+import { showError } from "@/lib/error-store";
 import { useT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
+import { supabase } from "@/lib/supabase-browser";
+import { useEffect, useRef, useState } from "react";
 
 interface Message {
   role: "user" | "assistant";
@@ -177,10 +177,7 @@ export default function AiChatModal({
           // 연결 중단 메시지 감지
           if (chunk.includes("[Connection interrupted]")) {
             console.warn("Received connection interrupted message");
-            showError(
-              t("ai.error_title"),
-              "연결이 중단되었습니다. 다시 시도해주세요."
-            );
+            showError(t("ai.error_title"), t("common.connection_error"));
             break;
           }
 
@@ -189,7 +186,7 @@ export default function AiChatModal({
         }
       } catch (streamError) {
         console.error("Stream reading error:", streamError);
-        throw new Error("스트리밍 중 연결이 끊어졌습니다.");
+        throw new Error(t("common.streaming_error"));
       } finally {
         clearInterval(connectionMonitor);
       }

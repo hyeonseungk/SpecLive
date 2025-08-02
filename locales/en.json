@@ -6,7 +6,18 @@
     "no_access": "No access rights",
     "loading": "Loading...",
     "processing": "Processing...",
-    "error_generic": "An error occurred."
+    "error_generic": "An error occurred.",
+    "unknown_error": "An unknown error has occurred.",
+    "connection_error": "Connection lost. Please try again.",
+    "streaming_error": "Connection lost during streaming.",
+    "edit": "Edit",
+    "copy_link": "Copy Link",
+    "link_copied": "Link has been copied.",
+    "remove_link": "Remove Link",
+    "error_title": "Error",
+    "success_title": "Success",
+    "no_search_results": "No search results found",
+    "clear_search": "Clear search"
   },
   "org": {
     "not_found": "Organization not found...",
@@ -144,7 +155,20 @@
     "sequence_updated": "Policy sequence updated successfully.",
     "sequence_error_title": "Sequence Update Error",
     "sequence_error_desc": "An error occurred while updating the policy sequence.",
-    "add_success": "Policy added."
+    "add_success": "Policy added successfully.",
+    "content_required": "Please enter policy content.",
+    "feature_required": "Policy must be connected to at least one feature.",
+    "features_and_policies": "Features & Policies",
+    "features_and_policies_desc": "Manage features of the use case and policies for each feature.",
+    "features_header": "Features",
+    "policies_header": "Policies",
+    "policy_header_with_feature": "Policies",
+    "select_feature": "Please select a feature",
+    "no_features": "No features yet",
+    "no_terms": "No terms available",
+    "first_policy_hint": "Add your first policy",
+    "sequence_error_title": "Failed to Change Policy Order",
+    "sequence_error_desc": "An error occurred while changing the policy order."
   },
   "policyAddModal": {
     "header": "Add New Policy",
@@ -222,14 +246,24 @@
     "select_placeholder": "Select Actor",
     "add_new_button": "+ Add New Actor",
     "add_modal_title": "Add Actor",
+    "edit_modal_title": "Edit Actor",
+    "delete_modal_title": "Delete Actor",
     "name_label": "Actor Name *",
-    "name_placeholder": "e.g. Regular User, Admin, Customer, ...",
+    "name_placeholder": "Enter actor name",
     "name_required": "Please enter actor name.",
     "add_success": "Actor has been added.",
+    "update_success": "Actor has been updated successfully.",
+    "delete_success": "Actor has been deleted successfully.",
     "add_error_title": "Failed to Add Actor",
     "add_error_desc": "An error occurred while adding the actor.",
+    "update_error_title": "Failed to Update Actor",
+    "update_error_desc": "An error occurred while updating the actor.",
+    "delete_error_title": "Failed to Delete Actor",
+    "delete_error_desc": "An error occurred while deleting the actor.",
     "load_error_title": "Failed to Load Actors",
-    "load_error_desc": "An error occurred while loading actors."
+    "load_error_desc": "An error occurred while loading actors.",
+    "sequence_error_title": "Failed to Change Actor Order",
+    "sequence_error_desc": "An error occurred while changing the actor order."
   },
   "usecase": {
     "label": "Use Case:",
@@ -237,15 +271,25 @@
     "select_placeholder": "Select Use Case",
     "add_new_button": "+ Add New Use Case",
     "add_modal_title": "Add Use Case",
+    "edit_modal_title": "Edit Use Case",
+    "delete_modal_title": "Delete Use Case",
     "name_label": "Use Case Name *",
-    "name_placeholder": "e.g. Purchase Product, Login, Sign Up, ...",
+    "name_placeholder": "Enter use case name",
     "actor_prefix": "(Actor: ",
     "name_required": "Please enter use case name.",
     "add_success": "Use case has been added.",
+    "update_success": "Use case has been updated successfully.",
+    "delete_success": "Use case has been deleted successfully.",
     "add_error_title": "Failed to Add Use Case",
     "add_error_desc": "An error occurred while adding the use case.",
+    "update_error_title": "Failed to Update Use Case",
+    "update_error_desc": "An error occurred while updating the use case.",
+    "delete_error_title": "Failed to Delete Use Case",
+    "delete_error_desc": "An error occurred while deleting the use case.",
     "load_error_title": "Failed to Load Use Cases",
-    "load_error_desc": "An error occurred while loading use cases."
+    "load_error_desc": "An error occurred while loading use cases.",
+    "sequence_error_title": "Failed to Change Use Case Order",
+    "sequence_error_desc": "An error occurred while changing the use case order."
   },
   "buttons": {
     "save": "Save",
@@ -256,8 +300,11 @@
     "back": "Back to Dashboard",
     "ok": "OK",
     "delete": "Delete",
+    "deleting": "Deleting...",
     "add": "Add",
     "adding": "Adding...",
+    "update": "Update",
+    "updating": "Updating...",
     "close": "Close"
   },
   "ai": {
@@ -396,5 +443,38 @@
     "name_placeholder": "e.g. E-commerce, Chat service",
     "creating": "Creating...",
     "create": "Create"
+  },
+  "feature": {
+    "label": "Feature:",
+    "add_button": "+ Add Feature",
+    "add_new_button": "+ Add New Feature",
+    "add_modal_title": "Add Feature",
+    "edit_modal_title": "Edit Feature",
+    "delete_modal_title": "Delete Feature",
+    "name_label": "Feature Name *",
+    "name_placeholder": "Enter feature name",
+    "name_required": "Please enter feature name.",
+    "add_success": "Feature has been added successfully.",
+    "update_success": "Feature has been updated successfully.",
+    "delete_success": "Feature has been deleted successfully.",
+    "add_error_title": "Failed to Add Feature",
+    "add_error_desc": "An error occurred while adding the feature.",
+    "update_error_title": "Failed to Update Feature",
+    "update_error_desc": "An error occurred while updating the feature.",
+    "delete_error_title": "Failed to Delete Feature",
+    "delete_error_desc": "An error occurred while deleting the feature.",
+    "load_error_title": "Failed to Load Features",
+    "load_error_desc": "An error occurred while loading features.",
+    "sequence_error_title": "Failed to Change Feature Order",
+    "sequence_error_desc": "An error occurred while changing the feature order."
+  },
+  "placeholders": {
+    "search_features": "Search by feature name...",
+    "search_terms": "Search by term name or definition...",
+    "search_policies": "Search by policy content or connected terms..."
+  },
+  "terms": {
+    "load_error_title": "Failed to Load Terms",
+    "load_error_desc": "An error occurred while loading terms."
   }
 }

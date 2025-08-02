@@ -1,5 +1,5 @@
-import { useCallback } from "react";
 import { showError, showSimpleError } from "@/lib/error-store";
+import { useCallback } from "react";
 
 export const useErrorHandler = () => {
   const handleError = useCallback((error: unknown, customMessage?: string) => {
@@ -8,7 +8,7 @@ export const useErrorHandler = () => {
         customMessage ? `${customMessage}: ${error.message}` : error.message
       );
     } else {
-      showSimpleError(customMessage || "알 수 없는 오류가 발생했습니다.");
+      showSimpleError(customMessage || "An unknown error has occurred.");
     }
   }, []);
 
@@ -42,6 +42,6 @@ export const globalErrorHandler = (error: unknown, customMessage?: string) => {
       customMessage ? `${customMessage}: ${error.message}` : error.message
     );
   } else {
-    showSimpleError(customMessage || "알 수 없는 오류가 발생했습니다.");
+    showSimpleError(customMessage || "An unknown error has occurred.");
   }
 };

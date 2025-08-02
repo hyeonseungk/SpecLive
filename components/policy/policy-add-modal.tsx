@@ -257,9 +257,9 @@ export default function PolicyAddModal({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium">
-                컨텍스트 링크들
+                {t("policyAddModal.contextLinksLabel")}
                 <span className="text-xs text-gray-500 font-normal ml-1">
-                  (정책 배경: 슬랙, 회의록 등)
+                  ({t("policyAddModal.contextLinksHint")})
                 </span>
               </label>
               <Button
@@ -270,7 +270,7 @@ export default function PolicyAddModal({
                 disabled={policySaving}
                 className="text-blue-600 hover:text-blue-700 text-sm"
               >
-                + 링크 추가
+                {t("policyAddModal.addLink")}
               </Button>
             </div>
             {contextLinks.map((link, i) => (
@@ -290,7 +290,7 @@ export default function PolicyAddModal({
                   onClick={() => removeLinkField("context", i)}
                   disabled={policySaving || contextLinks.length === 1}
                   className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
-                  title="링크 삭제"
+                  title={t("policyAddModal.removeLink")}
                 >
                   ✕
                 </button>
@@ -302,7 +302,7 @@ export default function PolicyAddModal({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium">
-                일반 링크들
+                {t("policyAddModal.generalLinksLabel")}
                 <span className="text-xs text-gray-500 font-normal ml-1">
                   (UI/UX 설계, 구현 코드 등)
                 </span>
@@ -315,7 +315,7 @@ export default function PolicyAddModal({
                 disabled={policySaving}
                 className="text-blue-600 hover:text-blue-700 text-sm"
               >
-                + 링크 추가
+                {t("policyAddModal.addLink")}
               </Button>
             </div>
             {generalLinks.map((link, i) => (
@@ -335,7 +335,7 @@ export default function PolicyAddModal({
                   onClick={() => removeLinkField("general", i)}
                   disabled={policySaving || generalLinks.length === 1}
                   className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
-                  title="링크 삭제"
+                  title={t("policyAddModal.removeLink")}
                 >
                   ✕
                 </button>
