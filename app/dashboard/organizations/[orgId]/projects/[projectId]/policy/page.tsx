@@ -2562,7 +2562,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
           onClose={() => setShowPolicyAiModal(false)}
           onPoliciesAdded={(newPolicies) => {
             if (selectedFeature) loadPoliciesForTheFeature(selectedFeature.id);
-            setShowPolicyAiModal(false);
           }}
         />
       )}

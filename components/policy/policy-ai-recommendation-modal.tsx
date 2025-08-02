@@ -175,7 +175,7 @@ export default function PolicyAiRecommendationModal({
             {!aiLoading && (
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={onClose}>
-                  {t("buttons.cancel")}
+                  {t("buttons.close")}
                 </Button>
                 <Button onClick={handleAiRecommendation} disabled={aiLoading}>
                   {t("policy.ai_get_recommendations")}
@@ -193,7 +193,7 @@ export default function PolicyAiRecommendationModal({
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={onClose}>
-                {t("buttons.cancel")}
+                {t("buttons.close")}
               </Button>
               <Button onClick={handleAiRecommendation} disabled={aiLoading}>
                 {t("policy.ai_retry")}
@@ -265,7 +265,7 @@ export default function PolicyAiRecommendationModal({
 
             <div className="flex justify-between">
               <Button variant="outline" onClick={onClose} disabled={aiLoading}>
-                {t("buttons.cancel")}
+                {t("buttons.close")}
               </Button>
               <div className="flex gap-2">
                 <Button
