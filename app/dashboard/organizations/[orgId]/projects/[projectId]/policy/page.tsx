@@ -2132,7 +2132,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             )}
             {/* 유즈케이스 선택 */}
             {selectedActor && (
-              <div className="flex flex-col gap-2 mt-8">
+              <div className="flex flex-col gap-2 mt-4">
                 <div className="flex items-center justify-between">
                   <span className="text-base font-semibold text-gray-800">
                     {t("usecase.label")}

@@ -167,8 +167,8 @@ export default function SortablePolicyCard({
                   className="block text-xs text-blue-600 hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {feature.name} ({feature.usecase.actor.name} →{" "}
-                  {feature.usecase.name})
+                  {feature.usecase.actor.name} {">"} {feature.usecase.name}{" "}
+                  {">"} {feature.name}
                 </a>
               ))}
             </div>
