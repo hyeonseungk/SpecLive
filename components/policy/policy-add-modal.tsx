@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 interface Feature {
   id: string;
@@ -86,6 +87,7 @@ export default function PolicyAddModal({
   selectedGlossaryIds,
   handleGlossaryToggle,
 }: PolicyAddModalProps) {
+  const t = useT();
   const filteredFeatures = useMemo(() => {
     if (!featureSearchTerm.trim()) return allFeatures;
     const term = featureSearchTerm.toLowerCase().trim();
@@ -115,18 +117,18 @@ export default function PolicyAddModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">정책 추가</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("policyAddModal.header")}</h3>
 
         <div className="space-y-4">
           {/* 정책 내용 */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              정책 내용 <span className="text-red-500">*</span>
+              {t("policyAddModal.contentsLabel")} <span className="text-red-500">*</span>
             </label>
             <textarea
               value={policyContents}
               onChange={(e) => setPolicyContents(e.target.value)}
-              placeholder="정책의 전체 내용을 입력하세요"
+              placeholder={t("policyAddModal.contentsPlaceholder")}
               rows={5}
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
               disabled={policySaving}
@@ -136,25 +138,19 @@ export default function PolicyAddModal({
           {/* 관련 기능 선택 */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              관련 기능들 <span className="text-red-500">*</span>
+              {t("policyAddModal.featuresLabel")} <span className="text-red-500">*</span>
               <span className="text-xs text-gray-500 font-normal ml-1">
-                (정책은 최소 1개의 기능과 연결되어야 합니다)
+                {t("policyAddModal.featuresHint")}
               </span>
             </label>
             {allFeaturesLoading ? (
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-                <span className="ml-2 text-sm text-gray-500">
-                  기능 로딩 중...
-                </span>
+                <span className="ml-2 text-sm text-gray-500">{t("policyAddModal.loadingFeatures")}</span>
               </div>
             ) : allFeatures.length === 0 ? (
-              <p className="text-sm text-gray-500 py-2">
-                프로젝트에 기능이 아직 없습니다. <br />
-                <span className="text-xs">
-                  먼저 액터, 유즈케이스, 기능을 추가해보세요.
-                </span>
-              </p>
+              <p className="text-sm text-gray-500 py-2">{t("policyAddModal.noFeatures")}</p>
+              <span className="text-xs">{t("policyAddModal.noFeaturesHint")}</span>
             ) : (
               <>
                 {/* 기능 검색창 */}
@@ -163,14 +159,13 @@ export default function PolicyAddModal({
                     type="text"
                     value={featureSearchTerm}
                     onChange={(e) => setFeatureSearchTerm(e.target.value)}
-                    placeholder="액터, 유즈케이스, 기능 이름으로 검색..."
+                    placeholder={t("policyAddModal.searchPlaceholder")}
                     className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     disabled={policySaving}
                   />
                   {featureSearchTerm && (
                     <p className="text-xs text-gray-500 mt-1">
-                      "{featureSearchTerm}" 검색 결과: {filteredFeatures.length}
-                      개
+                      {t("policyAddModal.searchResults", { term: featureSearchTerm, count: filteredFeatures.length })}
                     </p>
                   )}
                 </div>
@@ -181,8 +176,8 @@ export default function PolicyAddModal({
                     <div className="text-center py-4">
                       <p className="text-sm text-gray-500">
                         {featureSearchTerm
-                          ? "검색 결과가 없습니다"
-                          : "기능이 없습니다"}
+                          ? t("policyAddModal.noSearchResults")
+                          : t("policyAddModal.noFeatures")}
                       </p>
                       {featureSearchTerm && (
                         <button
@@ -190,7 +185,7 @@ export default function PolicyAddModal({
                           className="text-xs text-blue-600 hover:text-blue-700 mt-1"
                           disabled={policySaving}
                         >
-                          검색어 초기화
+                          {t("policyAddModal.clearSearch")}
                         </button>
                       )}
                     </div>

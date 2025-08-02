@@ -124,7 +124,7 @@ export default function SortablePolicyCard({
               url.searchParams.set("featureId", feature.id);
               url.searchParams.set("policyId", policy.id);
               navigator.clipboard.writeText(url.toString());
-              showSimpleSuccess("링크가 복사되었습니다.");
+              showSimpleSuccess(t("sortablePolicyCard.copyLinkSuccess"));
             }}
             className="absolute top-3 right-10 transform -translate-y-1 w-8 h-8 bg-white shadow-md hover:shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all"
             title={t("glossary.copy_url")}
@@ -149,7 +149,7 @@ export default function SortablePolicyCard({
         {policy.connected_features && policy.connected_features.length > 0 && (
           <div className={`mb-3 ${membership?.role === "admin" ? "ml-8" : ""}`}>
             <h5 className="text-xs font-medium text-gray-700 mb-1">
-              연결된 기능
+              {t("sortablePolicyCard.connectedFeatures")}
             </h5>
             <div className="space-y-1">
               {policy.connected_features.map((feature) => (
@@ -185,7 +185,7 @@ export default function SortablePolicyCard({
         {policy.policy_terms && policy.policy_terms.length > 0 && (
           <div className={`mb-3 ${membership?.role === "admin" ? "ml-8" : ""}`}>
             <h5 className="text-xs font-medium text-gray-700 mb-1">
-              연결된 용어
+              {t("sortablePolicyCard.connectedTerms")}
             </h5>
             <div className="flex flex-wrap gap-1">
               {policy.policy_terms.map((term) => (
@@ -212,7 +212,7 @@ export default function SortablePolicyCard({
               className={`mb-3 ${membership?.role === "admin" ? "ml-8" : ""}`}
             >
               <h5 className="text-xs font-medium text-gray-700 mb-1">
-                컨텍스트 링크
+                {t("sortablePolicyCard.contextLinks")}
               </h5>
               <div className="flex flex-wrap gap-1">
                 {policy.policy_links
@@ -242,7 +242,7 @@ export default function SortablePolicyCard({
               className={`mb-3 ${membership?.role === "admin" ? "ml-8" : ""}`}
             >
               <h5 className="text-xs font-medium text-gray-700 mb-1">
-                일반 링크
+                {t("sortablePolicyCard.generalLinks")}
               </h5>
               <div className="flex flex-wrap gap-1">
                 {policy.policy_links
@@ -271,8 +271,8 @@ export default function SortablePolicyCard({
             <span className="text-right">
               {policy.updated_at ? (
                 <>
-                  최종 수정:{" "}
-                  {new Date(policy.updated_at).toLocaleDateString("ko-KR", {
+                  {t("sortablePolicyCard.lastModifiedLabel")}{" "}
+                  {new Date(policy.updated_at).toLocaleDateString(undefined, {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
@@ -281,7 +281,7 @@ export default function SortablePolicyCard({
                   })}
                 </>
               ) : (
-                <>최종 수정 정보 없음</>
+                <>{t("sortablePolicyCard.noLastModified")}</>
               )}
             </span>
           </div>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
+import { useMemo, useState } from "react";
 
 interface Feature {
   id: string;
@@ -129,6 +130,7 @@ export default function PolicyEditModal({
   editSelectedGlossaryIds,
   handleEditGlossaryToggle,
 }: PolicyEditModalProps) {
+  const t = useT();
   /* 필터링 */
   const filteredFeatures = useMemo(() => {
     if (!editFeatureSearchTerm.trim()) return allFeatures;
@@ -164,14 +166,16 @@ export default function PolicyEditModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">정책 편집</h3>
+          <h3 className="text-lg font-semibold">
+            {t("policyEditModal.header")}
+          </h3>
           <Button
             variant="destructive"
             size="sm"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={policySaving}
           >
-            삭제
+            {t("policyEditModal.deleteButton")}
           </Button>
         </div>
 
@@ -179,12 +183,13 @@ export default function PolicyEditModal({
           {/* 정책 내용 */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              정책 내용 <span className="text-red-500">*</span>
+              {t("policyEditModal.contentsLabel")}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <textarea
               value={policyContents}
               onChange={(e) => setPolicyContents(e.target.value)}
-              placeholder="정책의 전체 내용을 입력하세요"
+              placeholder={t("policyEditModal.contentsPlaceholder")}
               rows={5}
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
               disabled={policySaving}
@@ -194,9 +199,10 @@ export default function PolicyEditModal({
           {/* 기능 선택 */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              관련 기능들 <span className="text-red-500">*</span>
+              {t("policyEditModal.featuresLabel")}{" "}
+              <span className="text-red-500">*</span>
               <span className="text-xs text-gray-500 font-normal ml-1">
-                (정책은 최소 1개의 기능과 연결되어야 합니다)
+                {t("policyEditModal.featuresHint")}
               </span>
             </label>
             {allFeaturesLoading ? (
@@ -217,10 +223,17 @@ export default function PolicyEditModal({
                     type="text"
                     value={editFeatureSearchTerm}
                     onChange={(e) => setEditFeatureSearchTerm(e.target.value)}
-                    placeholder="액터, 유즈케이스, 기능 이름으로 검색..."
+                    placeholder={t("policyEditModal.searchPlaceholder")}
                     className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     disabled={policySaving}
                   />
+                  {editFeatureSearchTerm && (
+                    <p className="text-xs text-gray-500">
+                      {editFeatureSearchTerm
+                        ? t("policyEditModal.noSearchResults")
+                        : t("policyEditModal.noFeatures")}
+                    </p>
+                  )}
                 </div>
                 <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50">
                   {filteredFeatures.map((feature) => (
