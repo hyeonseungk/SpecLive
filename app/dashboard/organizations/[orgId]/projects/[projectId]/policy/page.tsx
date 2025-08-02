@@ -2223,7 +2223,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </div>
 
                 {/* 기능 검색창 */}
-                <div className="mb-3 flex-shrink-0">
+                <div className="mb-3 flex-shrink-0, px-2">
                   <input
                     type="text"
                     value={featureListSearchTerm}
@@ -2273,7 +2273,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                         items={filteredFeatureList.map((f) => f.id)}
                         strategy={verticalListSortingStrategy}
                       >
-                        <div className="space-y-2 pr-2">
+                        <div className="space-y-2 px-2 py-2">
                           {filteredFeatureList.map((feature) => (
                             <SortableFeatureCard
                               key={feature.id}
@@ -2322,7 +2322,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   selectedUsecase &&
                   selectedFeature &&
                   featurePolicies.length > 0 && (
-                    <div className="mb-3 flex-shrink-0">
+                    <div className="mb-3 flex-shrink-0 px-2">
                       <input
                         type="text"
                         value={policyListSearchTerm}
@@ -2382,7 +2382,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                         items={filteredPolicyList.map((p) => p.id)}
                         strategy={verticalListSortingStrategy}
                       >
-                        <div className="space-y-4 pr-2">
+                        <div className="space-y-4 px-2 py-2">
                           {filteredPolicyList.map((policy) => (
                             <SortablePolicyCard
                               key={policy.id}
