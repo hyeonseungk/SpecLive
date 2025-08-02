@@ -17,6 +17,7 @@ interface Recommendation {
 interface PolicyAiRecommendationModalProps {
   projectId: string;
   userId: string;
+  selectedFeatureId: string;
   onClose: () => void;
   onPoliciesAdded: (
     newPolicies: (Tables<"policies"> & {
@@ -30,6 +31,7 @@ interface PolicyAiRecommendationModalProps {
 export default function PolicyAiRecommendationModal({
   projectId,
   userId,
+  selectedFeatureId,
   onClose,
   onPoliciesAdded,
 }: PolicyAiRecommendationModalProps) {
@@ -56,7 +58,12 @@ export default function PolicyAiRecommendationModal({
             "Content-Type": "application/json",
             Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
           },
-          body: JSON.stringify({ projectId, count: 5, language: locale }),
+          body: JSON.stringify({
+            projectId,
+            count: 5,
+            language: locale,
+            selectedFeatureId,
+          }),
         }
       );
 
@@ -111,11 +118,19 @@ export default function PolicyAiRecommendationModal({
           .select()
           .single();
         if (policyError) throw policyError;
+        // Link the new policy to the selected feature
+        const { data: featurePolicy, error: featurePolicyError } =
+          await supabase
+            .from("feature_policies")
+            .insert({ feature_id: selectedFeatureId, policy_id: policy.id })
+            .select()
+            .single();
+        if (featurePolicyError) throw featurePolicyError;
         addedPolicies.push({
           ...policy,
           policy_links: [],
           policy_terms: [],
-          feature_policies: [],
+          feature_policies: [featurePolicy],
         });
       }
       onPoliciesAdded(addedPolicies);

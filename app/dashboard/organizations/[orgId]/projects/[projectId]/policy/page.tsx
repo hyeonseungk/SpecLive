@@ -2558,6 +2558,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         <PolicyAiRecommendationModal
           projectId={params.projectId}
           userId={user!.id}
+          selectedFeatureId={selectedFeature!.id}
           onClose={() => setShowPolicyAiModal(false)}
           onPoliciesAdded={(newPolicies) => {
             if (selectedFeature) loadPoliciesForTheFeature(selectedFeature.id);
