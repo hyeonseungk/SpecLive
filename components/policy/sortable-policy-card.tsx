@@ -6,6 +6,7 @@ import { showSimpleSuccess } from "@/lib/success-store";
 import { Tables } from "@/types/database";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 type FeaturePolicy = Tables<"policies"> & {
@@ -158,8 +159,13 @@ export default function SortablePolicyCard({
                   className="block text-xs text-blue-600 hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {feature.usecase.actor.name} {">"} {feature.usecase.name}{" "}
-                  {">"} {feature.name}
+                  <span className="inline-flex items-center">
+                    <span>{feature.usecase.actor.name}</span>
+                    <ChevronRight className="w-3 h-3 mx-1 text-gray-500" />
+                    <span>{feature.usecase.name}</span>
+                    <ChevronRight className="w-3 h-3 mx-1 text-gray-500" />
+                    <span>{feature.name}</span>
+                  </span>
                 </a>
               ))}
             </div>

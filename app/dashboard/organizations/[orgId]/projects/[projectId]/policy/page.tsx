@@ -41,6 +41,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -220,6 +221,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     })[]
   >([]);
   const [allFeaturesLoading, setAllFeaturesLoading] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -2077,121 +2079,147 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
         {/* 액터 및 유즈케이스 선택 영역 */}
         <div className="mb-6 p-6 bg-gray-200 rounded-lg">
-          <div className="flex flex-col gap-2">
-            {/* 액터 선택 */}
-            <div className="flex items-center justify-between">
-              <span className="text-base font-semibold text-gray-800">
-                {t("actor.label")}
-              </span>
-              {membership?.role === "admin" && actors.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowActorModal(true)}
-                  className="text-sm px-3 py-1"
-                >
-                  {t("actor.add_new_button")}
-                </Button>
+          <div
+            className={`flex items-center justify-between ${
+              !isCollapsed ? "mb-2" : ""
+            }`}
+          >
+            <span className="text-base font-semibold text-gray-800 flex items-center">
+              <span>{selectedActor?.name || ""}</span>
+              <ChevronRight className="w-4 h-4 mx-2 text-gray-800" />
+              <span>{selectedUsecase?.name || ""}</span>
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsCollapsed((prev) => !prev)}
+            >
+              {isCollapsed ? (
+                <ChevronRight className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
               )}
-            </div>
-            {actors.length === 0 ? (
-              <Button
-                variant="outline"
-                size="default"
-                onClick={() => setShowActorModal(true)}
-                disabled={membership?.role !== "admin"}
-                className="text-base px-4 py-2 self-start"
-              >
-                {t("actor.add_button")}
-              </Button>
-            ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleActorDragEnd}
-              >
-                <SortableContext
-                  items={actors.map((actor) => actor.id)}
-                  strategy={horizontalListSortingStrategy}
-                >
-                  <div className="flex flex-wrap gap-2">
-                    {actors
-                      .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
-                      .map((actor) => (
-                        <SortableActorCard
-                          key={actor.id}
-                          actor={actor}
-                          onSelect={handleActorSelect}
-                          onEdit={handleEditActor}
-                          onDelete={handleDeleteActor}
-                          isSelected={selectedActor?.id === actor.id}
-                          membership={membership}
-                        />
-                      ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
-            {/* 유즈케이스 선택 */}
-            {selectedActor && (
-              <div className="flex flex-col gap-2 mt-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-base font-semibold text-gray-800">
-                    {t("usecase.label")}
-                  </span>
-                  {usecases.length > 0 && membership?.role === "admin" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowUsecaseModal(true)}
-                      className="text-sm px-3 py-1"
-                    >
-                      {t("usecase.add_new_button")}
-                    </Button>
-                  )}
-                </div>
-                {usecases.length === 0 ? (
+            </Button>
+          </div>
+          {!isCollapsed && (
+            <div className="flex flex-col gap-2">
+              {/* 액터 선택 */}
+              <div className="flex items-center justify-between">
+                <span className="text-base font-semibold text-gray-800">
+                  {t("actor.label")}
+                </span>
+                {membership?.role === "admin" && actors.length > 0 && (
                   <Button
                     variant="outline"
-                    size="default"
-                    onClick={() => setShowUsecaseModal(true)}
-                    disabled={membership?.role !== "admin"}
-                    className="text-base px-4 py-2 self-start"
+                    size="sm"
+                    onClick={() => setShowActorModal(true)}
+                    className="text-sm px-3 py-1"
                   >
-                    {t("usecase.add_button")}
+                    {t("actor.add_new_button")}
                   </Button>
-                ) : (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleUsecaseDragEnd}
-                  >
-                    <SortableContext
-                      items={usecases.map((uc) => uc.id)}
-                      strategy={horizontalListSortingStrategy}
-                    >
-                      <div className="flex flex-wrap gap-2">
-                        {usecases
-                          .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
-                          .map((usecase) => (
-                            <SortableUsecaseCard
-                              key={usecase.id}
-                              actor={selectedActor}
-                              usecase={usecase}
-                              onSelect={handleUsecaseSelect}
-                              onEdit={handleEditUsecase}
-                              onDelete={handleDeleteUsecase}
-                              isSelected={selectedUsecase?.id === usecase.id}
-                              membership={membership}
-                            />
-                          ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
                 )}
               </div>
-            )}
-          </div>
+              {actors.length === 0 ? (
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={() => setShowActorModal(true)}
+                  disabled={membership?.role !== "admin"}
+                  className="text-base px-4 py-2 self-start"
+                >
+                  {t("actor.add_button")}
+                </Button>
+              ) : (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleActorDragEnd}
+                >
+                  <SortableContext
+                    items={actors.map((actor) => actor.id)}
+                    strategy={horizontalListSortingStrategy}
+                  >
+                    <div className="flex flex-wrap gap-2">
+                      {actors
+                        .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+                        .map((actor) => (
+                          <SortableActorCard
+                            key={actor.id}
+                            actor={actor}
+                            onSelect={handleActorSelect}
+                            onEdit={handleEditActor}
+                            onDelete={handleDeleteActor}
+                            isSelected={selectedActor?.id === actor.id}
+                            membership={membership}
+                          />
+                        ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              )}
+              {/* 유즈케이스 선택 */}
+              {selectedActor && (
+                <div className="flex flex-col gap-2 mt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base font-semibold text-gray-800">
+                      {t("usecase.label")}
+                    </span>
+                    {usecases.length > 0 && membership?.role === "admin" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowUsecaseModal(true)}
+                        className="text-sm px-3 py-1"
+                      >
+                        {t("usecase.add_new_button")}
+                      </Button>
+                    )}
+                  </div>
+                  {usecases.length === 0 ? (
+                    <Button
+                      variant="outline"
+                      size="default"
+                      onClick={() => setShowUsecaseModal(true)}
+                      disabled={membership?.role !== "admin"}
+                      className="text-base px-4 py-2 self-start"
+                    >
+                      {t("usecase.add_button")}
+                    </Button>
+                  ) : (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleUsecaseDragEnd}
+                    >
+                      <SortableContext
+                        items={usecases.map((uc) => uc.id)}
+                        strategy={horizontalListSortingStrategy}
+                      >
+                        <div className="flex flex-wrap gap-2">
+                          {usecases
+                            .sort(
+                              (a, b) => (a.sequence || 0) - (b.sequence || 0)
+                            )
+                            .map((usecase) => (
+                              <SortableUsecaseCard
+                                key={usecase.id}
+                                actor={selectedActor}
+                                usecase={usecase}
+                                onSelect={handleUsecaseSelect}
+                                onEdit={handleEditUsecase}
+                                onDelete={handleDeleteUsecase}
+                                isSelected={selectedUsecase?.id === usecase.id}
+                                membership={membership}
+                              />
+                            ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
