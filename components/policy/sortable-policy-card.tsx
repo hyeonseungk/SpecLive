@@ -8,6 +8,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { renderServiceIcon } from "../../utils/service-icon-utils";
 
 type FeaturePolicy = Tables<"policies"> & {
   sequence?: number;
@@ -223,11 +224,12 @@ export default function SortablePolicyCard({
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors"
+                      className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
                       title={link.url}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      🔗 {new URL(link.url).hostname}
+                      <span>{renderServiceIcon(link.url, "w-4 h-4")}</span>
+                      <span className="break-all">{link.url}</span>
                     </a>
                   ))}
               </div>
@@ -253,11 +255,12 @@ export default function SortablePolicyCard({
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block px-2 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                      className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
                       title={link.url}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      📄 {new URL(link.url).hostname}
+                      <span>{renderServiceIcon(link.url, "w-4 h-4")}</span>
+                      <span className="break-all">{link.url}</span>
                     </a>
                   ))}
               </div>

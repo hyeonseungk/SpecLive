@@ -186,7 +186,7 @@
     "selectedFeatures": "Selected features",
     "contextLinksLabel": "Context Links",
     "contextLinksDesc": "Set links containing the rationale or history behind this policy decision.\n- Notion, Confluence links, etc.",
-    "generalLinksLabel": "General Links",
+    "generalLinksLabel": "Related Links",
     "generalLinksDesc": "Add links to help members better understand the policy.\n- Figma link for visual understanding, etc.\n- GitHub link where the policy is actually implemented in code\n- Notion, Confluence links containing detailed policy contents, etc.",
     "addLink": "+ Add Link",
     "removeLink": "Remove Link",
@@ -225,7 +225,7 @@
     "connectedFeatures": "Connected Features",
     "connectedTerms": "Connected Terms",
     "contextLinks": "Context Links",
-    "generalLinks": "General Links",
+    "generalLinks": "Related Links",
     "lastModifiedLabel": "Last modified",
     "noLastModified": "No modification record"
   },
