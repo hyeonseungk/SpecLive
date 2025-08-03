@@ -266,10 +266,7 @@ export default function PolicyEditModal({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium">
-                컨텍스트 링크들{" "}
-                <span className="text-xs text-gray-500 ml-1">
-                  (정책 배경: 슬랙, 회의록 등)
-                </span>
+                컨텍스트 링크들
               </label>
               <Button
                 type="button"
@@ -313,12 +310,7 @@ export default function PolicyEditModal({
           {/* 일반 링크 */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium">
-                일반 링크들{" "}
-                <span className="text-xs text-gray-500 ml-1">
-                  (UI/UX 설계, 구현 코드 등)
-                </span>
-              </label>
+              <label className="block text-sm font-medium">일반 링크들 </label>
               <Button
                 type="button"
                 size="sm"
@@ -329,6 +321,9 @@ export default function PolicyEditModal({
               >
                 + 링크 추가
               </Button>
+            </div>
+            <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
+              {t("policyAddModal.generalLinksDesc")}
             </div>
             {editGeneralLinks.map((link, i) => (
               <div key={i} className="flex gap-2 mb-2">

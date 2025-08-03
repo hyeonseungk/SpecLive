@@ -258,9 +258,6 @@ export default function PolicyAddModal({
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium">
                 {t("policyAddModal.contextLinksLabel")}
-                <span className="text-xs text-gray-500 font-normal ml-1">
-                  ({t("policyAddModal.contextLinksHint")})
-                </span>
               </label>
               <Button
                 type="button"
@@ -306,9 +303,6 @@ export default function PolicyAddModal({
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium">
                 {t("policyAddModal.generalLinksLabel")}
-                <span className="text-xs text-gray-500 font-normal ml-1">
-                  (UI/UX 설계, 구현 코드 등)
-                </span>
               </label>
               <Button
                 type="button"
@@ -320,6 +314,9 @@ export default function PolicyAddModal({
               >
                 {t("policyAddModal.addLink")}
               </Button>
+            </div>
+            <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
+              {t("policyAddModal.generalLinksDesc")}
             </div>
             {generalLinks.map((link, i) => (
               <div key={i} className="flex gap-2 mb-2">
