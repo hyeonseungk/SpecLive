@@ -8,6 +8,10 @@ interface FeatureAddModalProps {
   setFeatureName: (val: string) => void;
   onClose: () => void;
   onAdd: () => void;
+  featureLinks: string[];
+  addLinkField: () => void;
+  removeLinkField: (index: number) => void;
+  updateLinkField: (index: number, value: string) => void;
   saving: boolean;
   selectedUsecaseName?: string;
 }
@@ -18,6 +22,10 @@ export default function FeatureAddModal({
   setFeatureName,
   onClose,
   onAdd,
+  featureLinks,
+  addLinkField,
+  removeLinkField,
+  updateLinkField,
   saving,
   selectedUsecaseName,
 }: FeatureAddModalProps) {
@@ -45,6 +53,45 @@ export default function FeatureAddModal({
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               disabled={saving}
             />
+          </div>
+          {/* 관련 링크 입력 */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium">관련 링크</label>
+              <button
+                type="button"
+                onClick={addLinkField}
+                disabled={saving}
+                className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-400"
+              >
+                링크 추가
+              </button>
+            </div>
+            <div className="space-y-2">
+              {featureLinks.map((link, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="url"
+                    value={link}
+                    onChange={(e) => updateLinkField(index, e.target.value)}
+                    placeholder="URL을 입력하세요"
+                    className="flex-1 p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    disabled={saving}
+                  />
+                  {featureLinks.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeLinkField(index)}
+                      disabled={saving}
+                      className="px-2 py-1 text-red-600 hover:text-red-800 disabled:text-gray-400"
+                      title="링크 제거"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         <div className="flex justify-end gap-2 mt-6">

@@ -83,7 +83,7 @@
     "examples_label": "Example usage",
     "examples_placeholder": "e.g. John Doe, Jane Smith",
     "related_url_label": "Related Links",
-    "related_url_desc": "Add the following links to help team members better understand the term:\n- GitHub link where the term is actually implemented in code\n- Figma link for visual understanding\n- Any other links that help with understanding",
+    "related_url_desc": "Add links to help members better understand the terminology.\n- GitHub link where the term is actually implemented in code\n- Figma link for visual understanding\n- Any other links that help with understanding",
     "add_url": "+ Add Link",
     "related_url_placeholder": "https://github.com/username/repo/blob/main/file.js",
     "remove_url": "Remove Link",

@@ -115,6 +115,35 @@ export type Database = {
           }
         ];
       };
+      feature_links: {
+        Row: {
+          id: string;
+          feature_id: string | null;
+          url: string;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          feature_id?: string | null;
+          url: string;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          feature_id?: string | null;
+          url?: string;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "feature_links_feature_id_fkey";
+            columns: ["feature_id"];
+            isOneToOne: false;
+            referencedRelation: "features";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       features: {
         Row: {
           author_id: string | null;

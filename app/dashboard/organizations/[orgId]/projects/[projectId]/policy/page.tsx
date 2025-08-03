@@ -147,6 +147,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [showFeatureModal, setShowFeatureModal] = useState(false);
   const [featureName, setFeatureName] = useState("");
   const [featureSaving, setFeatureSaving] = useState(false);
+  // 관련 링크 입력 상태 (for feature add/edit)
+  const [featureLinks, setFeatureLinks] = useState<string[]>([""]);
+  const [editFeatureLinks, setEditFeatureLinks] = useState<string[]>([]);
 
   // 기능 편집 모달 상태
   const [showEditFeatureModal, setShowEditFeatureModal] = useState(false);
@@ -158,6 +161,22 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [showDeleteFeatureModal, setShowDeleteFeatureModal] = useState(false);
   const [deletingFeature, setDeletingFeature] = useState<Feature | null>(null);
   const [featureDeleting, setFeatureDeleting] = useState(false);
+  // 기능 링크 관리 함수들
+  const addFeatureLinkField = () => setFeatureLinks((prev) => [...prev, ""]);
+  const removeFeatureLinkField = (index: number) =>
+    setFeatureLinks((prev) => prev.filter((_, i) => i !== index));
+  const updateFeatureLinkField = (index: number, value: string) =>
+    setFeatureLinks((prev) =>
+      prev.map((link, i) => (i === index ? value : link))
+    );
+  const addEditFeatureLinkField = () =>
+    setEditFeatureLinks((prev) => [...prev, ""]);
+  const removeEditFeatureLinkField = (index: number) =>
+    setEditFeatureLinks((prev) => prev.filter((_, i) => i !== index));
+  const updateEditFeatureLinkField = (index: number, value: string) =>
+    setEditFeatureLinks((prev) =>
+      prev.map((link, i) => (i === index ? value : link))
+    );
 
   // 정책 추가 모달 상태
   const [showPolicyModal, setShowPolicyModal] = useState(false);
@@ -459,7 +478,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     try {
       const { data, error } = await supabase
         .from("features")
-        .select("*")
+        .select(`*, feature_links (url)`) // fetch related feature links
         .eq("usecase_id", usecaseId)
         .order("sequence", { ascending: true });
 
@@ -1141,7 +1160,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   };
 
   // 기능 추가 함수
-  const addFeature = async () => {
+  const addFeature = async (links: string[]) => {
     if (!selectedUsecase || !user) return;
     if (!featureName.trim()) {
       showSimpleError("기능 이름을 입력해주세요.");
@@ -1190,6 +1209,20 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       }
 
       showSimpleSuccess("기능이 성공적으로 추가되었습니다.");
+
+      // 3. 관련 링크 추가
+      const validFeatureLinks = links.filter((link) => link.trim());
+      if (validFeatureLinks.length > 0) {
+        const { error: featureLinksError } = await supabase
+          .from("feature_links")
+          .insert(
+            validFeatureLinks.map((url) => ({
+              feature_id: feature.id,
+              url: url.trim(),
+            }))
+          );
+        if (featureLinksError) throw featureLinksError;
+      }
     } catch (error) {
       console.error("Error adding feature:", error);
       showError("기능 추가 실패", "기능을 추가하는 중 오류가 발생했습니다.");
@@ -1202,11 +1235,14 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const handleEditFeature = (feature: Feature) => {
     setEditingFeature(feature);
     setEditFeatureName(feature.name);
+    setEditFeatureLinks(
+      (feature as any).feature_links?.map((l: any) => l.url) || [""]
+    );
     setShowEditFeatureModal(true);
   };
 
   // 기능 편집 함수
-  const updateFeature = async () => {
+  const updateFeature = async (links: string[]) => {
     if (!editingFeature || !user) return;
     if (!editFeatureName.trim()) {
       showSimpleError("기능 이름을 입력해주세요.");
@@ -1241,6 +1277,26 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setEditFeatureName("");
 
       showSimpleSuccess("기능이 성공적으로 수정되었습니다.");
+
+      // 기존 링크 삭제
+      const { error: deleteLinksError } = await supabase
+        .from("feature_links")
+        .delete()
+        .eq("feature_id", editingFeature.id);
+      if (deleteLinksError) throw deleteLinksError;
+      // 새로운 링크 삽입
+      const validEditLinks = links.filter((link) => link.trim());
+      if (validEditLinks.length > 0) {
+        const { error: insertLinksError } = await supabase
+          .from("feature_links")
+          .insert(
+            validEditLinks.map((url) => ({
+              feature_id: editingFeature.id,
+              url: url.trim(),
+            }))
+          );
+        if (insertLinksError) throw insertLinksError;
+      }
     } catch (error) {
       console.error("Error updating feature:", error);
       showError("기능 수정 실패", "기능을 수정하는 중 오류가 발생했습니다.");
@@ -2531,9 +2587,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
           setShowFeatureModal(false);
           setFeatureName("");
         }}
-        onAdd={addFeature}
+        onAdd={() => addFeature(featureLinks)}
         saving={featureSaving}
         selectedUsecaseName={selectedUsecase?.name}
+        featureLinks={featureLinks}
+        addLinkField={addFeatureLinkField}
+        removeLinkField={removeFeatureLinkField}
+        updateLinkField={updateFeatureLinkField}
       />
 
       <FeatureEditModal
@@ -2545,9 +2605,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
           setEditingFeature(null);
           setEditFeatureName("");
         }}
-        onUpdate={updateFeature}
+        onUpdate={() => updateFeature(editFeatureLinks)}
         saving={editFeatureSaving}
         selectedUsecaseName={selectedUsecase?.name}
+        featureLinks={editFeatureLinks}
+        addLinkField={addEditFeatureLinkField}
+        removeLinkField={removeEditFeatureLinkField}
+        updateLinkField={updateEditFeatureLinkField}
       />
 
       <FeatureDeleteModal

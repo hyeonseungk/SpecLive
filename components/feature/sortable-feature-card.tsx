@@ -6,11 +6,12 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Link as LinkIcon } from "lucide-react";
 import { useState } from "react";
+import { renderServiceIcon } from "../../utils/service-icon-utils";
 
 interface SortableFeatureCardProps {
   actor: Tables<"actors">;
   usecase: Tables<"usecases">;
-  feature: Tables<"features">;
+  feature: Tables<"features"> & { feature_links?: { url: string }[] };
   onSelect: (feature: Tables<"features">) => void;
   onEdit: (feature: Tables<"features">) => void;
   onDelete: (feature: Tables<"features">) => void;
@@ -163,6 +164,24 @@ export default function SortableFeatureCard({
             </div>
           )}
         </div>
+        {feature.feature_links && feature.feature_links.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {feature.feature_links.map((link, index) => (
+              <a
+                key={index}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
+                title={link.url}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span>{renderServiceIcon(link.url, "w-4 h-4")}</span>
+                {/* <span className="break-all">{link.url}</span> */}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
