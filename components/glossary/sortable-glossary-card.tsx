@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Tables } from "@/types/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tables } from "@/types/database";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useState } from "react";
+import { renderServiceIcon } from "../../utils/service-icon-utils";
 
 interface SortableGlossaryCardProps {
   glossary: Tables<"glossaries"> & { glossary_links?: any[] };
@@ -151,25 +152,8 @@ export default function SortableGlossaryCard({
                           title={link.url}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <span>
-                            {link.url.includes("github.com") ? (
-                              <img
-                                src="/images/github-mark.png"
-                                alt="GitHub"
-                                className="w-4 h-4"
-                              />
-                            ) : (
-                              "🔗"
-                            )}
-                          </span>
-                          <span className="break-all">
-                            {link.url
-                              .trim()
-                              .replace(
-                                /^https?:\/\/(?:www\.)?github\.com\/[^\^\/]+\//,
-                                ""
-                              )}
-                          </span>
+                          <span>{renderServiceIcon(link.url, "w-4 h-4")}</span>
+                          <span className="break-all">{link.url}</span>
                         </a>
                       )
                     )}
