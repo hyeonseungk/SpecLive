@@ -282,6 +282,9 @@ export default function PolicyEditModal({
                 + 링크 추가
               </Button>
             </div>
+            <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
+              {t("policyEditModal.contextLinksDesc")}
+            </div>
             {editContextLinks.map((link, i) => (
               <div key={i} className="flex gap-2 mb-2">
                 <input
