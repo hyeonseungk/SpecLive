@@ -466,7 +466,8 @@
     "load_error_title": "Failed to Load Features",
     "load_error_desc": "An error occurred while loading features.",
     "sequence_error_title": "Failed to Change Feature Order",
-    "sequence_error_desc": "An error occurred while changing the feature order."
+    "sequence_error_desc": "An error occurred while changing the feature order.",
+    "related_url_desc": "Add links to help members better understand the feature.\n- Figma link for visual understanding, etc."
   },
   "placeholders": {
     "search_features": "Search by feature name...",

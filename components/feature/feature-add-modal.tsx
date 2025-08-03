@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 import { useEffect } from "react";
 
 interface FeatureAddModalProps {
@@ -30,6 +31,7 @@ export default function FeatureAddModal({
   saving,
   selectedUsecaseName,
 }: FeatureAddModalProps) {
+  const t = useT();
   useEffect(() => {
     if (isOpen && featureLinks.length === 0) {
       addLinkField();
@@ -72,6 +74,9 @@ export default function FeatureAddModal({
               >
                 링크 추가
               </button>
+            </div>
+            <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
+              {t("feature.related_url_desc")}
             </div>
             <div className="space-y-2">
               {featureLinks.map((link, index) => (

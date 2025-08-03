@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 interface FeatureEditModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export default function FeatureEditModal({
   saving,
   selectedUsecaseName,
 }: FeatureEditModalProps) {
+  const t = useT();
   if (!isOpen) return null;
 
   return (
@@ -66,6 +68,9 @@ export default function FeatureEditModal({
               >
                 링크 추가
               </button>
+            </div>
+            <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
+              {t("feature.related_url_desc")}
             </div>
             <div className="space-y-2">
               {featureLinks.map((link, index) => (
