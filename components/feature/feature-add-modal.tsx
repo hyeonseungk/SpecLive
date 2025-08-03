@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 interface FeatureAddModalProps {
   isOpen: boolean;
@@ -29,6 +30,11 @@ export default function FeatureAddModal({
   saving,
   selectedUsecaseName,
 }: FeatureAddModalProps) {
+  useEffect(() => {
+    if (isOpen && featureLinks.length === 0) {
+      addLinkField();
+    }
+  }, [isOpen, addLinkField, featureLinks]);
   if (!isOpen) return null;
 
   return (

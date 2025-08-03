@@ -165,7 +165,7 @@ export default function SortableFeatureCard({
           )}
         </div>
         {feature.feature_links && feature.feature_links.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-2 flex flex-wrap gap-1 justify-end">
             {feature.feature_links.map((link, index) => (
               <a
                 key={index}
