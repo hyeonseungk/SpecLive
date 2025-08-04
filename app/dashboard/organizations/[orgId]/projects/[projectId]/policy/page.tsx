@@ -2388,9 +2388,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </p>
             </div>
 
-            <div className="flex-1 grid grid-cols-4 gap-6 min-h-0 h-full">
-              {/* 좌측: 기능 목록 (1/4) */}
-              <div className="col-span-1 bg-gray-100 border border-gray-300 rounded-lg p-4 flex flex-col min-h-0 h-full">
+            <div className="flex-1 grid grid-cols-10 gap-6 min-h-0 h-full">
+              {/* 좌측: 기능 목록 (4/10) */}
+              <div className="col-span-4 bg-gray-100 border border-gray-300 rounded-lg p-4 flex flex-col min-h-0 h-full">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">{t("policy.features_header")}</h4>
                   {membership?.role === "admin" && (
@@ -2488,8 +2488,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </div>
               </div>
 
-              {/* 우측: 정책 목록 (3/4) */}
-              <div className="col-span-3 bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col min-h-0 h-full">
+              {/* 우측: 정책 목록 (6/10) */}
+              <div className="col-span-6 bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col min-h-0 h-full">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">
                     {selectedFeature

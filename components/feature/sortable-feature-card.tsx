@@ -7,6 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Link as LinkIcon } from "lucide-react";
 import { useState } from "react";
 import { renderServiceIcon } from "../../utils/service-icon-utils";
+import { useGlobalT } from "@/lib/i18n";
 
 interface SortableFeatureCardProps {
   actor: Tables<"actors">;
@@ -29,6 +30,7 @@ export default function SortableFeatureCard({
   isSelected,
   membership,
 }: SortableFeatureCardProps) {
+  const t = useGlobalT();
   const {
     attributes,
     listeners,
@@ -154,7 +156,7 @@ export default function SortableFeatureCard({
                   url.searchParams.delete("policyId");
 
                   navigator.clipboard.writeText(url.toString());
-                  showSimpleSuccess("링크가 복사되었습니다.");
+                  showSimpleSuccess(t("common.link_copied"));
                 }}
                 className="p-1 hover:bg-gray-200 rounded transition-colors"
                 title="링크 복사"

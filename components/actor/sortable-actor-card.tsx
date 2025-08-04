@@ -1,5 +1,6 @@
 "use client";
 
+import { useGlobalT } from "@/lib/i18n";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { Tables } from "@/types/database";
 import { useSortable } from "@dnd-kit/sortable";
@@ -24,6 +25,7 @@ export default function SortableActorCard({
   isSelected,
   membership,
 }: SortableActorCardProps) {
+  const t = useGlobalT();
   const {
     attributes,
     listeners,
@@ -145,7 +147,7 @@ export default function SortableActorCard({
                   url.searchParams.delete("featureId");
                   url.searchParams.delete("policyId");
                   navigator.clipboard.writeText(url.toString());
-                  showSimpleSuccess("링크가 복사되었습니다.");
+                  showSimpleSuccess(t("common.link_copied"));
                 }}
                 className="p-1 hover:bg-gray-200 rounded transition-colors ml-auto"
                 title="링크 복사"

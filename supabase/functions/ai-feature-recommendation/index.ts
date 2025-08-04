@@ -166,11 +166,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // Existing features (by usecase)
     const usecaseIds = usecases.map((u) => u.id);
-    let features: Array<{ name: string; description: string }> = [];
+    let features: Array<{ name: string }> = [];
     if (usecaseIds.length > 0) {
       const { data: existingFeatures, error: featuresError } = await supabase
         .from("features")
-        .select("name, description")
+        .select("name")
         .in("usecase_id", usecaseIds)
         .order("updated_at", { ascending: false });
       if (featuresError) {
@@ -265,7 +265,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       : "";
     const featureText = features.length
       ? `\n\n현재 프로젝트에 등록된 기능(Feature)들:\n${features
-          .map((f) => `- ${f.name}: ${f.description || "설명 없음"}`)
+          .map((f) => `- ${f.name}`)
           .join("\n")}`
       : "";
     const policyText = policies.length
