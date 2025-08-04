@@ -240,27 +240,33 @@ export default function SortablePolicyCard({
         {policy.policy_links &&
           policy.policy_links.filter((l) => l.type === "context").length >
             0 && (
-            <div className="absolute bottom-16 right-4 flex flex-col items-start">
-              <h5 className="text-xs font-medium text-gray-700 mb-1">
-                {t("sortablePolicyCard.contextLinks")}
-              </h5>
-              <div className="flex flex-col gap-1 items-start">
-                {policy.policy_links
-                  .filter((l) => l.type === "context")
-                  .map((link, idx) => (
-                    <a
-                      key={idx}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
-                      title={link.url}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span>{renderServiceIcon(link.url, "w-4 h-4")}</span>
-                      <span className="break-all">{link.url}</span>
-                    </a>
-                  ))}
+            <div
+              className={`mb-3 ${
+                membership?.role === "admin" ? "ml-8" : ""
+              } flex justify-start`}
+            >
+              <div className="flex flex-col items-start">
+                <h5 className="text-xs font-medium text-gray-700 mb-1">
+                  {t("sortablePolicyCard.contextLinks")}
+                </h5>
+                <div className="flex flex-col gap-1 items-start">
+                  {policy.policy_links
+                    .filter((l) => l.type === "context")
+                    .map((link, idx) => (
+                      <a
+                        key={idx}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 flex items-center gap-1 w-fit"
+                        title={link.url}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <span>{renderServiceIcon(link.url, "w-4 h-4")}</span>
+                        <span className="break-all">{link.url}</span>
+                      </a>
+                    ))}
+                </div>
               </div>
             </div>
           )}
