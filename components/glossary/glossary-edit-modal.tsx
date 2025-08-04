@@ -27,7 +27,8 @@ export default function GlossaryEditModal({
   onGlossaryDeleted,
 }: GlossaryEditModalProps) {
   const t = useProjectT();
-  const { locale } = useLangStore();
+  const { lang } = useLangStore();
+  const locale = lang === "ko" ? "ko-KR" : "en-US";
 
   // local states for edit form
   const [editName, setEditName] = useState(glossary.name);

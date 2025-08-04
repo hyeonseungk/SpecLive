@@ -384,7 +384,8 @@
     "project_label": "Projects",
     "member_label": "Members",
     "count_unit": "",
-    "member_unit": ""
+    "member_unit": "",
+    "created_date": "Created"
   },
   "home": {
     "tagline": "Build Your Team's Ubiquitous Language"

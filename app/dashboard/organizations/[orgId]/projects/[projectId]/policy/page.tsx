@@ -100,7 +100,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [membership, setMembership] = useState<Membership | null>(null);
   const [loading, setLoading] = useState(true);
   const t = useProjectT();
-  const { locale } = useLangStore();
+  const { lang } = useLangStore();
+  const locale = lang === "ko" ? "ko-KR" : "en-US";
 
   // 액터와 유즈케이스 상태
   const [actors, setActors] = useState<Actor[]>([]);

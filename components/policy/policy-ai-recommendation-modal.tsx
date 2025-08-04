@@ -36,7 +36,8 @@ export default function PolicyAiRecommendationModal({
   onPoliciesAdded,
 }: PolicyAiRecommendationModalProps) {
   const t = useProjectT();
-  const { locale } = useLangStore();
+  const { lang } = useLangStore();
+  const locale = lang === "ko" ? "ko-KR" : "en-US";
 
   const [aiRecommendations, setAiRecommendations] = useState<Recommendation[]>(
     []

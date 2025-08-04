@@ -4,17 +4,12 @@ import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { LanguageSelector } from "@/components/common/language-selector";
 import { OrganizationCreateModal } from "@/components/common/organization-create-modal";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import supabase from "@/lib/supabase-browser";
 import type { Tables } from "@/types/database";
+import { formatDateWithSuffix } from "@/utils/date-format";
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -35,7 +30,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showOrgCreateModal, setShowOrgCreateModal] = useState(false);
   const t = useGlobalT();
-  const { locale } = useLangStore();
+  const { globalLang } = useLangStore();
+  const locale = globalLang === "ko" ? "ko-KR" : "en-US";
   const router = useRouter();
 
   useEffect(() => {
@@ -274,12 +270,6 @@ export default function Dashboard() {
                         </span>
                       )}
                     </CardTitle>
-                    <CardDescription>
-                      {org.created_at
-                        ? new Date(org.created_at).toLocaleDateString(locale)
-                        : ""}{" "}
-                      {t("dashboard.created_suffix")}
-                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between text-sm text-muted-foreground">
@@ -290,6 +280,12 @@ export default function Dashboard() {
                       <span>
                         {t("dashboard.member_label")}: {org.memberCount}
                         {t("dashboard.member_unit")}
+                      </span>
+                    </div>
+                    <div className="flex justify-end mt-2">
+                      <span className="text-xs text-muted-foreground">
+                        {org.created_at &&
+                          formatDateWithSuffix(org.created_at, locale)}
                       </span>
                     </div>
                   </CardContent>

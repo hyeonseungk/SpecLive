@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase-browser";
-import { Tables } from "@/types/database";
+import AiChatModal from "@/components/common/ai-chat-modal";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { showError } from "@/lib/error-store";
 import { useProjectT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { showError, showSimpleError } from "@/lib/error-store";
 import { showSimpleSuccess } from "@/lib/success-store";
-import AiChatModal from "@/components/common/ai-chat-modal";
+import { supabase } from "@/lib/supabase-browser";
+import { Tables } from "@/types/database";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type User = {
   id: string;
@@ -41,7 +41,8 @@ export default function PrdPage({ params }: PrdPageProps) {
   const [prdSaving, setPrdSaving] = useState(false);
 
   const t = useProjectT();
-  const { locale } = useLangStore();
+  const { lang } = useLangStore();
+  const locale = lang === "ko" ? "ko-KR" : "en-US";
 
   // AI 채팅 모달 상태
   const [isAiChatOpen, setIsAiChatOpen] = useState(false);

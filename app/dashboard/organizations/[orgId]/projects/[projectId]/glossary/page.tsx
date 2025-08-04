@@ -81,7 +81,8 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
   // 추가: 다국어 지원 훅
   const t = useProjectT();
-  const { locale } = useLangStore();
+  const { lang } = useLangStore();
+  const locale = lang === "ko" ? "ko-KR" : "en-US";
 
   const router = useRouter();
 

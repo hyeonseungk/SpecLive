@@ -31,7 +31,8 @@ export default function Home() {
   const [isSignUp, setIsSignUp] = useState(false);
   const router = useRouter();
   const t = useGlobalT();
-  const { locale } = useLangStore();
+  const { globalLang } = useLangStore();
+  const locale = globalLang === "ko" ? "ko-KR" : "en-US";
 
   useEffect(() => {
     const getSession = async () => {
@@ -103,7 +104,7 @@ export default function Home() {
       }
     } catch (error) {
       let errorMessage = t("common.error_generic");
-      
+
       if (error instanceof Error) {
         // Supabase 에러 메시지를 다국어로 처리
         if (error.message.includes("Invalid login credentials")) {
@@ -120,7 +121,7 @@ export default function Home() {
           errorMessage = error.message;
         }
       }
-      
+
       showSimpleError(errorMessage);
     } finally {
       setSubmitting(false);

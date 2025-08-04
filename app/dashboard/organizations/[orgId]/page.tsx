@@ -3,17 +3,12 @@
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { ProjectCreateModal } from "@/components/common/project-create-modal";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import supabase from "@/lib/supabase-browser";
 import type { Tables } from "@/types/database";
+import { formatDateWithSuffix } from "@/utils/date-format";
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -39,7 +34,8 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
   const [loading, setLoading] = useState(true);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const t = useGlobalT();
-  const { locale } = useLangStore();
+  const { globalLang } = useLangStore();
+  const locale = globalLang === "ko" ? "ko-KR" : "en-US";
   const router = useRouter();
 
   useEffect(() => {
@@ -210,19 +206,17 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
                         </span>
                       )}
                     </CardTitle>
-                    <CardDescription>
-                      {project.created_at
-                        ? new Date(project.created_at).toLocaleDateString(
-                            locale
-                          )
-                        : ""}{" "}
-                      {t("org.created_suffix")}
-                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
                       {t("org.card_hint")}
                     </p>
+                    <div className="flex justify-end mt-2">
+                      <span className="text-xs text-muted-foreground">
+                        {project.created_at &&
+                          formatDateWithSuffix(project.created_at, locale)}
+                      </span>
+                    </div>
                   </CardContent>
                 </Card>
               ))}

@@ -80,7 +80,8 @@
     "project_label": "프로젝트",
     "member_label": "멤버",
     "count_unit": "개",
-    "member_unit": "명"
+    "member_unit": "명",
+    "created_date": "생성일"
   },
   "glossary": {
     "header": "용어 관리",
