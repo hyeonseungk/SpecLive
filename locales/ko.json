@@ -240,7 +240,7 @@
     "contextLinksLabel": "컨텍스트 링크들",
     "contextLinksHint": "정책 배경: 슬랙, 회의록 등",
     "contextLinksDesc": "이 정책을 결정한 근거나 히스토리를 담고있는 링크를 설정해보세요.\n- Slack, Notion, Confluence 링크 등",
-    "generalLinksLabel": "일반 링크들",
+    "generalLinksLabel": "관련 링크들",
     "generalLinksDesc": "정책에 대한 이해를 돕는 링크를 추가해보세요\n- 시각적 이해를 돕는 Figma 링크\n- 해당 용어가 실제로 구현된 코드의 GitHub 링크\n- 정책의 세부 내용이 담긴 Notion, Confluence 링크 등",
     "addLink": "+ 링크 추가",
     "removeLink": "링크 삭제",
@@ -286,7 +286,7 @@
     "connectedFeatures": "연결된 기능",
     "connectedTerms": "연결된 용어",
     "contextLinks": "컨텍스트 링크",
-    "generalLinks": "일반 링크",
+    "generalLinks": "관련 링크",
     "lastModifiedLabel": "최종 수정",
     "noLastModified": "수정 기록 없음"
   },

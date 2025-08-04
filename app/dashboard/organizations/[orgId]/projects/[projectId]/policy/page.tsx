@@ -694,14 +694,15 @@ export default function PolicyPage({ params }: PolicyPageProps) {
           *,
           usecase:usecases (
             name,
+            sequence,
             actor:actors (
-              name
+              name,
+              sequence
             )
           )
         `
         )
-        .eq("usecase.actor.project_id", projectId)
-        .order("sequence", { ascending: true });
+        .eq("usecase.actor.project_id", projectId);
 
       if (error) throw error;
 
@@ -712,8 +713,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             ...feature,
             usecase: {
               name: feature.usecase?.name || "",
+              sequence: feature.usecase?.sequence || 0,
               actor: {
                 name: feature.usecase?.actor?.name || "",
+                sequence: feature.usecase?.actor?.sequence || 0,
               },
             },
           }))
@@ -721,7 +724,23 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             (feature) => feature.usecase.name && feature.usecase.actor.name
           ) || [];
 
-      setAllFeatures(featuresWithHierarchy);
+      // actor sequence -> usecase sequence -> feature sequence 순으로 정렬
+      const sortedFeatures = featuresWithHierarchy.sort((a, b) => {
+        // 1. actor sequence 비교
+        const actorDiff =
+          (a.usecase.actor.sequence || 0) - (b.usecase.actor.sequence || 0);
+        if (actorDiff !== 0) return actorDiff;
+
+        // 2. usecase sequence 비교
+        const usecaseDiff =
+          (a.usecase.sequence || 0) - (b.usecase.sequence || 0);
+        if (usecaseDiff !== 0) return usecaseDiff;
+
+        // 3. feature sequence 비교
+        return (a.sequence || 0) - (b.sequence || 0);
+      });
+
+      setAllFeatures(sortedFeatures);
     } catch (error) {
       console.error("Error loading all features:", error);
       showError(t("feature.load_error_title"), t("feature.load_error_desc"));
@@ -2567,10 +2586,18 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
+                        onClick={async () => {
+                          // 모달을 열기 전에 모든 기능들과 용어들을 다시 로드
+                          await Promise.all([
+                            loadAllFeaturesForProject(params.projectId),
+                            loadGlossariesForProject(params.projectId),
+                          ]);
+
+                          // 현재 활성화된 기능이 있으면 자동으로 선택
                           if (selectedFeature) {
                             setSelectedFeatureIds([selectedFeature.id]);
                           }
+
                           setShowPolicyModal(true);
                         }}
                       >
