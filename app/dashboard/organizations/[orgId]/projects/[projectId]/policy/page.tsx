@@ -740,15 +740,20 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
     setActorSaving(true);
     try {
-      // Determine next sequence value
+      // 1. 현재 프로젝트의 최대 sequence 값 조회
       const { data: maxSequenceData, error: maxSequenceError } = await supabase
         .from("actors")
         .select("sequence")
         .eq("project_id", project.id)
         .order("sequence", { ascending: false })
         .limit(1);
+
       if (maxSequenceError) throw maxSequenceError;
+
+      // 2. 다음 sequence 값 계산 (최대값 + 1부터 시작)
       const nextSequence = (maxSequenceData?.[0]?.sequence || 0) + 1;
+
+      // 3. 새로운 actor 추가
       const { data: actor, error } = await supabase
         .from("actors")
         .insert({
@@ -762,11 +767,15 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       if (error) throw error;
 
-      setActors((prev) => [...prev, actor]);
+      // 4. 로컬 상태 업데이트 (sequence 순서대로 정렬)
+      setActors((prev) =>
+        [...prev, actor].sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+      );
+
       setActorName("");
       setShowActorModal(false);
 
-      // 첫 번째 액터라면 자동 선택
+      // 5. 첫 번째 액터라면 자동 선택
       if (actors.length === 0) {
         setSelectedActor(actor);
         setUsecases([]);
@@ -844,11 +853,14 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   };
 
   const deleteActor = async () => {
-    if (!deletingActor || !user) return;
+    if (!deletingActor || !user || !project) return;
 
     setActorDeleting(true);
     try {
-      // 1. 액터에 속한 모든 유즈케이스의 기능들의 정책들을 먼저 삭제
+      // 1. 삭제할 액터의 sequence 값 저장
+      const deletedSequence = deletingActor.sequence || 0;
+
+      // 2. 액터에 속한 모든 유즈케이스의 기능들의 정책들을 먼저 삭제
       const { data: usecasesData, error: usecasesError } = await supabase
         .from("usecases")
         .select("id")
@@ -912,7 +924,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         if (usecasesDeleteError) throw usecasesDeleteError;
       }
 
-      // 2. 액터 삭제
+      // 3. 액터 삭제
       const { error: actorDeleteError } = await supabase
         .from("actors")
         .delete()
@@ -920,20 +932,63 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       if (actorDeleteError) throw actorDeleteError;
 
-      // 3. 상태 업데이트
-      setActors((prev) =>
-        prev.filter((actor) => actor.id !== deletingActor.id)
-      );
+      // 4. 삭제된 액터보다 큰 sequence를 가진 액터들의 sequence를 -1씩 조정
+      const { data: higherSequenceActors, error: updateError } = await supabase
+        .from("actors")
+        .select("id, sequence")
+        .eq("project_id", project.id)
+        .gt("sequence", deletedSequence)
+        .order("sequence", { ascending: true });
 
-      // 삭제된 액터가 선택된 액터라면 선택 해제
+      if (updateError) throw updateError;
+
+      // 5. sequence 업데이트 (배치 처리)
+      if (higherSequenceActors && higherSequenceActors.length > 0) {
+        const updatePromises = higherSequenceActors.map((actor) =>
+          supabase
+            .from("actors")
+            .update({ sequence: (actor.sequence || 0) - 1 })
+            .eq("id", actor.id)
+        );
+
+        await Promise.all(updatePromises);
+      }
+
+      // 6. 목록에서 제거하고 sequence 재정렬
+      const updatedActors = actors
+        .filter((actor) => actor.id !== deletingActor.id)
+        .map((actor) => ({
+          ...actor,
+          sequence:
+            (actor.sequence || 0) > deletedSequence
+              ? (actor.sequence || 0) - 1
+              : actor.sequence || 0,
+        }));
+
+      setActors(updatedActors);
+
+      // 7. 삭제된 액터가 선택된 액터라면 다른 액터 선택
       if (selectedActor?.id === deletingActor.id) {
-        setSelectedActor(null);
-        setSelectedUsecase(null);
-        setUsecases([]);
-        setFeatures([]);
-        setSelectedFeature(null);
-        setFeaturePolicies([]);
-        updateURL();
+        if (updatedActors.length > 0) {
+          // 첫 번째 액터 선택
+          setSelectedActor(updatedActors[0]);
+          setSelectedUsecase(null);
+          setUsecases([]);
+          setFeatures([]);
+          setSelectedFeature(null);
+          setFeaturePolicies([]);
+          updateURL(updatedActors[0].id);
+          await loadUsecasesForActor(updatedActors[0].id);
+        } else {
+          // 액터가 없으면 선택 해제
+          setSelectedActor(null);
+          setSelectedUsecase(null);
+          setUsecases([]);
+          setFeatures([]);
+          setSelectedFeature(null);
+          setFeaturePolicies([]);
+          updateURL();
+        }
       }
 
       setShowDeleteActorModal(false);
