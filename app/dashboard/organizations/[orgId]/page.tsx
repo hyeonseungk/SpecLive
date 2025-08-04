@@ -119,8 +119,6 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
     }
   };
 
-
-
   if (loading) {
     return <FullScreenLoading message={t("common.loading")} />;
   }

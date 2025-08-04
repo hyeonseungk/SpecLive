@@ -75,9 +75,12 @@ export default function OrganizationLayout({
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       {/* 공통 헤더 */}
-      <header className="border-b flex-shrink-0">
+      <header
+        id="organization-header"
+        className="border-b flex-shrink-0 bg-white sticky top-0 z-50"
+      >
         <div className="px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">{t("common.brand")}</h1>
@@ -101,7 +104,7 @@ export default function OrganizationLayout({
       </header>
 
       {/* 메인 콘텐츠 */}
-      <main className="flex-1 overflow-hidden">{children}</main>
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
