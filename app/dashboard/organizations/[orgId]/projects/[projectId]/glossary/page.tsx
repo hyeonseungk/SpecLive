@@ -438,6 +438,12 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
                   <DropdownMenuItem
+                    onClick={() => setSortBy("sequence")}
+                    className="text-base py-2"
+                  >
+                    {t("glossary.sort_sequence")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     onClick={() => setSortBy("updated_at")}
                     className="text-base py-2"
                   >
@@ -454,12 +460,6 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
                     className="text-base py-2"
                   >
                     {t("glossary.sort_name")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setSortBy("sequence")}
-                    className="text-base py-2"
-                  >
-                    {t("glossary.sort_sequence")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
