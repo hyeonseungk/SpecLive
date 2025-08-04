@@ -396,8 +396,10 @@ export default function PolicyAddModal({
                   />
                   {glossarySearchTerm && (
                     <p className="text-xs text-gray-500 mt-1">
-                      "{glossarySearchTerm}" 검색 결과:{" "}
-                      {filteredGlossaries.length}개
+                      {t("policyAddModal.termsSearchResults", {
+                        term: glossarySearchTerm,
+                        count: filteredGlossaries.length,
+                      })}
                     </p>
                   )}
                 </div>
@@ -408,8 +410,8 @@ export default function PolicyAddModal({
                     <div className="text-center py-4">
                       <p className="text-sm text-gray-500">
                         {glossarySearchTerm
-                          ? "검색 결과가 없습니다"
-                          : "용어가 없습니다"}
+                          ? t("policyAddModal.noTermsFound")
+                          : t("policyAddModal.noTermsAvailable")}
                       </p>
                       {glossarySearchTerm && (
                         <button
@@ -417,7 +419,7 @@ export default function PolicyAddModal({
                           className="text-xs text-blue-600 hover:text-blue-700 mt-1"
                           disabled={policySaving}
                         >
-                          검색어 초기화
+                          {t("policyAddModal.clearSearchTerms")}
                         </button>
                       )}
                     </div>
@@ -451,7 +453,9 @@ export default function PolicyAddModal({
             {selectedGlossaryIds.length > 0 && (
               <div className="mt-3 p-3 bg-blue-50 rounded-md border">
                 <p className="text-sm font-medium text-gray-700 mb-2">
-                  선택된 용어 ({selectedGlossaryIds.length}개):
+                  {t("policyAddModal.selectedTermsCount", {
+                    count: selectedGlossaryIds.length,
+                  })}
                 </p>
                 <div className="space-y-1">
                   {selectedGlossaryIds.map((id) => {
@@ -480,10 +484,12 @@ export default function PolicyAddModal({
 
         <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
           <Button variant="outline" onClick={onClose} disabled={policySaving}>
-            취소
+            {t("policyAddModal.cancel")}
           </Button>
           <Button onClick={onAdd} disabled={addDisabled}>
-            {policySaving ? "추가 중..." : "정책 추가"}
+            {policySaving
+              ? t("policyAddModal.adding")
+              : t("policyAddModal.add")}
           </Button>
         </div>
       </div>

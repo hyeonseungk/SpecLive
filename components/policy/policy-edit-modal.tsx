@@ -442,7 +442,9 @@ export default function PolicyEditModal({
             {editSelectedGlossaryIds.length > 0 && (
               <div className="mt-3 p-3 bg-blue-50 rounded-md border">
                 <p className="text-sm font-medium text-gray-700 mb-2">
-                  선택된 용어 ({editSelectedGlossaryIds.length}개):
+                  {t("policyEditModal.selectedTerms", {
+                    count: editSelectedGlossaryIds.length,
+                  })}
                 </p>
                 <div className="space-y-1">
                   {editSelectedGlossaryIds.map((id) => {
@@ -479,10 +481,12 @@ export default function PolicyEditModal({
           </Button>
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose} disabled={policySaving}>
-              취소
+              {t("policyEditModal.cancel")}
             </Button>
             <Button onClick={onUpdate} disabled={updateDisabled}>
-              {policySaving ? "수정 중..." : "정책 수정"}
+              {policySaving
+                ? t("policyEditModal.updating")
+                : t("policyEditModal.update")}
             </Button>
           </div>
         </div>
@@ -492,7 +496,9 @@ export default function PolicyEditModal({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">정책 삭제</h3>
+              <h3 className="text-lg font-semibold">
+                {t("policyEditModal.deleteConfirmTitle")}
+              </h3>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none"
@@ -501,10 +507,10 @@ export default function PolicyEditModal({
               </button>
             </div>
             <p className="text-muted-foreground mb-6">
-              정말로 이 정책을 삭제하시겠어요?
+              {t("policyEditModal.deleteConfirmDesc")}
               <br />
               <span className="text-sm text-red-600">
-                삭제된 정책은 복구할 수 없습니다.
+                {t("policyEditModal.deleteConfirmSubtext")}
               </span>
             </p>
             <div className="flex justify-end gap-2">
@@ -513,7 +519,7 @@ export default function PolicyEditModal({
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={policySaving}
               >
-                취소
+                {t("policyEditModal.cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -523,7 +529,9 @@ export default function PolicyEditModal({
                 }}
                 disabled={policySaving}
               >
-                {policySaving ? "삭제 중..." : "삭제"}
+                {policySaving
+                  ? t("policyEditModal.deleting")
+                  : t("policyEditModal.delete")}
               </Button>
             </div>
           </div>

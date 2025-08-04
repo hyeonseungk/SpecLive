@@ -168,7 +168,7 @@
     "all_categories": "모든 카테고리",
     "add_button": "정책 추가",
     "add_new_policy_button": "+ 새 정책 추가",
-    "policies_with_feature": "정책",
+    "policies_with_feature": "관련 정책",
     "loading": "정책을 불러오는 중...",
     "no_results": "검색 결과가 없습니다.",
     "no_policies": "아직 등록된 정책이 없습니다.",
@@ -241,7 +241,12 @@
     "selectedTerms": "선택된 용어",
     "cancel": "취소",
     "add": "정책 추가",
-    "adding": "추가 중..."
+    "adding": "추가 중...",
+    "termsSearchResults": "\"{{term}}\" 검색 결과: {{count}}개",
+    "noTermsFound": "검색 결과가 없습니다",
+    "noTermsAvailable": "용어가 없습니다",
+    "clearSearchTerms": "검색어 초기화",
+    "selectedTermsCount": "선택된 용어 ({{count}}개):"
   },
   "policyEditModal": {
     "header": "정책 수정",
@@ -258,9 +263,11 @@
     "updating": "수정 중...",
     "contextLinksDesc": "이 정책을 결정한 근거나 히스토리를 담고있는 링크를 설정해보세요.\n- Notion, Confluence 링크 등",
     "deleteConfirmTitle": "정책 삭제",
-    "deleteConfirmDesc": "정말로 이 정책을 삭제하시겠어요?\n삭제된 정책은 복구할 수 없습니다.",
+    "deleteConfirmDesc": "정말로 이 정책을 삭제하시겠어요?",
+    "deleteConfirmSubtext": "삭제된 정책은 복구할 수 없습니다.",
     "delete": "삭제",
-    "deleting": "삭제 중..."
+    "deleting": "삭제 중...",
+    "selectedTerms": "선택된 용어 ({{count}}개):"
   },
   "sortablePolicyCard": {
     "copyLinkSuccess": "정책 링크가 복사되었습니다.",

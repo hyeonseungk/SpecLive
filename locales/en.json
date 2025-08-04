@@ -127,7 +127,7 @@
     "all_categories": "All categories",
     "add_button": "Add Policy",
     "add_new_policy_button": "+ Add New Policy",
-    "policies_with_feature": "Policies",
+    "policies_with_feature": "Related Policies",
     "loading": "Loading policies...",
     "no_results": "No results found.",
     "no_policies": "No policies added yet.",
@@ -201,7 +201,12 @@
     "selectedTerms": "Selected terms",
     "cancel": "Cancel",
     "add": "Add Policy",
-    "adding": "Adding..."
+    "adding": "Adding...",
+    "termsSearchResults": "\"{{term}}\" search results: {{count}}",
+    "noTermsFound": "No search results found",
+    "noTermsAvailable": "No terms available",
+    "clearSearchTerms": "Clear search",
+    "selectedTermsCount": "Selected terms ({{count}}):"
   },
   "policyEditModal": {
     "header": "Edit Policy",
@@ -219,9 +224,11 @@
     "contextLinksLabel": "Context Links",
     "contextLinksDesc": "Set links containing the rationale or history behind this policy decision.\n- Notion, Confluence links, etc.",
     "deleteConfirmTitle": "Delete Policy",
-    "deleteConfirmDesc": "Do you really want to delete this policy?\nDeleted policies cannot be recovered.",
+    "deleteConfirmDesc": "Do you really want to delete this policy?",
+    "deleteConfirmSubtext": "Deleted policies cannot be recovered.",
     "delete": "Delete",
-    "deleting": "Deleting..."
+    "deleting": "Deleting...",
+    "selectedTerms": "Selected terms ({{count}}):"
   },
   "sortablePolicyCard": {
     "copyLinkSuccess": "Policy link has been copied.",
