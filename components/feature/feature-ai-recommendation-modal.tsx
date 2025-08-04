@@ -109,9 +109,7 @@ export default function FeatureAiRecommendationModal({
         const { data: feature, error: featureError } = await supabase
           .from("features")
           .insert({
-            project_id: projectId,
             name: rec.name,
-            description: rec.description,
             author_id: userId,
             usecase_id: selectedUsecaseId,
           })
