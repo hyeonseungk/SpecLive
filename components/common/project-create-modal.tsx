@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useErrorStore } from "@/lib/error-store";
 import { useSuccessStore } from "@/lib/success-store";
-import { useT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import supabase from "@/lib/supabase-browser";
 import type { User } from "@supabase/supabase-js";
 import type { Tables } from "@/types/database";
@@ -43,7 +43,7 @@ export function ProjectCreateModal({
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(false);
   const { showError } = useErrorStore();
   const { showSuccess } = useSuccessStore();
-  const t = useT();
+  const t = useGlobalT();
 
   // 조직 목록 로드 (organizationId가 없는 경우에만)
   useEffect(() => {

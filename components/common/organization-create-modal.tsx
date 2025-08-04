@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,10 +12,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { useErrorStore } from "@/lib/error-store";
+import { useGlobalT } from "@/lib/i18n";
 import { useSuccessStore } from "@/lib/success-store";
-import { useT } from "@/lib/i18n";
 import supabase from "@/lib/supabase-browser";
 import type { User } from "@supabase/supabase-js";
+import { useState } from "react";
 
 interface OrganizationCreateModalProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ export function OrganizationCreateModal({
   const [isLoading, setIsLoading] = useState(false);
   const { showError } = useErrorStore();
   const { showSuccess } = useSuccessStore();
-  const t = useT();
+  const t = useGlobalT();
 
   const handleSubmit = async () => {
     if (!organizationName.trim()) {

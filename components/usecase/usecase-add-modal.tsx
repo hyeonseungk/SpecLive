@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n";
 
 interface UsecaseAddModalProps {
   isOpen: boolean;
@@ -22,7 +21,7 @@ export default function UsecaseAddModal({
   saving,
   selectedActorName,
 }: UsecaseAddModalProps) {
-  const t = useT();
+  const t = useProjectT();
 
   if (!isOpen) return null;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -131,7 +131,7 @@ export default function PolicyEditModal({
   editSelectedGlossaryIds,
   handleEditGlossaryToggle,
 }: PolicyEditModalProps) {
-  const t = useT();
+  const t = useProjectT();
   /* 필터링 */
   const filteredFeatures = useMemo(() => {
     if (!editFeatureSearchTerm.trim()) return allFeatures;

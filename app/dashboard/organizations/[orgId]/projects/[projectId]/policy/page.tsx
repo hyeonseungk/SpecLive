@@ -20,7 +20,7 @@ import UsecaseAddModal from "@/components/usecase/usecase-add-modal";
 import UsecaseDeleteModal from "@/components/usecase/usecase-delete-modal";
 import UsecaseEditModal from "@/components/usecase/usecase-edit-modal";
 import { showError, showSimpleError } from "@/lib/error-store";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
@@ -99,7 +99,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [project, setProject] = useState<Project | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
   const [loading, setLoading] = useState(true);
-  const t = useT();
+  const t = useProjectT();
   const { locale } = useLangStore();
 
   // 액터와 유즈케이스 상태

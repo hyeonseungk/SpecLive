@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { showError } from "@/lib/error-store";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
@@ -80,7 +80,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     useState(false);
 
   // 추가: 다국어 지원 훅
-  const t = useT();
+  const t = useProjectT();
   const { locale } = useLangStore();
 
   const router = useRouter();

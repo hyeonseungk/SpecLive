@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
@@ -23,7 +23,7 @@ export default function GlossaryAddModal({
   onClose,
   onGlossaryAdded,
 }: GlossaryAddModalProps) {
-  const t = useT();
+  const t = useProjectT();
 
   /* ----------------------------- local form state ---------------------------- */
   const [glossaryName, setGlossaryName] = useState("");

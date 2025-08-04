@@ -10,11 +10,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useErrorStore } from "@/lib/error-store";
-import { useT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 
 export function ErrorModal() {
   const { isOpen, title, message, onConfirm, hideError } = useErrorStore();
-  const t = useT();
+  const t = useGlobalT();
 
   const handleConfirm = () => {
     if (onConfirm) {

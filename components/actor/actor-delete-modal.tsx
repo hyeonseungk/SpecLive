@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 
 interface ActorDeleteModalProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export default function ActorDeleteModal({
   onDelete,
   deleting,
 }: ActorDeleteModalProps) {
-  const t = useT();
+  const t = useProjectT();
 
   if (!isOpen) return null;
 

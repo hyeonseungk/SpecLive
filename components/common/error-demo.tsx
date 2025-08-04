@@ -10,12 +10,12 @@ import {
 } from "@/components/ui/card";
 import { showError, showSimpleError } from "@/lib/error-store";
 import { useErrorHandler } from "@/lib/hooks/use-error-handler";
-import { useT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 
 export function ErrorDemo() {
   const { handleError, handleAsyncError } = useErrorHandler();
-  const t = useT();
+  const t = useGlobalT();
   const { locale } = useLangStore();
 
   const simulateApiError = async () => {

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
@@ -31,7 +31,7 @@ export default function GlossaryAiRecommendationModal({
   onClose,
   onTermsAdded,
 }: GlossaryAiRecommendationModalProps) {
-  const t = useT();
+  const t = useProjectT();
   const { locale } = useLangStore();
 
   const [aiRecommendations, setAiRecommendations] = useState<Recommendation[]>(

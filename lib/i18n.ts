@@ -14,7 +14,7 @@ function getNested(obj: any, path: string[]): string | undefined {
   return path.reduce((acc, key) => (acc ? acc[key] : undefined), obj);
 }
 
-export function useT() {
+export function useProjectT() {
   const { lang, globalLang } = useLangStore();
 
   // 프로젝트별 언어 설정이 있으면 그것을 사용, 없으면 전체 언어 설정 사용

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { ChevronRight } from "lucide-react";
 import { useMemo } from "react";
 
@@ -88,7 +88,7 @@ export default function PolicyAddModal({
   selectedGlossaryIds,
   handleGlossaryToggle,
 }: PolicyAddModalProps) {
-  const t = useT();
+  const t = useProjectT();
   const filteredFeatures = useMemo(() => {
     if (!featureSearchTerm.trim()) return allFeatures;
     const term = featureSearchTerm.toLowerCase().trim();

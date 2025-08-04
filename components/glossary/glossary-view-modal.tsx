@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import { useEffect, useState } from "react";
@@ -22,7 +22,7 @@ export default function GlossaryViewModal({
   isOpen,
   onClose,
 }: GlossaryViewModalProps) {
-  const t = useT();
+  const t = useProjectT();
   const [loading, setLoading] = useState(false);
   const [glossary, setGlossary] = useState<GlossaryWithLinks | null>(null);
 

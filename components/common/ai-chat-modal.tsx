@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
 import { showError } from "@/lib/error-store";
-import { useT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { supabase } from "@/lib/supabase-browser";
 import { useEffect, useRef, useState } from "react";
@@ -35,7 +35,7 @@ export default function AiChatModal({
   onClose,
   onSavePrd,
 }: AiChatModalProps) {
-  const t = useT();
+  const t = useGlobalT();
   const { locale } = useLangStore();
   // 최초 안내 메시지를 현재 언어로 설정
   const [messages, setMessages] = useState<Message[]>([

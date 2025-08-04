@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -25,7 +25,7 @@ export default function ProjectLayout({
   const [project, setProject] = useState<Project | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
   const [loading, setLoading] = useState(true);
-  const t = useT();
+  const t = useProjectT();
   const router = useRouter();
   const params = useParams();
   const pathname = usePathname();

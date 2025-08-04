@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError, showSimpleError } from "@/lib/error-store";
 import { showSimpleSuccess } from "@/lib/success-store";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { MemberInviteModal } from "@/components/common/member-invite-modal";
 
 type User = {
@@ -32,7 +32,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const [membership, setMembership] = useState<Membership | null>(null);
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const t = useT();
+  const t = useProjectT();
 
   const router = useRouter();
 

@@ -1,13 +1,13 @@
 "use client";
 
-import { useT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 
 interface FullScreenLoadingProps {
   message?: string;
 }
 
 export function FullScreenLoading({ message }: FullScreenLoadingProps) {
-  const t = useT();
+  const t = useGlobalT();
   const displayMessage = message ?? t("common.loading");
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">

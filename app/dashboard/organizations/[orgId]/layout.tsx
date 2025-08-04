@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/common/language-selector";
 import { OrganizationSelector } from "@/components/common/organization-selector";
+import { Button } from "@/components/ui/button";
+import { useProjectT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import type { User } from "@supabase/supabase-js";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type Organization = Tables<"organizations">;
 
@@ -19,7 +19,7 @@ export default function OrganizationLayout({
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const t = useT();
+  const t = useProjectT();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useParams();

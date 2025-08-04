@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n";
+import { useProjectT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError, showSimpleError } from "@/lib/error-store";
@@ -40,7 +40,7 @@ export default function PrdPage({ params }: PrdPageProps) {
   const [prdLoading, setPrdLoading] = useState(false);
   const [prdSaving, setPrdSaving] = useState(false);
 
-  const t = useT();
+  const t = useProjectT();
   const { locale } = useLangStore();
 
   // AI 채팅 모달 상태

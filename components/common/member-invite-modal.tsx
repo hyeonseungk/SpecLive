@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,10 +12,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { useErrorStore } from "@/lib/error-store";
+import { useGlobalT } from "@/lib/i18n";
 import { useSuccessStore } from "@/lib/success-store";
-import { useT } from "@/lib/i18n";
-import supabase from "@/lib/supabase-browser";
 import type { Tables } from "@/types/database";
+import { useState } from "react";
 
 type Project = Tables<"projects">;
 
@@ -38,7 +37,7 @@ export function MemberInviteModal({
   const [isLoading, setIsLoading] = useState(false);
   const { showError } = useErrorStore();
   const { showSuccess } = useSuccessStore();
-  const t = useT();
+  const t = useGlobalT();
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -1,10 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ChevronDown, Search, Plus, Check } from "lucide-react";
-import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +8,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { OrganizationCreateModal } from "./organization-create-modal";
+import { Input } from "@/components/ui/input";
+import { useGlobalT } from "@/lib/i18n";
 import supabase from "@/lib/supabase-browser";
-import type { User } from "@supabase/supabase-js";
 import type { Tables } from "@/types/database";
+import type { User } from "@supabase/supabase-js";
+import { Check, ChevronDown, Plus, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { OrganizationCreateModal } from "./organization-create-modal";
 
 type Organization = Tables<"organizations">;
 
@@ -37,7 +37,7 @@ export function OrganizationSelector({
   const [isOpen, setIsOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const t = useT();
+  const t = useGlobalT();
 
   useEffect(() => {
     loadOrganizations();
