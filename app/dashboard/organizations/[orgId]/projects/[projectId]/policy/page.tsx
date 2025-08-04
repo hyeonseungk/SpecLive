@@ -1196,20 +1196,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       if (error) throw error;
 
-      setFeatures((prev) =>
-        [...prev, feature].sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
-      );
-      setFeatureName("");
-      setShowFeatureModal(false);
-
-      // 첫 번째 기능이라면 자동 선택
-      if (features.length === 0) {
-        setSelectedFeature(feature);
-        await loadPoliciesForTheFeature(feature.id);
-      }
-
-      showSimpleSuccess(t("feature.add_success"));
-
       // 3. 관련 링크 추가
       const validFeatureLinks = links.filter((link) => link.trim());
       if (validFeatureLinks.length > 0) {
@@ -1223,6 +1209,32 @@ export default function PolicyPage({ params }: PolicyPageProps) {
           );
         if (featureLinksError) throw featureLinksError;
       }
+
+      // 4. 링크까지 포함된 완전한 feature 데이터를 다시 조회
+      const { data: completeFeature, error: fetchError } = await supabase
+        .from("features")
+        .select(`*, feature_links (url)`)
+        .eq("id", feature.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      setFeatures((prev) =>
+        [...prev, completeFeature].sort(
+          (a, b) => (a.sequence || 0) - (b.sequence || 0)
+        )
+      );
+      setFeatureName("");
+      setFeatureLinks([]); // 링크 필드 초기화
+      setShowFeatureModal(false);
+
+      // 첫 번째 기능이라면 자동 선택
+      if (features.length === 0) {
+        setSelectedFeature(completeFeature);
+        await loadPoliciesForTheFeature(completeFeature.id);
+      }
+
+      showSimpleSuccess(t("feature.add_success"));
     } catch (error) {
       console.error("Error adding feature:", error);
       showError(t("feature.add_error_title"), t("feature.add_error_desc"));
@@ -1262,28 +1274,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       if (error) throw error;
 
-      // 목록에서 업데이트
-      setFeatures((prev) =>
-        prev.map((f) => (f.id === editingFeature.id ? updatedFeature : f))
-      );
-
-      // 현재 선택된 기능이라면 업데이트
-      if (selectedFeature?.id === editingFeature.id) {
-        setSelectedFeature(updatedFeature);
-      }
-
-      setShowEditFeatureModal(false);
-      setEditingFeature(null);
-      setEditFeatureName("");
-
-      showSimpleSuccess(t("feature.update_success"));
-
       // 기존 링크 삭제
       const { error: deleteLinksError } = await supabase
         .from("feature_links")
         .delete()
         .eq("feature_id", editingFeature.id);
       if (deleteLinksError) throw deleteLinksError;
+
       // 새로운 링크 삽입
       const validEditLinks = links.filter((link) => link.trim());
       if (validEditLinks.length > 0) {
@@ -1297,6 +1294,32 @@ export default function PolicyPage({ params }: PolicyPageProps) {
           );
         if (insertLinksError) throw insertLinksError;
       }
+
+      // 링크까지 포함된 완전한 feature 데이터를 다시 조회
+      const { data: completeFeature, error: fetchError } = await supabase
+        .from("features")
+        .select(`*, feature_links (url)`)
+        .eq("id", editingFeature.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // 목록에서 업데이트
+      setFeatures((prev) =>
+        prev.map((f) => (f.id === editingFeature.id ? completeFeature : f))
+      );
+
+      // 현재 선택된 기능이라면 업데이트
+      if (selectedFeature?.id === editingFeature.id) {
+        setSelectedFeature(completeFeature);
+      }
+
+      setShowEditFeatureModal(false);
+      setEditingFeature(null);
+      setEditFeatureName("");
+      setEditFeatureLinks([]); // 링크 필드 초기화
+
+      showSimpleSuccess(t("feature.update_success"));
     } catch (error) {
       console.error("Error updating feature:", error);
       showError(
