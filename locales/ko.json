@@ -131,7 +131,7 @@
     "add_modal_title": "새 용어 추가",
     "name_label": "용어 이름 *",
     "name_placeholder": "예: 유저, 상품, 주문, ..",
-    "definition_label": "정의 *",
+    "definition_label": "정의",
     "definition_placeholder": "용어의 의미를 작성해주세요.",
     "examples_label": "예시",
     "examples_placeholder": "",

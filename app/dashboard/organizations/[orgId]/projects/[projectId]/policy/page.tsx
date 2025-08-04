@@ -2567,9 +2567,11 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">
                     {selectedFeature
-                      ? `${selectedFeature.name} ${t(
-                          "policy.policies_with_feature"
-                        )}`
+                      ? `${
+                          selectedFeature.name.length > 30
+                            ? selectedFeature.name.substring(0, 30) + "..."
+                            : selectedFeature.name
+                        } ${t("policy.policies_with_feature")}`
                       : t("policy.policies_header")}
                   </h4>
                   {membership?.role === "admin" && (

@@ -82,7 +82,7 @@
     "add_modal_title": "Add New Term",
     "name_label": "Term Name *",
     "name_placeholder": "e.g. User, Product, Order...",
-    "definition_label": "Definition *",
+    "definition_label": "Definition",
     "definition_placeholder": "Please write the meaning of the term.",
     "examples_label": "Example",
     "examples_placeholder": "",
