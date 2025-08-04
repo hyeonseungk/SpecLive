@@ -246,7 +246,7 @@ export default function PolicyAddModal({
                     return (
                       <div
                         key={id}
-                        className="text-sm text-blue-600 font-medium inline-flex items-center"
+                        className="text-sm text-blue-600 font-medium flex items-center"
                       >
                         {f.usecase.actor.name}
                         <ChevronRight className="w-3 h-3 mx-1 text-gray-500" />
@@ -451,7 +451,7 @@ export default function PolicyAddModal({
                     return (
                       <div
                         key={id}
-                        className="text-sm text-blue-600 font-medium"
+                        className="flex items-center text-sm text-blue-600 font-medium"
                       >
                         {g.name}
                         <span className="text-xs text-gray-500 ml-2">

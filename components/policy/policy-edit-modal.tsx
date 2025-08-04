@@ -263,6 +263,32 @@ export default function PolicyEditModal({
                 </div>
               </>
             )}
+            {editSelectedFeatureIds.length > 0 && (
+              <div className="mt-3 p-3 bg-blue-50 rounded-md border">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  {t("policyAddModal.selectedFeatures")} (
+                  {editSelectedFeatureIds.length}개):
+                </p>
+                <div className="space-y-1">
+                  {editSelectedFeatureIds.map((id) => {
+                    const f = allFeatures.find((x) => x.id === id);
+                    if (!f) return null;
+                    return (
+                      <div
+                        key={id}
+                        className="text-sm text-blue-600 font-medium flex items-center"
+                      >
+                        {f.usecase.actor.name}
+                        <ChevronRight className="w-3 h-3 mx-1 text-gray-500" />
+                        {f.usecase.name}
+                        <ChevronRight className="w-3 h-3 mx-1 text-gray-500" />
+                        {f.name}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 컨텍스트 / 일반 링크 - 편집용 */}
@@ -413,6 +439,33 @@ export default function PolicyEditModal({
                   ))}
                 </div>
               </>
+            )}
+            {editSelectedGlossaryIds.length > 0 && (
+              <div className="mt-3 p-3 bg-blue-50 rounded-md border">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  선택된 용어 ({editSelectedGlossaryIds.length}개):
+                </p>
+                <div className="space-y-1">
+                  {editSelectedGlossaryIds.map((id) => {
+                    const g = glossaries.find((x) => x.id === id);
+                    if (!g) return null;
+                    return (
+                      <div
+                        key={id}
+                        className="flex items-center text-sm text-blue-600 font-medium"
+                      >
+                        {g.name}
+                        <span className="text-xs text-gray-500 ml-2">
+                          -{" "}
+                          {g.definition.length > 50
+                            ? `${g.definition.substring(0, 50)}...`
+                            : g.definition}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
         </div>
