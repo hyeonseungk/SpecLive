@@ -822,10 +822,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setEditingActor(null);
       setEditActorName("");
 
-      showSimpleSuccess("액터가 성공적으로 수정되었습니다.");
+      showSimpleSuccess(t("actor.update_success"));
     } catch (error) {
       console.error("Error updating actor:", error);
-      showError("액터 수정 실패", "액터를 수정하는 중 오류가 발생했습니다.");
+      showError(t("actor.update_error_title"), t("actor.update_error_desc"));
     } finally {
       setEditActorSaving(false);
     }
@@ -978,12 +978,12 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setShowEditUsecaseModal(false);
       setEditingUsecase(null);
       setEditUsecaseName("");
-      showSimpleSuccess("유즈케이스가 성공적으로 수정되었습니다.");
+      showSimpleSuccess(t("usecase.update_success_detailed"));
     } catch (error) {
       console.error("Error updating usecase:", error);
       showError(
-        "유즈케이스 수정 실패",
-        "유즈케이스를 수정하는 중 오류가 발생했습니다."
+        t("usecase.update_error_title_detailed"),
+        t("usecase.update_error_desc_detailed")
       );
     } finally {
       setEditUsecaseSaving(false);
@@ -1093,12 +1093,12 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setShowDeleteUsecaseModal(false);
       setDeletingUsecase(null);
-      showSimpleSuccess("유즈케이스가 성공적으로 삭제되었습니다.");
+      showSimpleSuccess(t("usecase.delete_success"));
     } catch (error) {
       console.error("Error deleting usecase:", error);
       showError(
-        "유즈케이스 삭제 실패",
-        "유즈케이스를 삭제하는 중 오류가 발생했습니다."
+        t("usecase.delete_error_title"),
+        t("usecase.delete_error_desc")
       );
     } finally {
       setUsecaseDeleting(false);

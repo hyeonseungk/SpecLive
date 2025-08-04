@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 interface UsecaseDeleteModalProps {
   isOpen: boolean;
@@ -17,13 +18,17 @@ export default function UsecaseDeleteModal({
   onDelete,
   deleting,
 }: UsecaseDeleteModalProps) {
+  const t = useT();
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">유즈케이스 삭제</h3>
+          <h3 className="text-lg font-semibold">
+            {t("usecase.delete_modal_title")}
+          </h3>
           <button
             onClick={onClose}
             disabled={deleting}
@@ -33,18 +38,20 @@ export default function UsecaseDeleteModal({
           </button>
         </div>
         <p className="text-muted-foreground mb-6">
-          정말로 "{usecaseName}" 유즈케이스를 삭제하시겠어요?
+          {t("usecase.delete_confirm_message", { usecaseName })}
           <br />
           <span className="text-sm text-red-600 font-medium">
-            이 유즈케이스의 모든 기능과 정책이 함께 삭제됩니다.
+            {t("usecase.delete_warning_message")}
           </span>
         </p>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose} disabled={deleting}>
-            취소
+            {t("usecase.delete_cancel")}
           </Button>
           <Button variant="destructive" onClick={onDelete} disabled={deleting}>
-            {deleting ? "삭제 중..." : "삭제"}
+            {deleting
+              ? t("usecase.delete_progress")
+              : t("usecase.delete_confirm")}
           </Button>
         </div>
       </div>
