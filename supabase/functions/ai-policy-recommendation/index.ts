@@ -231,9 +231,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
         );
       }
       selectedFeatureName = selectedFeature.name;
-      selectedFeatureText = language === "en-US"
-        ? `\n\nSelected Feature:\n- ${selectedFeatureName}`
-        : `\n\n선택된 기능(Feature):\n- ${selectedFeatureName}`;
+      selectedFeatureText =
+        language === "en-US"
+          ? `\n\nSelected Feature:\n- ${selectedFeatureName}`
+          : `\n\n선택된 기능(Feature):\n- ${selectedFeatureName}`;
     }
 
     // Prepare context texts
@@ -274,9 +275,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // Language-specific system prompt
     const getLanguagePrompt = (lang: string) => {
       if (lang === "en-US") {
-        return `You are an expert in IT project policy management.\n\nBased on the provided project information and the selected feature "${selectedFeatureName}", recommend ${count} useful policies in English that are specifically tailored to or address this feature. All policy contents should be in English.\n\nProject Name: ${projectName}${prdText}${glossaryText}${actorText}${usecaseText}${featureText}${selectedFeatureText}${policyText}\n\nRecommendation Criteria:\n1. Core guidelines that align with project requirements\n2. Policies that prevent common miscommunications or risks\n3. Important rules for onboarding new team members\n4. Do not duplicate existing policies\n5. Cover business logic, technical standards, and user interactions\n6. Prioritize policies highly relevant to PRD content\n7. Ensure each recommended policy clearly ties back to the selected feature: ${selectedFeatureName}\n\nProvide each policy as an object with:\n- contents: A clear, concise policy statement. `;
+        return `You are an expert in IT project policy management.\n\nBased on the provided project information and the selected feature "${selectedFeatureName}", recommend ${count} useful policies in English that are specifically tailored to or address this feature. All policy contents should be in English.\n\nProject Name: ${projectName}${prdText}${glossaryText}${actorText}${usecaseText}${featureText}${selectedFeatureText}${policyText}\n\nRecommendation Criteria:\n1. Core guidelines that align with project requirements\n2. Policies that prevent common miscommunications or risks\n3. Important rules for onboarding new team members\n4. Do not duplicate existing policies\n5. Cover business logic, technical standards, and user interactions\n6. Prioritize policies highly relevant to PRD content\n7. Ensure each recommended policy clearly ties back to the selected feature: ${selectedFeatureName}\n8. Focus on Domain Driven Design (DDD) Policy concept - business rules and constraints that developers can quickly implement in code\n9. Exclude vague or ambiguous policies - only recommend concrete, actionable business rules\n10. ABSOLUTELY DO NOT recommend specific technical implementation details, frameworks, or coding patterns\n\nProvide each policy as an object with:\n- contents: A clear, concise policy statement. `;
       } else {
-        return `당신은 IT 프로젝트 정책(Policy) 관리 전문가입니다.\n\n제공된 프로젝트 정보와 선택된 기능 "${selectedFeatureName}"에 적합하고 이를 구체적으로 반영한 ${count}개의 유용한 정책을 한국어로 추천해주세요. 모든 정책 문장은 한국어로 작성되어야 합니다.\n\n프로젝트명: ${projectName}${prdText}${glossaryText}${actorText}${usecaseText}${featureText}${selectedFeatureText}${policyText}\n\n추천 기준:\n1. 프로젝트 요구사항에 부합하는 핵심 지침\n2. 일반적인 오해나 리스크를 방지할 수 있는 정책\n3. 신입 팀원 온보딩 시 필요한 중요한 규칙\n4. 기존 정책과 중복되지 않는 내용\n5. 비즈니스 로직, 기술 표준, 사용자 상호작용을 모두 포함\n6. PRD 내용과 가장 관련성이 높은 정책 우선\n7. 각 정책이 선택된 기능 "${selectedFeatureName}"와 분명히 연결되어 있도록 해주세요.\n\n각 항목은 다음 형태로 제공해주세요:\n- contents: 명확하고 간결한 정책 문장입니다.`;
+        return `당신은 IT 프로젝트 정책(Policy) 관리 전문가입니다.\n\n제공된 프로젝트 정보와 선택된 기능 "${selectedFeatureName}"에 적합하고 이를 구체적으로 반영한 ${count}개의 유용한 정책을 한국어로 추천해주세요. 모든 정책 문장은 한국어로 작성되어야 합니다.\n\n프로젝트명: ${projectName}${prdText}${glossaryText}${actorText}${usecaseText}${featureText}${selectedFeatureText}${policyText}\n\n추천 기준:\n1. 프로젝트 요구사항에 부합하는 핵심 지침\n2. 일반적인 오해나 리스크를 방지할 수 있는 정책\n3. 신입 팀원 온보딩 시 필요한 중요한 규칙\n4. 기존 정책과 중복되지 않는 내용\n5. 비즈니스 로직, 기술 표준, 사용자 상호작용을 모두 포함\n6. PRD 내용과 가장 관련성이 높은 정책 우선\n7. 각 정책이 선택된 기능 "${selectedFeatureName}"와 분명히 연결되어 있도록 해주세요.\n8. Domain Driven Design (DDD)의 Policy 개념에 집중 - 개발자들이 코드에서 빠르게 구현할 수 있는 비즈니스 규칙과 제약사항\n9. 모호하거나 애매한 정책은 모두 제외하고, 구체적이고 실행 가능한 비즈니스 규칙만 추천\n10. 절대로 구체적인 기술 구현 세부사항, 프레임워크, 코딩 패턴을 추천하지 마세요\n\n각 항목은 다음 형태로 제공해주세요:\n- contents: 명확하고 간결한 정책 문장입니다.`;
       }
     };
     const systemPrompt = getLanguagePrompt(language);
@@ -298,9 +299,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
             { role: "system", content: systemPrompt },
             {
               role: "user",
-              content: language === "en-US"
-                ? "Please recommend policies suitable for the above project in English."
-                : "위 프로젝트에 적합한 정책을 한국어로 추천해주세요.",
+              content:
+                language === "en-US"
+                  ? "Please recommend policies suitable for the above project in English."
+                  : "위 프로젝트에 적합한 정책을 한국어로 추천해주세요.",
             },
           ],
           response_format: {

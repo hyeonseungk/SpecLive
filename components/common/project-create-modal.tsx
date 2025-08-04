@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,11 +12,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { useErrorStore } from "@/lib/error-store";
-import { useSuccessStore } from "@/lib/success-store";
 import { useGlobalT } from "@/lib/i18n";
+import { useSuccessStore } from "@/lib/success-store";
 import supabase from "@/lib/supabase-browser";
-import type { User } from "@supabase/supabase-js";
 import type { Tables } from "@/types/database";
+import type { User } from "@supabase/supabase-js";
+import { useEffect, useState } from "react";
 
 type Organization = Tables<"organizations">;
 
@@ -131,7 +131,7 @@ export function ProjectCreateModal({
 
       showSuccess(
         t("projectCreate.success_title"),
-        t("projectCreate.success_message").replace("{project}", projectName)
+        t("projectCreate.success_message", { project: projectName })
       );
 
       setProjectName("");

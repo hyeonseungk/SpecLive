@@ -72,9 +72,7 @@ export function MemberInviteModal({
       // 현재는 시연용으로 간단하게 구현
       showSuccess(
         t("invite.success_title"),
-        t("invite.success_message")
-          .replace("{email}", email)
-          .replace("{project}", project.name)
+        t("invite.success_message", { email, project: project.name })
       );
 
       setEmail("");
@@ -103,7 +101,7 @@ export function MemberInviteModal({
         <AlertDialogHeader>
           <AlertDialogTitle>{t("invite.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            {t("invite.description_prefix").replace("{project}", project.name)}
+            {t("invite.description_prefix", { project: project.name })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 

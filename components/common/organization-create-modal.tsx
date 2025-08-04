@@ -65,7 +65,7 @@ export function OrganizationCreateModal({
 
       showSuccess(
         t("orgCreate.success_title"),
-        t("orgCreate.success_message").replace("{org}", organizationName)
+        t("orgCreate.success_message", { org: organizationName })
       );
 
       setOrganizationName("");
