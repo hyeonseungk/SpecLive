@@ -39,7 +39,7 @@
     "card_hint": "Click to manage terms and policies."
   },
   "glossary": {
-    "header": "Glossary Management",
+    "header": "Glossary",
     "sub": "Define and manage terms used in the project.",
     "grid_view": "Grid View",
     "list_view": "List View",
@@ -84,8 +84,8 @@
     "name_placeholder": "e.g. User, Product, Order...",
     "definition_label": "Definition *",
     "definition_placeholder": "Please write the meaning of the term.",
-    "examples_label": "Example usage",
-    "examples_placeholder": "e.g. John Doe, Jane Smith",
+    "examples_label": "Example",
+    "examples_placeholder": "",
     "related_url_label": "Related Links",
     "related_url_desc": "Add links to help members better understand the terminology.\n- GitHub link where the term is actually implemented in code\n- Figma link for visual understanding\n- Any other links that help with understanding",
     "add_url": "+ Add Link",
@@ -139,7 +139,7 @@
     "first_policy_button": "Add First Policy",
     "load_error_title": "Failed to load policies",
     "load_error_desc": "An error occurred while loading policies.",
-    "ai_recommendation": "🤖 AI Policy Recommendations",
+    "ai_recommendation": "🤖 Get AI Recommendations",
     "ai_modal_title": "AI Policy Recommendations",
     "ai_modal_desc": "We can recommend additional policies based on your existing PRD, terms, actors, use cases, features, and policies. Would you like to get recommendations?",
     "ai_get_recommendations": "Get recommendations",
@@ -245,15 +245,15 @@
   },
   "sidebar": {
     "project": "Project",
-    "prd": "Project PRD",
+    "prd": "PRD",
     "glossary": "Glossary",
     "policy": "Policy",
     "management": "Project Management",
     "dashboard": "Dashboard"
   },
   "project": {
-    "prd_header": "Project PRD",
-    "prd_sub": "Define the project's requirements and goals."
+    "prd_header": "PRD",
+    "prd_sub": "Write the product requirements document accurately and in detail."
   },
   "actor": {
     "label": "Actor:",
@@ -327,7 +327,7 @@
   "buttons": {
     "save": "Save",
     "saving": "Saving...",
-    "edit_with_ai": "Write with AI",
+    "edit_with_ai": "🤖 Write with AI",
     "cancel": "Cancel",
     "send": "Send",
     "back": "Back to Dashboard",

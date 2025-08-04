@@ -133,8 +133,8 @@
     "name_placeholder": "예: 유저, 상품, 주문, ..",
     "definition_label": "정의 *",
     "definition_placeholder": "용어의 의미를 작성해주세요.",
-    "examples_label": "예시 문구",
-    "examples_placeholder": "예: 홍길동, 김철수, 이영희",
+    "examples_label": "예시",
+    "examples_placeholder": "",
     "related_url_label": "참고 링크",
     "related_url_desc": "용어에 대한 이해를 돕는 링크를 추가해보세요\n- 시각적 이해를 돕는 Figma 링크\n- 해당 용어가 실제로 구현된 코드의 GitHub 링크\n- 이해에 도움이 될 기타 링크들",
     "add_url": "+ 링크 추가",
@@ -292,15 +292,15 @@
   },
   "sidebar": {
     "project": "프로젝트",
-    "prd": "프로젝트 PRD",
+    "prd": "PRD",
     "glossary": "용어 관리",
     "policy": "정책 관리",
     "management": "프로젝트 관리",
     "dashboard": "대시보드"
   },
   "project": {
-    "prd_header": "프로젝트 PRD",
-    "prd_sub": "프로젝트의 요구사항과 목표를 정의합니다."
+    "prd_header": "PRD",
+    "prd_sub": "제품 요구사항 문서를 정확하고 자세하게 작성하세요."
   },
   "actor": {
     "label": "액터:",
