@@ -1733,16 +1733,45 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         if (policyTermsError) throw policyTermsError;
       }
 
-      // 6. 기존 기능 연결 삭제 후 새로 추가
-      const { error: deleteFeaturePoliciesError } = await supabase
-        .from("feature_policies")
-        .delete()
-        .eq("policy_id", editingPolicy.id);
+      // 6. 기존 기능 연결과 새로운 기능 연결을 비교하여 차이점만 업데이트
+      // 기존 연결 조회 (sequence 포함)
+      const { data: existingFeaturePolicies, error: fetchError } =
+        await supabase
+          .from("feature_policies")
+          .select("feature_id, sequence")
+          .eq("policy_id", editingPolicy.id);
 
-      if (deleteFeaturePoliciesError) throw deleteFeaturePoliciesError;
+      if (fetchError) throw fetchError;
 
-      // 각 기능별로 현재 최대 sequence 값을 조회하고 새로운 sequence 할당
-      for (const featureId of editSelectedFeatureIds) {
+      const existingFeatureIds =
+        existingFeaturePolicies?.map((fp) => fp.feature_id) || [];
+      const existingFeatureMap = new Map(
+        existingFeaturePolicies?.map((fp) => [fp.feature_id, fp.sequence]) || []
+      );
+
+      // 삭제할 기능들 (기존에 있었지만 새로운 선택에서 제외된 것들)
+      const featuresToRemove = existingFeatureIds.filter(
+        (featureId) => !editSelectedFeatureIds.includes(featureId)
+      );
+
+      // 추가할 기능들 (새로 선택된 것들)
+      const featuresToAdd = editSelectedFeatureIds.filter(
+        (featureId) => !existingFeatureIds.includes(featureId)
+      );
+
+      // 기존 연결 삭제 (제거된 기능들만)
+      if (featuresToRemove.length > 0) {
+        const { error: deleteError } = await supabase
+          .from("feature_policies")
+          .delete()
+          .eq("policy_id", editingPolicy.id)
+          .in("feature_id", featuresToRemove);
+
+        if (deleteError) throw deleteError;
+      }
+
+      // 새로운 연결 추가 (새로 추가된 기능들만)
+      for (const featureId of featuresToAdd) {
         const { data: maxSequenceData, error: maxSequenceError } =
           await supabase
             .from("feature_policies")
