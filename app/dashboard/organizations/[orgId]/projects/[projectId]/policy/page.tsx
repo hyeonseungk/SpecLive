@@ -2763,6 +2763,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         onUpdate={() => updateFeature(editFeatureLinks)}
         saving={editFeatureSaving}
         selectedUsecaseName={selectedUsecase?.name}
+        selectedActorName={selectedActor?.name}
         featureLinks={editFeatureLinks}
         addLinkField={addEditFeatureLinkField}
         removeLinkField={removeEditFeatureLinkField}
@@ -2921,6 +2922,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         }}
         onUpdate={updateUsecase}
         saving={editUsecaseSaving}
+        selectedActorName={selectedActor?.name}
       />
 
       <GlossaryViewModal
