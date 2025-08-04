@@ -32,7 +32,7 @@ export default function Home() {
   const router = useRouter();
   const t = useGlobalT();
   const { lang } = useLangStore();
-  const locale = lang === "ko" ? "ko-KR" : "en-US";
+  const locale = lang;
 
   useEffect(() => {
     const getSession = async () => {

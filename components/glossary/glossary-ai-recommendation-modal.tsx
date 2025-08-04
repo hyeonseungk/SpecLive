@@ -33,7 +33,7 @@ export default function GlossaryAiRecommendationModal({
 }: GlossaryAiRecommendationModalProps) {
   const t = useGlobalT();
   const { lang } = useLangStore();
-  const locale = lang === "ko" ? "ko-KR" : "en-US";
+  const locale = lang;
 
   const [aiRecommendations, setAiRecommendations] = useState<Recommendation[]>(
     []

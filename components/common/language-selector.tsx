@@ -14,8 +14,8 @@ export function LanguageSelector() {
   const { lang, setLanguage } = useLangStore();
 
   const languages = [
-    { code: "ko", name: "한국어" },
-    { code: "en", name: "English" },
+    { code: "ko-KR", name: "한국어" },
+    { code: "en-US", name: "English" },
   ] as const;
 
   return (

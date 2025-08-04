@@ -43,7 +43,7 @@ export default function PrdPage({ params }: PrdPageProps) {
 
   const t = useGlobalT();
   const { lang } = useLangStore();
-  const locale = lang === "ko" ? "ko-KR" : "en-US";
+  const locale = lang;
 
   // AI 채팅 모달 상태
   const [isAiChatOpen, setIsAiChatOpen] = useState(false);

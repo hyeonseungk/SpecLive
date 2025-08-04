@@ -1,8 +1,8 @@
 export function formatDate(date: string | Date, locale: string): string {
   const dateObj = typeof date === "string" ? new Date(date) : date;
 
-  // locale이 "ko-KR" 또는 "ko"인지 확인
-  const isKorean = locale.startsWith("ko");
+  // locale이 "ko-KR"인지 확인
+  const isKorean = locale === "ko-KR";
 
   if (isKorean) {
     const year = dateObj.getFullYear();
@@ -23,8 +23,8 @@ export function formatDateWithSuffix(
 ): string {
   const dateStr = formatDate(date, locale);
 
-  // locale이 "ko-KR" 또는 "ko"인지 확인
-  const isKorean = locale.startsWith("ko");
+  // locale이 "ko-KR"인지 확인
+  const isKorean = locale === "ko-KR";
 
   if (isKorean) {
     return `${dateStr}에 생성`;

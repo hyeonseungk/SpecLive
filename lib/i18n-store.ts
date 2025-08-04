@@ -1,36 +1,36 @@
 import { create } from "zustand";
 
-export type LangCode = "en" | "ko";
+export type LangCode = "en-US" | "ko-KR";
 export type LocaleCode = "en-US" | "ko-KR";
 
 const languageMap: Record<LangCode, LocaleCode> = {
-  en: "en-US",
-  ko: "ko-KR",
+  "en-US": "en-US",
+  "ko-KR": "ko-KR",
 };
 
 // 브라우저 언어를 기반으로 초기 언어 설정
 function getInitialLanguage(): LangCode {
   // 서버 사이드에서는 기본값 반환
   if (typeof window === "undefined") {
-    return "ko";
+    return "ko-KR";
   }
 
   // localStorage에서 저장된 언어 설정 확인
   const storedLang = localStorage.getItem("lang") as LangCode | null;
-  if (storedLang === "en" || storedLang === "ko") {
+  if (storedLang === "en-US" || storedLang === "ko-KR") {
     return storedLang;
   }
 
   // 브라우저 언어 기반 추론
   const browserLang = navigator.language.toLowerCase();
   if (browserLang.startsWith("ko")) {
-    return "ko";
+    return "ko-KR";
   } else if (browserLang.startsWith("en")) {
-    return "en";
+    return "en-US";
   }
 
   // 기본값
-  return "ko";
+  return "ko-KR";
 }
 
 interface LangState {

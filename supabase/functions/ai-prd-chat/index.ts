@@ -37,7 +37,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     });
   }
 
-  const { messages, language = "ko" } = body as {
+  const { messages, language = "ko-KR" } = body as {
     messages?: Array<{ role: string; content: string }>;
     language?: string;
   };
@@ -55,7 +55,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   // 3. Generate language-specific system prompt
   // ------------------------------------------------------------------
   const getLanguagePrompt = (lang: string) => {
-    if (lang.includes("en")) {
+    if (lang === "en-US") {
       return `1. You are an excellent PM and PRD (Product Requirements Document) writing expert in the IT industry.
 2. Based on the conversation with the user, derive a clear, specific, and detailed PRD.
 3. Ask the user between 10 to 20 questions (judge the number of questions according to the service the user wants to create), and ask only one question at a time. Don't tell them which question number it is. And it's good to respond to user answers from time to time and ask additional questions about those answers.

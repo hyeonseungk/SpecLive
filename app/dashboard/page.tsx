@@ -34,7 +34,7 @@ export default function Dashboard() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const t = useGlobalT();
   const { lang } = useLangStore();
-  const locale = lang === "ko" ? "ko-KR" : "en-US";
+  const locale = lang;
   const router = useRouter();
 
   useEffect(() => {

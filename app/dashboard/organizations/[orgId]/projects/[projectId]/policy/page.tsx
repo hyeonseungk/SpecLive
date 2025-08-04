@@ -102,7 +102,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [loading, setLoading] = useState(true);
   const t = useGlobalT();
   const { lang } = useLangStore();
-  const locale = lang === "ko" ? "ko-KR" : "en-US";
+  const locale = lang;
 
   // 액터와 유즈케이스 상태
   const [actors, setActors] = useState<Actor[]>([]);

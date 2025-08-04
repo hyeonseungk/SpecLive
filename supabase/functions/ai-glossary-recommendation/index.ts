@@ -17,7 +17,7 @@ interface GlossaryRecommendation {
 interface RequestBody {
   projectId: string;
   count?: number; // 추천받을 용어 개수 (기본값: 5)
-  language?: string; // 언어 코드 (기본값: 'ko')
+  language?: string; // 언어 코드 (기본값: 'ko-KR')
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -49,7 +49,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     });
   }
 
-  const { projectId, count = 5, language = "ko" } = body;
+  const { projectId, count = 5, language = "ko-KR" } = body;
 
   if (!projectId) {
     return new Response(JSON.stringify({ error: "projectId is required" }), {
@@ -145,7 +145,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // 언어별 시스템 프롬프트
     const getLanguagePrompt = (lang: string) => {
-      if (lang.includes("en")) {
+      if (lang === "en-US") {
         return `You are an expert in IT project glossary management.
 
 Please recommend ${count} useful terms in ENGLISH based on the given project information. All term names and definitions should be primarily in English.
@@ -213,7 +213,7 @@ Please recommend practical terms in English that can be used immediately in actu
             },
             {
               role: "user",
-              content: language.includes("en")
+              content: language === "en-US"
                 ? "Please recommend terms suitable for the above project in English."
                 : "위 프로젝트에 적합한 용어들을 한국어로 추천해주세요.",
             },

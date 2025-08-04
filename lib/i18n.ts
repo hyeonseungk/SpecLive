@@ -6,8 +6,8 @@ import { useLangStore } from "./i18n-store";
 type TranslationMap = Record<string, any>;
 
 const resources: Record<string, TranslationMap> = {
-  en,
-  ko,
+  "en-US": en,
+  "ko-KR": ko,
 };
 
 function getNested(obj: any, path: string[]): string | undefined {
@@ -21,7 +21,7 @@ export function useGlobalT() {
   return (key: string, vars?: Record<string, string | number>): string => {
     const parts = key.split(".");
     const res =
-      getNested(resources[lang], parts) || getNested(resources["en"], parts);
+      getNested(resources[lang], parts) || getNested(resources["en-US"], parts);
     let str = typeof res === "string" ? res : key;
     if (vars && typeof str === "string") {
       for (const [varKey, value] of Object.entries(vars)) {
