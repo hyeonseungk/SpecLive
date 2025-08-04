@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Tables } from "@/types/database";
-import { supabase } from "@/lib/supabase-browser";
 import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
-import { showSimpleSuccess } from "@/lib/success-store";
 import { useT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
+import { showSimpleSuccess } from "@/lib/success-store";
+import { supabase } from "@/lib/supabase-browser";
+import { Tables } from "@/types/database";
+import { useState } from "react";
 
 interface GlossaryEditModalProps {
   glossary: Tables<"glossaries">;
@@ -170,9 +170,18 @@ export default function GlossaryEditModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h3 className="text-lg font-semibold mb-4">
-          {t("glossary.edit_modal_title")}
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">
+            {t("glossary.edit_modal_title")}
+          </h3>
+          <button
+            onClick={onClose}
+            disabled={editSaving}
+            className="text-gray-400 hover:text-gray-600 disabled:text-gray-300 text-xl font-bold leading-none"
+          >
+            ×
+          </button>
+        </div>
 
         <div className="space-y-4">
           {/* Name */}
@@ -294,9 +303,17 @@ export default function GlossaryEditModal({
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
-            <h3 className="text-lg font-semibold mb-4">
-              {t("glossary.delete_confirm_title")}
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">
+                {t("glossary.delete_confirm_title")}
+              </h3>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none"
+              >
+                ×
+              </button>
+            </div>
             <p className="text-muted-foreground mb-6">
               {t("glossary.delete_confirm_desc")}
             </p>

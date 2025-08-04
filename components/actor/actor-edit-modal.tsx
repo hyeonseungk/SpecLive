@@ -27,7 +27,16 @@ export default function ActorEditModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h3 className="text-lg font-semibold mb-4">액터 편집</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">액터 편집</h3>
+          <button
+            onClick={onClose}
+            disabled={saving}
+            className="text-gray-400 hover:text-gray-600 disabled:text-gray-300 text-xl font-bold leading-none"
+          >
+            ×
+          </button>
+        </div>
 
         <div className="space-y-4">
           <div>

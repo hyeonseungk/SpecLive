@@ -166,18 +166,17 @@ export default function PolicyEditModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">
             {t("policyEditModal.header")}
           </h3>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowDeleteConfirm(true)}
+          <button
+            onClick={onClose}
             disabled={policySaving}
+            className="text-gray-400 hover:text-gray-600 disabled:text-gray-300 text-xl font-bold leading-none"
           >
-            {t("policyEditModal.deleteButton")}
-          </Button>
+            ×
+          </button>
         </div>
 
         <div className="space-y-4">
@@ -470,20 +469,37 @@ export default function PolicyEditModal({
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
-          <Button variant="outline" onClick={onClose} disabled={policySaving}>
-            취소
+        <div className="flex justify-between items-center mt-6 pt-4 border-t">
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={policySaving}
+          >
+            {t("policyEditModal.deleteButton")}
           </Button>
-          <Button onClick={onUpdate} disabled={updateDisabled}>
-            {policySaving ? "수정 중..." : "정책 수정"}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose} disabled={policySaving}>
+              취소
+            </Button>
+            <Button onClick={onUpdate} disabled={updateDisabled}>
+              {policySaving ? "수정 중..." : "정책 수정"}
+            </Button>
+          </div>
         </div>
       </div>
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
-            <h3 className="text-lg font-semibold mb-4">정책 삭제</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">정책 삭제</h3>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none"
+              >
+                ×
+              </button>
+            </div>
             <p className="text-muted-foreground mb-6">
               정말로 이 정책을 삭제하시겠어요?
               <br />

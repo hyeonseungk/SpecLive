@@ -22,7 +22,16 @@ export default function UsecaseDeleteModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
-        <h3 className="text-lg font-semibold mb-4">유즈케이스 삭제</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">유즈케이스 삭제</h3>
+          <button
+            onClick={onClose}
+            disabled={deleting}
+            className="text-gray-400 hover:text-gray-600 disabled:text-gray-300 text-xl font-bold leading-none"
+          >
+            ×
+          </button>
+        </div>
         <p className="text-muted-foreground mb-6">
           정말로 "{usecaseName}" 유즈케이스를 삭제하시겠어요?
           <br />

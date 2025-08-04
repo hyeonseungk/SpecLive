@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase-browser";
-import { Tables } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
-import { showSimpleSuccess } from "@/lib/success-store";
 import { useT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
+import { showSimpleSuccess } from "@/lib/success-store";
+import { supabase } from "@/lib/supabase-browser";
+import { Tables } from "@/types/database";
+import { useState } from "react";
 
 interface Recommendation {
   name: string;
@@ -159,9 +159,18 @@ export default function GlossaryAiRecommendationModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">
-          {t("glossary.ai_modal_title")}
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">
+            {t("glossary.ai_modal_title")}
+          </h3>
+          <button
+            onClick={onClose}
+            disabled={aiLoading}
+            className="text-gray-400 hover:text-gray-600 disabled:text-gray-300 text-xl font-bold leading-none"
+          >
+            ×
+          </button>
+        </div>
 
         {/* initial / loading state */}
         {aiRecommendations.length === 0 && !aiError && (
