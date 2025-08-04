@@ -719,7 +719,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setAllFeatures(featuresWithHierarchy);
     } catch (error) {
       console.error("Error loading all features:", error);
-      showError("기능 로드 실패", "기능을 불러오는 중 오류가 발생했습니다.");
+      showError(t("feature.load_error_title"), t("feature.load_error_desc"));
     } finally {
       setAllFeaturesLoading(false);
     }
@@ -789,7 +789,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const updateActor = async () => {
     if (!editingActor || !user) return;
     if (!editActorName.trim()) {
-      showSimpleError("액터 이름을 입력해주세요.");
+      showSimpleError(t("actor.name_required"));
       return;
     }
 
@@ -953,7 +953,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const updateUsecase = async () => {
     if (!editingUsecase || !user) return;
     if (!editUsecaseName.trim()) {
-      showSimpleError("유즈케이스 이름을 입력해주세요.");
+      showSimpleError(t("usecase.name_required"));
       return;
     }
 
@@ -1163,7 +1163,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const addFeature = async (links: string[]) => {
     if (!selectedUsecase || !user) return;
     if (!featureName.trim()) {
-      showSimpleError("기능 이름을 입력해주세요.");
+      showSimpleError(t("feature.name_required"));
       return;
     }
 
@@ -1208,7 +1208,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         await loadPoliciesForTheFeature(feature.id);
       }
 
-      showSimpleSuccess("기능이 성공적으로 추가되었습니다.");
+      showSimpleSuccess(t("feature.add_success"));
 
       // 3. 관련 링크 추가
       const validFeatureLinks = links.filter((link) => link.trim());
@@ -1225,7 +1225,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       }
     } catch (error) {
       console.error("Error adding feature:", error);
-      showError("기능 추가 실패", "기능을 추가하는 중 오류가 발생했습니다.");
+      showError(t("feature.add_error_title"), t("feature.add_error_desc"));
     } finally {
       setFeatureSaving(false);
     }
@@ -1245,7 +1245,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const updateFeature = async (links: string[]) => {
     if (!editingFeature || !user) return;
     if (!editFeatureName.trim()) {
-      showSimpleError("기능 이름을 입력해주세요.");
+      showSimpleError(t("feature.name_required"));
       return;
     }
 
@@ -1276,7 +1276,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setEditingFeature(null);
       setEditFeatureName("");
 
-      showSimpleSuccess("기능이 성공적으로 수정되었습니다.");
+      showSimpleSuccess(t("feature.update_success"));
 
       // 기존 링크 삭제
       const { error: deleteLinksError } = await supabase
@@ -1299,7 +1299,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       }
     } catch (error) {
       console.error("Error updating feature:", error);
-      showError("기능 수정 실패", "기능을 수정하는 중 오류가 발생했습니다.");
+      showError(
+        t("feature.update_error_title"),
+        t("feature.update_error_desc")
+      );
     } finally {
       setEditFeatureSaving(false);
     }
@@ -1366,13 +1369,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const addPolicy = async () => {
     if (!user) return;
     if (!policyContents.trim()) {
-      showSimpleError("정책 내용을 입력해주세요.");
+      showSimpleError(t("policy.content_required"));
       return;
     }
 
     // 모달에서 체크박스로 선택된 기능들만 기준으로 체크
     if (selectedFeatureIds.length === 0) {
-      showSimpleError("정책은 최소 1개의 기능과 연결되어야 합니다.");
+      showSimpleError(t("policy.feature_required"));
       return;
     }
 
@@ -1480,10 +1483,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setFeatureSearchTerm("");
       setShowPolicyModal(false);
 
-      showSimpleSuccess("정책이 성공적으로 추가되었습니다.");
+      showSimpleSuccess(t("policy.add_success"));
     } catch (error) {
       console.error("Error adding policy:", error);
-      showError("정책 추가 실패", "정책을 추가하는 중 오류가 발생했습니다.");
+      showError(t("policy.add_error_title"), t("policy.add_error_desc"));
     } finally {
       setPolicySaving(false);
     }
@@ -1566,10 +1569,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setShowDeleteFeatureModal(false);
       setDeletingFeature(null);
 
-      showSimpleSuccess("기능이 성공적으로 삭제되었습니다.");
+      showSimpleSuccess(t("feature.delete_success"));
     } catch (error) {
       console.error("Error deleting feature:", error);
-      showError("기능 삭제 실패", "기능을 삭제하는 중 오류가 발생했습니다.");
+      showError(
+        t("feature.delete_error_title"),
+        t("feature.delete_error_desc")
+      );
     } finally {
       setFeatureDeleting(false);
     }
@@ -1623,11 +1629,11 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const updatePolicy = async () => {
     if (!editingPolicy || !user) return;
     if (!editPolicyContents.trim()) {
-      showSimpleError("정책 내용을 입력해주세요.");
+      showSimpleError(t("policy.content_required"));
       return;
     }
     if (editSelectedFeatureIds.length === 0) {
-      showSimpleError("정책은 최소 1개의 기능과 연결되어야 합니다.");
+      showSimpleError(t("policy.feature_required"));
       return;
     }
 
@@ -1753,10 +1759,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setEditSelectedFeatureIds([]);
       setEditFeatureSearchTerm("");
 
-      showSimpleSuccess("정책이 성공적으로 수정되었습니다.");
+      showSimpleSuccess(t("policy.update_success"));
     } catch (error) {
       console.error("Error updating policy:", error);
-      showError("정책 수정 실패", "정책을 수정하는 중 오류가 발생했습니다.");
+      showError(t("policy.update_error_title"), t("policy.update_error_desc"));
     } finally {
       setEditPolicySaving(false);
     }
@@ -1807,10 +1813,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setDeletingPolicy(null);
 
-      showSimpleSuccess("정책이 성공적으로 삭제되었습니다.");
+      showSimpleSuccess(t("policy.delete_success"));
     } catch (error) {
       console.error("Error deleting policy:", error);
-      showError("정책 삭제 실패", "정책을 삭제하는 중 오류가 발생했습니다.");
+      showError(t("policy.delete_error_title"), t("policy.delete_error_desc"));
     } finally {
     }
   };
@@ -1901,8 +1907,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     } catch (error) {
       console.error("Error updating usecase sequence:", error);
       showError(
-        "유즈케이스 순서 변경 실패",
-        "유즈케이스 순서를 변경하는 중 오류가 발생했습니다."
+        t("usecase.sequence_error_title"),
+        t("usecase.sequence_error_desc")
       );
       // 에러 발생 시 원래 상태로 복원
       if (selectedActor) {
@@ -1946,8 +1952,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     } catch (error) {
       console.error("Error updating feature sequence:", error);
       showError(
-        "기능 순서 변경 실패",
-        "기능 순서를 변경하는 중 오류가 발생했습니다."
+        t("feature.sequence_error_title"),
+        t("feature.sequence_error_desc")
       );
       // 에러 발생 시 원래 상태로 복원
       if (selectedUsecase) {
@@ -1992,8 +1998,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     } catch (error) {
       console.error("Error updating policy sequence:", error);
       showError(
-        "정책 순서 변경 실패",
-        "정책 순서를 변경하는 중 오류가 발생했습니다."
+        t("policy.sequence_error_title"),
+        t("policy.sequence_error_desc")
       );
       // 에러 발생 시 원래 상태로 복원
       if (selectedFeature) {
@@ -2056,8 +2062,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     } catch (err) {
       console.error("Error updating actor sequence:", err);
       showError(
-        "액터 순서 변경 실패",
-        "액터 순서를 변경하는 중 오류가 발생했습니다."
+        t("actor.sequence_error_title"),
+        t("actor.sequence_error_desc")
       );
       await loadActorsForProject(params.projectId);
     }

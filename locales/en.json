@@ -180,7 +180,7 @@
     "noFeatures": "No features in project yet.",
     "noFeaturesHint": "Please add features first.",
     "searchPlaceholder": "Search features...",
-    "searchResults": "{{term}} search results: {count}",
+    "searchResults": "{{term}} search results: {{count}}",
     "noSearchResults": "No search results found.",
     "clearSearch": "Clear search",
     "selectedFeatures": "Selected features",
@@ -417,7 +417,7 @@
     "inviting": "Inviting...",
     "send": "Send Invite",
     "success_title": "Invitation sent",
-    "success_message": "Invitation email has been sent to {email} for project {{project}}.\n(Actual implementation will use Supabase Admin API to send invites.)",
+    "success_message": "Invitation email has been sent to {{email}} for project {{project}}.\n(Actual implementation will use Supabase Admin API to send invites.)",
     "failure_title": "Invitation failed",
     "failure_message": "Failed to invite member. Please try again.",
     "api_unreachable": "Cannot connect to API server."
@@ -492,7 +492,15 @@
     "load_error_desc": "An error occurred while loading features.",
     "sequence_error_title": "Failed to Change Feature Order",
     "sequence_error_desc": "An error occurred while changing the feature order.",
-    "related_url_desc": "Add links to help members better understand the feature.\n- Figma link for visual understanding, etc."
+    "related_url_desc": "Add links to help members better understand the feature.\n- Figma link for visual understanding, etc.",
+    "related_links_label": "Related Links",
+    "add_link": "Add Link",
+    "remove_link": "Remove Link",
+    "url_placeholder": "Enter URL",
+    "usecase_suffix": " use case)",
+    "cancel": "Cancel",
+    "add": "Add",
+    "adding": "Adding..."
   },
   "placeholders": {
     "search_features": "Search by feature name...",

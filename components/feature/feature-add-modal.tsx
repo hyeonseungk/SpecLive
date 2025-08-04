@@ -43,7 +43,9 @@ export default function FeatureAddModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">기능 추가</h3>
+          <h3 className="text-lg font-semibold">
+            {t("feature.add_modal_title")}
+          </h3>
           <button
             onClick={onClose}
             disabled={saving}
@@ -55,10 +57,11 @@ export default function FeatureAddModal({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              기능 이름{" "}
+              {t("feature.name_label")}{" "}
               {selectedUsecaseName && (
                 <span className="text-xs text-gray-500 font-normal">
-                  ({selectedUsecaseName} 유즈케이스)
+                  ({selectedUsecaseName}
+                  {t("feature.usecase_suffix")}
                 </span>
               )}
             </label>
@@ -66,7 +69,7 @@ export default function FeatureAddModal({
               type="text"
               value={featureName}
               onChange={(e) => setFeatureName(e.target.value)}
-              placeholder="기능 이름을 입력하세요"
+              placeholder={t("feature.name_placeholder")}
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               disabled={saving}
             />
@@ -74,14 +77,16 @@ export default function FeatureAddModal({
           {/* 관련 링크 입력 */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium">관련 링크</label>
+              <label className="block text-sm font-medium">
+                {t("feature.related_links_label")}
+              </label>
               <button
                 type="button"
                 onClick={addLinkField}
                 disabled={saving}
                 className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-400"
               >
-                링크 추가
+                {t("feature.add_link")}
               </button>
             </div>
             <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
@@ -94,7 +99,7 @@ export default function FeatureAddModal({
                     type="url"
                     value={link}
                     onChange={(e) => updateLinkField(index, e.target.value)}
-                    placeholder="URL을 입력하세요"
+                    placeholder={t("feature.url_placeholder")}
                     className="flex-1 p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     disabled={saving}
                   />
@@ -104,7 +109,7 @@ export default function FeatureAddModal({
                       onClick={() => removeLinkField(index)}
                       disabled={saving}
                       className="px-2 py-1 text-red-600 hover:text-red-800 disabled:text-gray-400"
-                      title="링크 제거"
+                      title={t("feature.remove_link")}
                     >
                       ×
                     </button>
@@ -116,10 +121,10 @@ export default function FeatureAddModal({
         </div>
         <div className="flex justify-end gap-2 mt-6">
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            취소
+            {t("feature.cancel")}
           </Button>
           <Button onClick={onAdd} disabled={saving || !featureName.trim()}>
-            {saving ? "추가 중..." : "추가"}
+            {saving ? t("feature.adding") : t("feature.add")}
           </Button>
         </div>
       </div>
