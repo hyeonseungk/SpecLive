@@ -2219,13 +2219,13 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
         {/* 액터 및 유즈케이스 선택 영역 */}
         {
-          <div className="mb-6 p-6 bg-gray-200 rounded-lg">
+          <div
+            className={`mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg ${
+              isCollapsed ? "px-6 py-3" : "p-6"
+            }`}
+          >
             {selectedActor && selectedUsecase && (
-              <div
-                className={`flex items-center justify-between ${
-                  !isCollapsed ? "mb-2" : ""
-                }`}
-              >
+              <div className="flex items-center justify-between">
                 <span className="text-base font-semibold text-gray-800 flex items-center">
                   <span>{selectedActor?.name || ""}</span>
                   <ChevronRight className="w-4 h-4 mx-2 text-gray-800" />
@@ -2246,7 +2246,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </div>
             )}
             {!isCollapsed && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 mt-2">
                 {/* 액터 선택 */}
                 <div className="flex items-center justify-between">
                   <span className="text-base font-semibold text-gray-800">
@@ -2386,9 +2386,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </p>
             </div>
 
-            <div className="flex-1 grid grid-cols-4 gap-6 min-h-0">
+            <div className="flex-1 grid grid-cols-4 gap-6 min-h-0 h-full">
               {/* 좌측: 기능 목록 (1/4) */}
-              <div className="col-span-1 bg-gray-200 rounded-lg p-4 flex flex-col min-h-0">
+              <div className="col-span-1 bg-gray-100 border border-gray-300 rounded-lg p-4 flex flex-col min-h-0 h-full">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">{t("policy.features_header")}</h4>
                   {membership?.role === "admin" && (
@@ -2476,7 +2476,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
               </div>
 
               {/* 우측: 정책 목록 (3/4) */}
-              <div className="col-span-3 bg-gray-200 rounded-lg p-4 flex flex-col min-h-0">
+              <div className="col-span-3 bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col min-h-0 h-full">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">
                     {selectedFeature
