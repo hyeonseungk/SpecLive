@@ -390,7 +390,7 @@ export default function PolicyAddModal({
                     type="text"
                     value={glossarySearchTerm}
                     onChange={(e) => setGlossarySearchTerm(e.target.value)}
-                    placeholder="용어 이름이나 정의로 검색..."
+                    placeholder={t("placeholders.search_terms")}
                     className="w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     disabled={policySaving}
                   />
