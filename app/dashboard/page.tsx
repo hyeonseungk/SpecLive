@@ -33,8 +33,8 @@ export default function Dashboard() {
   const [showOrgCreateModal, setShowOrgCreateModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const t = useGlobalT();
-  const { globalLang } = useLangStore();
-  const locale = globalLang === "ko" ? "ko-KR" : "en-US";
+  const { lang } = useLangStore();
+  const locale = lang === "ko" ? "ko-KR" : "en-US";
   const router = useRouter();
 
   useEffect(() => {

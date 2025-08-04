@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 
 interface FeatureDeleteModalProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export default function FeatureDeleteModal({
   onDelete,
   deleting,
 }: FeatureDeleteModalProps) {
-  const t = useProjectT();
+  const t = useGlobalT();
   if (!isOpen) return null;
 
   return (

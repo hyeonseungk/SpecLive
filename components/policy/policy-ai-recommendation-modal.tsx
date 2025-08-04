@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
@@ -35,7 +35,7 @@ export default function PolicyAiRecommendationModal({
   onClose,
   onPoliciesAdded,
 }: PolicyAiRecommendationModalProps) {
-  const t = useProjectT();
+  const t = useGlobalT();
   const { lang } = useLangStore();
   const locale = lang === "ko" ? "ko-KR" : "en-US";
 

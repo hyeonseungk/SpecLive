@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 
 interface FeatureEditModalProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ export default function FeatureEditModal({
   saving,
   selectedUsecaseName,
 }: FeatureEditModalProps) {
-  const t = useProjectT();
+  const t = useGlobalT();
   if (!isOpen) return null;
 
   return (

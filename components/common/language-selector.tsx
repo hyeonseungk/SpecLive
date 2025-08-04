@@ -7,13 +7,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { Globe } from "lucide-react";
 
 export function LanguageSelector() {
-  const t = useGlobalT();
-  const { globalLang, setGlobalLanguage } = useLangStore();
+  const { lang, setLanguage } = useLangStore();
 
   const languages = [
     { code: "ko", name: "한국어" },
@@ -25,14 +23,14 @@ export function LanguageSelector() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Globe className="h-4 w-4" />
-          {languages.find((lang) => lang.code === globalLang)?.name}
+          {languages.find((language) => language.code === lang)?.name}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {languages.map((language) => (
           <DropdownMenuItem
             key={language.code}
-            onClick={() => setGlobalLanguage(language.code)}
+            onClick={() => setLanguage(language.code)}
           >
             {language.name}
           </DropdownMenuItem>

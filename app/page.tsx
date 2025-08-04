@@ -31,8 +31,8 @@ export default function Home() {
   const [isSignUp, setIsSignUp] = useState(false);
   const router = useRouter();
   const t = useGlobalT();
-  const { globalLang } = useLangStore();
-  const locale = globalLang === "ko" ? "ko-KR" : "en-US";
+  const { lang } = useLangStore();
+  const locale = lang === "ko" ? "ko-KR" : "en-US";
 
   useEffect(() => {
     const getSession = async () => {

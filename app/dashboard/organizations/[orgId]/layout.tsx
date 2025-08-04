@@ -4,7 +4,7 @@ import { LanguageSelector } from "@/components/common/language-selector";
 import { LogoutConfirmModal } from "@/components/common/logout-confirm-modal";
 import { OrganizationSelector } from "@/components/common/organization-selector";
 import { Button } from "@/components/ui/button";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import type { User } from "@supabase/supabase-js";
@@ -22,7 +22,7 @@ export default function OrganizationLayout({
   const [user, setUser] = useState<User | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const t = useProjectT();
+  const t = useGlobalT();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useParams();

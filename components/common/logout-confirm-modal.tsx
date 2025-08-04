@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 
 interface LogoutConfirmModalProps {
   isOpen: boolean;
@@ -24,7 +23,7 @@ export function LogoutConfirmModal({
   onClose,
   onConfirm,
 }: LogoutConfirmModalProps) {
-  const t = useProjectT();
+  const t = useGlobalT();
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -46,4 +45,4 @@ export function LogoutConfirmModal({
       </AlertDialogContent>
     </AlertDialog>
   );
-} 
+}

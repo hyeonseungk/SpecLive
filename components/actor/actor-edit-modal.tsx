@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 
 interface ActorEditModalProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ export default function ActorEditModal({
   onUpdate,
   saving,
 }: ActorEditModalProps) {
-  const t = useProjectT();
+  const t = useGlobalT();
 
   if (!isOpen) return null;
 

@@ -15,12 +15,10 @@ function getInitialLanguage(): LangCode {
     return "ko";
   }
 
-  // localStorage에서 저장된 전체 언어 설정 확인
-  const storedGlobalLang = localStorage.getItem(
-    "global_lang"
-  ) as LangCode | null;
-  if (storedGlobalLang === "en" || storedGlobalLang === "ko") {
-    return storedGlobalLang;
+  // localStorage에서 저장된 언어 설정 확인
+  const storedLang = localStorage.getItem("lang") as LangCode | null;
+  if (storedLang === "en" || storedLang === "ko") {
+    return storedLang;
   }
 
   // 브라우저 언어 기반 추론
@@ -35,34 +33,14 @@ function getInitialLanguage(): LangCode {
   return "ko";
 }
 
-// 프로젝트별 언어 설정을 위한 함수
-function getProjectLanguage(): LangCode {
-  // 서버 사이드에서는 기본값 반환
-  if (typeof window === "undefined") {
-    return "ko";
-  }
-
-  const stored = localStorage.getItem("lang") as LangCode | null;
-  if (stored === "en" || stored === "ko") {
-    return stored;
-  }
-
-  // 프로젝트별 설정이 없으면 전체 언어 설정 사용
-  return getInitialLanguage();
-}
-
 interface LangState {
   lang: LangCode;
   locale: LocaleCode;
   setLanguage: (code: LangCode) => void;
-  // 전체 언어 설정 (프로젝트 진입 전 화면용)
-  globalLang: LangCode;
-  setGlobalLanguage: (code: LangCode) => void;
 }
 
 export const useLangStore = create<LangState>((set) => {
-  const initialGlobalLang = getInitialLanguage();
-  const initialLang = getProjectLanguage();
+  const initialLang = getInitialLanguage();
 
   return {
     lang: initialLang,
@@ -73,14 +51,6 @@ export const useLangStore = create<LangState>((set) => {
         document.documentElement.lang = code;
       }
       set({ lang: code, locale: languageMap[code] });
-    },
-    globalLang: initialGlobalLang,
-    setGlobalLanguage: (code) => {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("global_lang", code);
-        document.documentElement.lang = code;
-      }
-      set({ globalLang: code });
     },
   };
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { Tables } from "@/types/database";
 import { useSortable } from "@dnd-kit/sortable";
@@ -57,7 +57,7 @@ export default function SortablePolicyCard({
   membership,
   onGlossaryClick,
 }: SortablePolicyCardProps) {
-  const t = useProjectT();
+  const t = useGlobalT();
   const {
     attributes,
     listeners,

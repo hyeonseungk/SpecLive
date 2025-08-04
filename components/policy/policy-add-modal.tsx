@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { ChevronRight } from "lucide-react";
 import { useMemo } from "react";
 
@@ -88,7 +88,7 @@ export default function PolicyAddModal({
   selectedGlossaryIds,
   handleGlossaryToggle,
 }: PolicyAddModalProps) {
-  const t = useProjectT();
+  const t = useGlobalT();
   const filteredFeatures = useMemo(() => {
     if (!featureSearchTerm.trim()) return allFeatures;
     const term = featureSearchTerm.toLowerCase().trim();
@@ -246,7 +246,8 @@ export default function PolicyAddModal({
               <div className="mt-3 p-3 bg-blue-50 rounded-md border">
                 <p className="text-sm font-medium text-gray-700 mb-2">
                   {t("policyAddModal.selectedFeatures")} (
-                  {selectedFeatureIds.length}{t("dashboard.count_unit")}):
+                  {selectedFeatureIds.length}
+                  {t("dashboard.count_unit")}):
                 </p>
                 <div className="space-y-1">
                   {selectedFeatureIds.map((id) => {

@@ -1,10 +1,10 @@
 "use client";
 
+import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import GlossaryAddModal from "@/components/glossary/glossary-add-modal";
 import GlossaryAiRecommendationModal from "@/components/glossary/glossary-ai-recommendation-modal";
 import GlossaryEditModal from "@/components/glossary/glossary-edit-modal";
 import SortableGlossaryCard from "@/components/glossary/sortable-glossary-card";
-import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { showError } from "@/lib/error-store";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
@@ -81,7 +81,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     useState(false);
 
   // 추가: 다국어 지원 훅
-  const t = useProjectT();
+  const t = useGlobalT();
   const { lang } = useLangStore();
   const locale = lang === "ko" ? "ko-KR" : "en-US";
 

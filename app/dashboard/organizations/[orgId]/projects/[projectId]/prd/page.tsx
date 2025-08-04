@@ -5,7 +5,7 @@ import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError } from "@/lib/error-store";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
@@ -41,7 +41,7 @@ export default function PrdPage({ params }: PrdPageProps) {
   const [prdLoading, setPrdLoading] = useState(false);
   const [prdSaving, setPrdSaving] = useState(false);
 
-  const t = useProjectT();
+  const t = useGlobalT();
   const { lang } = useLangStore();
   const locale = lang === "ko" ? "ko-KR" : "en-US";
 

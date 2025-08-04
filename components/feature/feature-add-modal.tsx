@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { useEffect } from "react";
 
 interface FeatureAddModalProps {
@@ -31,7 +31,7 @@ export default function FeatureAddModal({
   saving,
   selectedUsecaseName,
 }: FeatureAddModalProps) {
-  const t = useProjectT();
+  const t = useGlobalT();
   useEffect(() => {
     if (isOpen && featureLinks.length === 0) {
       addLinkField();

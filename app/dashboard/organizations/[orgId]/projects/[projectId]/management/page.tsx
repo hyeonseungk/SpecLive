@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase-browser";
-import { Tables } from "@/types/database";
+import { MemberInviteModal } from "@/components/common/member-invite-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { showError, showSimpleError } from "@/lib/error-store";
+import { useGlobalT } from "@/lib/i18n";
 import { showSimpleSuccess } from "@/lib/success-store";
-import { useProjectT } from "@/lib/i18n";
-import { MemberInviteModal } from "@/components/common/member-invite-modal";
+import { supabase } from "@/lib/supabase-browser";
+import { Tables } from "@/types/database";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type User = {
   id: string;
@@ -32,7 +31,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const [membership, setMembership] = useState<Membership | null>(null);
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const t = useProjectT();
+  const t = useGlobalT();
 
   const router = useRouter();
 

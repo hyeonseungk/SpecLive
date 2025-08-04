@@ -11,15 +11,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { globalLang } = useLangStore();
+  const { lang } = useLangStore();
 
   useEffect(() => {
     // 전체 언어 설정에 따라 HTML lang 속성 설정
-    document.documentElement.lang = globalLang;
-  }, [globalLang]);
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   return (
-    <html lang={globalLang} suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"

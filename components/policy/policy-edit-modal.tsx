@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useProjectT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -131,7 +131,7 @@ export default function PolicyEditModal({
   editSelectedGlossaryIds,
   handleEditGlossaryToggle,
 }: PolicyEditModalProps) {
-  const t = useProjectT();
+  const t = useGlobalT();
   /* 필터링 */
   const filteredFeatures = useMemo(() => {
     if (!editFeatureSearchTerm.trim()) return allFeatures;
@@ -266,7 +266,8 @@ export default function PolicyEditModal({
               <div className="mt-3 p-3 bg-blue-50 rounded-md border">
                 <p className="text-sm font-medium text-gray-700 mb-2">
                   {t("policyAddModal.selectedFeatures")} (
-                  {editSelectedFeatureIds.length}{t("dashboard.count_unit")}):
+                  {editSelectedFeatureIds.length}
+                  {t("dashboard.count_unit")}):
                 </p>
                 <div className="space-y-1">
                   {editSelectedFeatureIds.map((id) => {

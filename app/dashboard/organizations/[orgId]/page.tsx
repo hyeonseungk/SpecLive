@@ -34,8 +34,8 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
   const [loading, setLoading] = useState(true);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const t = useGlobalT();
-  const { globalLang } = useLangStore();
-  const locale = globalLang === "ko" ? "ko-KR" : "en-US";
+  const { lang } = useLangStore();
+  const locale = lang === "ko" ? "ko-KR" : "en-US";
   const router = useRouter();
 
   useEffect(() => {
