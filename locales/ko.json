@@ -9,7 +9,7 @@
     "unknown_error": "알 수 없는 오류가 발생했습니다.",
     "connection_error": "연결이 중단되었습니다. 다시 시도해주세요.",
     "streaming_error": "스트리밍 중 연결이 끊어졌습니다.",
-    "brand": "UbiLang",
+    "brand": "SpecLive",
     "edit": "편집",
     "copy_link": "링크 복사",
     "link_copied": "링크가 복사되었습니다.",
@@ -56,7 +56,7 @@
   },
   "dashboard": {
     "welcome": "환영합니다!",
-    "intro_line1": "UbiLang을 시작하려면 먼저 조직을 만들어주세요.",
+    "intro_line1": "SpecLive를 시작하려면 먼저 조직을 만들어주세요.",
     "intro_line2": "조직 안에서 여러 프로젝트를 생성하고 프로젝트 별로 용어와 정책을 관리할 수 있습니다.",
     "create_org_button": "새 조직 만들기",
     "after_title": "조직을 만든 후에는:",

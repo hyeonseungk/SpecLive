@@ -1,6 +1,6 @@
 {
   "common": {
-    "brand": "UbiLang",
+    "brand": "SpecLive",
     "logout": "Logout",
     "language": "Language",
     "no_access": "No access rights",
@@ -367,7 +367,7 @@
   },
   "dashboard": {
     "welcome": "Welcome!",
-    "intro_line1": "To get started with UbiLang, please create an organization first.",
+    "intro_line1": "To get started with SpecLive, please create an organization first.",
     "intro_line2": "Inside an organization you can create multiple projects and manage terms & policies per project.",
     "create_org_button": "Create Organization",
     "after_title": "After creating an organization:",

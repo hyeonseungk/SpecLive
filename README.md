@@ -1,10 +1,10 @@
-# UbiLang
+# SpecLive
 
 전사 용어·정책 관리 SaaS 플랫폼
 
 ## 개요
 
-UbiLang은 전사 구성원들이 동일한 언어로 소통할 수 있도록, 조직 내에서 사용하는 용어(Glossary)와 정책(Policy)을 구조화하여 한곳에서 관리하는 SaaS입니다.
+SpecLive는 전사 구성원들이 동일한 언어로 소통할 수 있도록, 조직 내에서 사용하는 용어(Glossary)와 정책(Policy)을 구조화하여 한곳에서 관리하는 SaaS입니다.
 
 ## 기술 스택
 
