@@ -211,6 +211,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [deletingPolicy, setDeletingPolicy] = useState<FeaturePolicy | null>(
     null
   );
+
   // 기능과 정책 관련 상태
   const [features, setFeatures] = useState<Feature[]>([]);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
@@ -1751,7 +1752,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       // 삭제할 기능들 (기존에 있었지만 새로운 선택에서 제외된 것들)
       const featuresToRemove = existingFeatureIds.filter(
-        (featureId) => !editSelectedFeatureIds.includes(featureId)
+        (featureId) => featureId && !editSelectedFeatureIds.includes(featureId)
       );
 
       // 추가할 기능들 (새로 선택된 것들)
@@ -1795,12 +1796,39 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         if (featurePolicyError) throw featurePolicyError;
       }
 
-      // 7. 정책 목록 새로고침
-      if (selectedFeature && selectedFeature.id) {
-        await loadPoliciesForTheFeature(selectedFeature.id);
-      }
+      // 7. 수정된 정책 데이터를 다시 조회하여 로컬 상태 업데이트
+      const { data: updatedPolicy, error: fetchUpdatedError } = await supabase
+        .from("policies")
+        .select(
+          `
+          *,
+          policy_links (id, url, type),
+          policy_terms (
+            glossary_id,
+            glossaries (name)
+          )
+        `
+        )
+        .eq("id", editingPolicy.id)
+        .single();
 
-      // 8. 모달 초기화 및 닫기
+      if (fetchUpdatedError) throw fetchUpdatedError;
+
+      // 기존 정책 목록에서 해당 정책만 업데이트 (전체 리로드 없이)
+      setFeaturePolicies((prev) =>
+        prev.map((p) => {
+          if (p.id === editingPolicy.id) {
+            // FeaturePolicy 타입에 맞게 sequence 정보 유지
+            return {
+              ...updatedPolicy,
+              sequence: p.sequence, // 기존 sequence 유지
+            } as FeaturePolicy;
+          }
+          return p;
+        })
+      );
+
+      // 9. 모달 초기화 및 닫기
       setShowEditPolicyModal(false);
       setEditingPolicy(null);
       setEditPolicyContents("");
