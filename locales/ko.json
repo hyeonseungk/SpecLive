@@ -1,6 +1,9 @@
 {
   "common": {
     "logout": "로그아웃",
+    "logoutConfirmTitle": "로그아웃 확인",
+    "logoutConfirmMessage": "정말로 로그아웃하시겠어요?",
+    "cancel": "취소",
     "language": "언어",
     "no_access": "접근 권한이 없습니다",
     "loading": "로딩 중...",

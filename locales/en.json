@@ -2,6 +2,9 @@
   "common": {
     "brand": "SpecLive",
     "logout": "Logout",
+    "logoutConfirmTitle": "Confirm Logout",
+    "logoutConfirmMessage": "Are you sure you want to logout?",
+    "cancel": "Cancel",
     "language": "Language",
     "no_access": "No access rights",
     "loading": "Loading...",

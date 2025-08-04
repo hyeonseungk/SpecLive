@@ -1,12 +1,14 @@
 "use client";
 
 import { LanguageSelector } from "@/components/common/language-selector";
+import { LogoutConfirmModal } from "@/components/common/logout-confirm-modal";
 import { OrganizationSelector } from "@/components/common/organization-selector";
 import { Button } from "@/components/ui/button";
 import { useProjectT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import type { User } from "@supabase/supabase-js";
+import { LogOut } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -19,6 +21,7 @@ export default function OrganizationLayout({
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const t = useProjectT();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -64,6 +67,15 @@ export default function OrganizationLayout({
     router.push("/");
   };
 
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    setShowLogoutModal(false);
+    await handleSignOut();
+  };
+
   if (loading) {
     return (
       <div className="h-full bg-background">
@@ -96,8 +108,13 @@ export default function OrganizationLayout({
           <div className="flex items-center gap-6">
             <span className="text-sm text-muted-foreground">{user?.email}</span>
             <LanguageSelector />
-            <Button variant="outline" onClick={handleSignOut}>
-              {t("common.logout")}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleLogoutClick}
+              className="h-9 w-9"
+            >
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -105,6 +122,13 @@ export default function OrganizationLayout({
 
       {/* 메인 콘텐츠 */}
       <main className="flex-1">{children}</main>
+
+      {/* 로그아웃 확인 모달 */}
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogoutConfirm}
+      />
     </div>
   );
 }

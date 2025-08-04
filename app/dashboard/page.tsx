@@ -2,6 +2,7 @@
 
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { LanguageSelector } from "@/components/common/language-selector";
+import { LogoutConfirmModal } from "@/components/common/logout-confirm-modal";
 import { OrganizationCreateModal } from "@/components/common/organization-create-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import supabase from "@/lib/supabase-browser";
 import type { Tables } from "@/types/database";
 import { formatDateWithSuffix } from "@/utils/date-format";
 import type { User } from "@supabase/supabase-js";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -29,6 +31,7 @@ export default function Dashboard() {
   );
   const [loading, setLoading] = useState(true);
   const [showOrgCreateModal, setShowOrgCreateModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const t = useGlobalT();
   const { globalLang } = useLangStore();
   const locale = globalLang === "ko" ? "ko-KR" : "en-US";
@@ -162,6 +165,15 @@ export default function Dashboard() {
     router.push("/");
   };
 
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    setShowLogoutModal(false);
+    await handleSignOut();
+  };
+
   const handleModalSuccess = () => {
     if (user) {
       loadUserOrganizations(user.id);
@@ -182,8 +194,13 @@ export default function Dashboard() {
           <div className="flex items-center gap-4">
             <LanguageSelector />
             <span className="text-sm text-muted-foreground">{user?.email}</span>
-            <Button variant="outline" onClick={handleSignOut}>
-              {t("common.logout")}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleLogoutClick}
+              className="h-9 w-9"
+            >
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -305,6 +322,13 @@ export default function Dashboard() {
           user={user}
         />
       )}
+
+      {/* 로그아웃 확인 모달 */}
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogoutConfirm}
+      />
     </div>
   );
 }
