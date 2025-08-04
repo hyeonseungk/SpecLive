@@ -404,7 +404,14 @@
     "have_account": "Already have an account?",
     "no_account": "Don't have an account?",
     "signup_complete_title": "Sign up completed",
-    "signup_complete_desc": "Sign up completed.\nPlease check your email to verify."
+    "signup_complete_desc": "Sign up completed.\nPlease check your email to verify.",
+    "invalid_credentials": "Invalid email or password.",
+    "login_failed": "Login failed.",
+    "signup_failed": "Sign up failed.",
+    "email_already_exists": "Email already exists.",
+    "weak_password": "Password is too weak.",
+    "invalid_email": "Invalid email format.",
+    "email_not_confirmed": "Email not confirmed. Please check your email."
   },
   "lang": {
     "english": "English",

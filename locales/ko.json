@@ -37,7 +37,14 @@
     "have_account": "이미 계정이 있으신가요?",
     "no_account": "계정이 없으신가요?",
     "signup_complete_title": "회원가입 완료",
-    "signup_complete_desc": "회원가입이 완료되었습니다.\n이메일을 확인해서 인증을 완료해주세요"
+    "signup_complete_desc": "회원가입이 완료되었습니다.\n이메일을 확인해서 인증을 완료해주세요",
+    "invalid_credentials": "이메일 또는 비밀번호가 올바르지 않습니다.",
+    "login_failed": "로그인에 실패했습니다.",
+    "signup_failed": "회원가입에 실패했습니다.",
+    "email_already_exists": "이미 등록된 이메일입니다.",
+    "weak_password": "비밀번호가 너무 약합니다.",
+    "invalid_email": "올바르지 않은 이메일 형식입니다.",
+    "email_not_confirmed": "이메일 인증이 완료되지 않았습니다. 이메일을 확인해주세요."
   },
   "org": {
     "not_found": "조직을 찾을 수 없습니다...",

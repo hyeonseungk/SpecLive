@@ -1,17 +1,25 @@
 "use client";
 
-import type { Metadata } from "next";
-import "./globals.css";
 import { ErrorModal } from "@/components/common/error-modal";
 import { SuccessModal } from "@/components/common/success-modal";
+import { useLangStore } from "@/lib/i18n-store";
+import { useEffect } from "react";
+import "./globals.css";
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { globalLang } = useLangStore();
+
+  useEffect(() => {
+    // 전체 언어 설정에 따라 HTML lang 속성 설정
+    document.documentElement.lang = globalLang;
+  }, [globalLang]);
+
   return (
-    <html lang="ko">
+    <html lang={globalLang}>
       <head>
         <link
           rel="stylesheet"

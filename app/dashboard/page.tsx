@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FullScreenLoading } from "@/components/common/full-screen-loading";
+import { LanguageSelector } from "@/components/common/language-selector";
+import { OrganizationCreateModal } from "@/components/common/organization-create-modal";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,14 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n";
+import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { FullScreenLoading } from "@/components/common/full-screen-loading";
-import { OrganizationCreateModal } from "@/components/common/organization-create-modal";
 import supabase from "@/lib/supabase-browser";
-import type { User } from "@supabase/supabase-js";
 import type { Tables } from "@/types/database";
+import type { User } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type Organization = Tables<"organizations">;
 
@@ -33,7 +34,7 @@ export default function Dashboard() {
   );
   const [loading, setLoading] = useState(true);
   const [showOrgCreateModal, setShowOrgCreateModal] = useState(false);
-  const t = useT();
+  const t = useGlobalT();
   const { locale } = useLangStore();
   const router = useRouter();
 
@@ -147,7 +148,8 @@ export default function Dashboard() {
         if (a.isOwner && !b.isOwner) return -1;
         if (!a.isOwner && b.isOwner) return 1;
         return (
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          new Date(b.created_at || "").getTime() -
+          new Date(a.created_at || "").getTime()
         );
       });
 
@@ -182,6 +184,7 @@ export default function Dashboard() {
             <h1 className="text-2xl font-bold">{t("common.brand")}</h1>
           </div>
           <div className="flex items-center gap-4">
+            <LanguageSelector />
             <span className="text-sm text-muted-foreground">{user?.email}</span>
             <Button variant="outline" onClick={handleSignOut}>
               {t("common.logout")}
@@ -272,7 +275,9 @@ export default function Dashboard() {
                       )}
                     </CardTitle>
                     <CardDescription>
-                      {new Date(org.created_at).toLocaleDateString(locale)}{" "}
+                      {org.created_at
+                        ? new Date(org.created_at).toLocaleDateString(locale)
+                        : ""}{" "}
                       {t("dashboard.created_suffix")}
                     </CardDescription>
                   </CardHeader>

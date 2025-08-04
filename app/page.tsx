@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { FullScreenLoading } from "@/components/common/full-screen-loading";
+import { LanguageSelector } from "@/components/common/language-selector";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,15 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useT } from "@/lib/i18n";
-import { useLangStore } from "@/lib/i18n-store";
-import { FullScreenLoading } from "@/components/common/full-screen-loading";
-import supabase from "@/lib/supabase-browser";
 import { showError, showSimpleError } from "@/lib/error-store";
+import { useGlobalT } from "@/lib/i18n";
+import { useLangStore } from "@/lib/i18n-store";
 import { showSuccess } from "@/lib/success-store";
+import supabase from "@/lib/supabase-browser";
 import type { User } from "@supabase/supabase-js";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -29,7 +30,7 @@ export default function Home() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const router = useRouter();
-  const t = useT();
+  const t = useGlobalT();
   const { locale } = useLangStore();
 
   useEffect(() => {
@@ -101,9 +102,26 @@ export default function Home() {
         if (error) throw error;
       }
     } catch (error) {
-      showSimpleError(
-        error instanceof Error ? error.message : t("common.error_generic")
-      );
+      let errorMessage = t("common.error_generic");
+      
+      if (error instanceof Error) {
+        // Supabase 에러 메시지를 다국어로 처리
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = t("auth.invalid_credentials");
+        } else if (error.message.includes("Email not confirmed")) {
+          errorMessage = t("auth.email_not_confirmed");
+        } else if (error.message.includes("User already registered")) {
+          errorMessage = t("auth.email_already_exists");
+        } else if (error.message.includes("Password should be at least")) {
+          errorMessage = t("auth.weak_password");
+        } else if (error.message.includes("Invalid email")) {
+          errorMessage = t("auth.invalid_email");
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      showSimpleError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -125,6 +143,11 @@ export default function Home() {
           className="opacity-20 blur-sm"
           priority
         />
+      </div>
+
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSelector />
       </div>
 
       {/* Content */}
