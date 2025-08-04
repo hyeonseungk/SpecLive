@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 interface FeatureDeleteModalProps {
   isOpen: boolean;
@@ -17,13 +18,16 @@ export default function FeatureDeleteModal({
   onDelete,
   deleting,
 }: FeatureDeleteModalProps) {
+  const t = useT();
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">기능 삭제</h3>
+          <h3 className="text-lg font-semibold">
+            {t("feature.delete_modal_title")}
+          </h3>
           <button
             onClick={onClose}
             disabled={deleting}
@@ -33,20 +37,21 @@ export default function FeatureDeleteModal({
           </button>
         </div>
         <p className="text-muted-foreground mb-6">
-          정말로 &quot;{featureName}&quot; 기능을 삭제하시겠어요?
+          {t("feature.delete_confirm_message").replace(
+            "{featureName}",
+            featureName
+          )}
           <br />
-          <span className="text-sm text-red-600">
-            삭제된 기능은 복구할 수 없습니다.
-            <br />
-            기능 내의 정책들도 모두 삭제됩니다.
+          <span className="text-sm text-red-600 whitespace-pre-line">
+            {t("feature.delete_warning")}
           </span>
         </p>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose} disabled={deleting}>
-            취소
+            {t("feature.cancel")}
           </Button>
           <Button variant="destructive" onClick={onDelete} disabled={deleting}>
-            {deleting ? "삭제 중..." : "삭제"}
+            {deleting ? t("feature.deleting") : t("feature.delete")}
           </Button>
         </div>
       </div>

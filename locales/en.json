@@ -500,7 +500,14 @@
     "usecase_suffix": " use case)",
     "cancel": "Cancel",
     "add": "Add",
-    "adding": "Adding..."
+    "adding": "Adding...",
+    "update": "Update",
+    "updating": "Updating...",
+    "name_label_simple": "Feature Name",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "delete_confirm_message": "Are you sure you want to delete the \"{featureName}\" feature?",
+    "delete_warning": "Deleted features cannot be recovered.\nAll policies within the feature will also be deleted."
   },
   "placeholders": {
     "search_features": "Search by feature name...",
