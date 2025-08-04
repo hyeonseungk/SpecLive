@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
+import { ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
 interface Feature {
@@ -239,7 +240,7 @@ export default function PolicyEditModal({
                   {filteredFeatures.map((feature) => (
                     <label
                       key={feature.id}
-                      className="flex items-start gap-2 p-2 hover:bg-white rounded cursor-pointer"
+                      className="flex items-start gap-2 p-2 hover:bg-white rounded cursor-pointer items-center py-1"
                     >
                       <input
                         type="checkbox"
@@ -249,9 +250,12 @@ export default function PolicyEditModal({
                         className="mt-0.5 flex-shrink-0"
                       />
                       <div className="min-w-0 flex-1">
-                        <span className="text-sm font-medium block">
-                          {feature.usecase.actor.name} &gt;{" "}
-                          {feature.usecase.name} &gt; {feature.name}
+                        <span className="text-sm font-medium inline-flex items-center">
+                          {feature.usecase.actor.name}
+                          <ChevronRight className="w-3 h-3 mx-1 text-gray-500" />
+                          {feature.usecase.name}
+                          <ChevronRight className="w-3 h-3 mx-1 text-gray-500" />
+                          {feature.name}
                         </span>
                       </div>
                     </label>
