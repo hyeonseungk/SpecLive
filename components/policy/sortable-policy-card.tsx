@@ -152,12 +152,12 @@ export default function SortablePolicyCard({
             <h5 className="text-xs font-medium text-gray-700 mb-1">
               {t("sortablePolicyCard.connectedFeatures")}
             </h5>
-            <div className="space-y-1">
+            <div className="flex flex-col space-y-1">
               {policy.connected_features.map((feature) => (
                 <a
                   key={feature.id}
                   href={`?actorId=${feature.usecase.actor_id}&usecaseId=${feature.usecase.id}&featureId=${feature.id}`}
-                  className="group block text-xs text-blue-600"
+                  className="group w-fit inline-block text-xs text-blue-600"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <span className="inline-flex items-center border-b border-transparent group-hover:border-blue-600">
