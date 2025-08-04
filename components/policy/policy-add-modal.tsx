@@ -316,7 +316,7 @@ export default function PolicyAddModal({
             ))}
           </div>
 
-          {/* 일반 링크들 */}
+          {/* 관련 링크들 */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium">
