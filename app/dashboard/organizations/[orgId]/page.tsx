@@ -2,6 +2,7 @@
 
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { ProjectCreateModal } from "@/components/common/project-create-modal";
+import ProjectEditModal from "@/components/common/project-edit-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGlobalT } from "@/lib/i18n";
@@ -33,6 +34,9 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
     useState<Tables<"memberships"> | null>(null);
   const [loading, setLoading] = useState(true);
   const [showProjectModal, setShowProjectModal] = useState(false);
+  const [showProjectEditModal, setShowProjectEditModal] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editMode, setEditMode] = useState<"edit" | "delete">("edit");
   const t = useGlobalT();
   const { lang } = useLangStore();
   const locale = lang;
@@ -115,6 +119,23 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
     }
   };
 
+  const handleProjectEdit = (project: Project) => {
+    setEditingProject(project);
+    setEditMode("edit");
+    setShowProjectEditModal(true);
+  };
+
+  const handleProjectDelete = (project: Project) => {
+    setEditingProject(project);
+    setEditMode("delete");
+    setShowProjectEditModal(true);
+  };
+
+  const handleProjectEditClose = () => {
+    setShowProjectEditModal(false);
+    setEditingProject(null);
+  };
+
   if (loading) {
     return <FullScreenLoading message={t("common.loading")} />;
   }
@@ -175,7 +196,7 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
               {projects.map((project) => (
                 <Card
                   key={project.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className="group relative cursor-pointer hover:shadow-md transition-shadow"
                   onClick={() =>
                     router.push(
                       `/dashboard/organizations/${params.orgId}/projects/${project.id}`
@@ -190,11 +211,62 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
                         </div>
                         {project.name}
                       </div>
-                      {userMembership?.role === "admin" && (
-                        <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
-                          {t("org.admin_role")}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {userMembership?.role === "admin" && (
+                          <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
+                            {t("org.admin_role")}
+                          </span>
+                        )}
+                        {/* Edit/Delete buttons (visible on hover, admin only) */}
+                        {userMembership?.role === "admin" && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleProjectEdit(project);
+                              }}
+                              className="p-1 hover:bg-gray-200 rounded transition-colors"
+                              title="프로젝트 이름 수정"
+                            >
+                              <svg
+                                className="w-3 h-3 text-gray-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleProjectDelete(project);
+                              }}
+                              className="p-1 hover:bg-red-100 rounded transition-colors"
+                              title="프로젝트 삭제"
+                            >
+                              <svg
+                                className="w-3 h-3 text-red-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -225,6 +297,15 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
           organizationId={params.orgId}
         />
       )}
+
+      {/* 프로젝트 편집/삭제 모달 */}
+      <ProjectEditModal
+        isOpen={showProjectEditModal}
+        onClose={handleProjectEditClose}
+        onSuccess={handleModalSuccess}
+        project={editingProject}
+        mode={editMode}
+      />
     </div>
   );
 }

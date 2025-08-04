@@ -1,0 +1,165 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { showError, showSimpleError } from "@/lib/error-store";
+import { useGlobalT } from "@/lib/i18n";
+import { showSuccess } from "@/lib/success-store";
+import supabase from "@/lib/supabase-browser";
+import type { Tables } from "@/types/database";
+import { useState } from "react";
+
+interface ProjectEditModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  project:
+    | (Tables<"projects"> & {
+        memberships: Tables<"memberships">[];
+      })
+    | null;
+  mode: "edit" | "delete";
+}
+
+export default function ProjectEditModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  project,
+  mode,
+}: ProjectEditModalProps) {
+  const [name, setName] = useState(project?.name || "");
+  const [loading, setLoading] = useState(false);
+  const t = useGlobalT();
+
+  if (!isOpen || !project) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (mode === "edit") {
+      if (!name.trim()) {
+        showSimpleError("프로젝트 이름을 입력해주세요.");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const { error } = await supabase
+          .from("projects")
+          .update({ name: name.trim() })
+          .eq("id", project.id);
+
+        if (error) throw error;
+
+        showSuccess("프로젝트 이름이 수정되었습니다.");
+        onSuccess();
+        onClose();
+      } catch (error) {
+        console.error("Error updating project:", error);
+        showError("프로젝트 수정 중 오류가 발생했습니다.", error);
+      } finally {
+        setLoading(false);
+      }
+    } else if (mode === "delete") {
+      setLoading(true);
+      try {
+        // 먼저 해당 프로젝트의 모든 멤버십을 삭제
+        const { error: membershipsError } = await supabase
+          .from("memberships")
+          .delete()
+          .eq("project_id", project.id);
+
+        if (membershipsError) throw membershipsError;
+
+        // 그 다음 프로젝트를 삭제
+        const { error: projectError } = await supabase
+          .from("projects")
+          .delete()
+          .eq("id", project.id);
+
+        if (projectError) throw projectError;
+
+        showSuccess("프로젝트가 삭제되었습니다.");
+        onSuccess();
+        onClose();
+      } catch (error) {
+        console.error("Error deleting project:", error);
+        showError("프로젝트 삭제 중 오류가 발생했습니다.", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <Card className="w-full max-w-md mx-4">
+        <CardHeader>
+          <CardTitle>
+            {mode === "edit" ? "프로젝트 이름 수정" : "프로젝트 삭제"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {mode === "edit" ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  프로젝트 이름
+                </label>
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="프로젝트 이름을 입력하세요"
+                  disabled={loading}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={loading}
+                >
+                  취소
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? "수정 중..." : "수정"}
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                <strong>{project.name}</strong> 프로젝트를 삭제하시겠습니까?
+              </p>
+              <p className="text-xs text-red-600">
+                ⚠️ 이 작업은 되돌릴 수 없습니다. 프로젝트와 관련된 모든 데이터가
+                함께 삭제됩니다.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={loading}
+                >
+                  취소
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                >
+                  {loading ? "삭제 중..." : "삭제"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
