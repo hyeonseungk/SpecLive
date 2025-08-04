@@ -177,7 +177,7 @@ export default function SortablePolicyCard({
         <div
           className={`mb-3 pr-8 ${membership?.role === "admin" ? "ml-8" : ""}`}
         >
-          <p className="text-2xl font-medium text-black whitespace-pre-line">
+          <p className="text-xl font-medium text-black whitespace-pre-line">
             {policy.contents}
           </p>
         </div>
