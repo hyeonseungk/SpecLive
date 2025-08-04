@@ -5,6 +5,7 @@ import ActorDeleteModal from "@/components/actor/actor-delete-modal";
 import ActorEditModal from "@/components/actor/actor-edit-modal";
 import SortableActorCard from "@/components/actor/sortable-actor-card";
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
+import TermExplanationModal from "@/components/common/term-explanation-modal";
 import FeatureAddModal from "@/components/feature/feature-add-modal";
 import FeatureAiRecommendationModal from "@/components/feature/feature-ai-recommendation-modal";
 import FeatureDeleteModal from "@/components/feature/feature-delete-modal";
@@ -43,7 +44,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, HelpCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -237,6 +238,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const [viewingGlossaryId, setViewingGlossaryId] = useState<string | null>(
     null
   );
+
+  // term explanation modal state
+  const [showTermExplanationModal, setShowTermExplanationModal] =
+    useState(false);
 
   // 모든 기능 관련 상태 (정책 모달용)
   const [allFeatures, setAllFeatures] = useState<
@@ -2288,9 +2293,22 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       {/* 고정 영역: 헤더와 액터/유즈케이스 선택 */}
       <div className="flex-shrink-0 p-6 pb-0">
         {/* 헤더 영역 */}
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold mb-2">{t("policy.header")}</h2>
-          <p className="text-muted-foreground">{t("policy.sub")}</p>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold mb-2">{t("policy.header")}</h2>
+            <p className="text-muted-foreground">{t("policy.sub")}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+              <HelpCircle className="w-4 h-4 text-blue-600" />
+            </div>
+            <button
+              onClick={() => setShowTermExplanationModal(true)}
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
+            >
+              용어 설명
+            </button>
+          </div>
         </div>
 
         {/* 액터 및 유즈케이스 선택 영역 */}
@@ -2976,6 +2994,12 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         }}
         onDelete={deleteUsecase}
         deleting={usecaseDeleting}
+      />
+
+      {/* 용어 설명 모달 */}
+      <TermExplanationModal
+        isOpen={showTermExplanationModal}
+        onClose={() => setShowTermExplanationModal(false)}
       />
     </div>
   );
