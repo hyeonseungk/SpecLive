@@ -16,17 +16,15 @@ function getNested(obj: any, path: string[]): string | undefined {
 
 export function useT() {
   const { lang, globalLang } = useLangStore();
-  
+
   // 프로젝트별 언어 설정이 있으면 그것을 사용, 없으면 전체 언어 설정 사용
   const currentLang = lang || globalLang;
-  
-  return (
-    key: string,
-    vars?: Record<string, string | number>
-  ): string => {
+
+  return (key: string, vars?: Record<string, string | number>): string => {
     const parts = key.split(".");
     const res =
-      getNested(resources[currentLang], parts) || getNested(resources["en"], parts);
+      getNested(resources[currentLang], parts) ||
+      getNested(resources["en"], parts);
     let str = typeof res === "string" ? res : key;
     if (vars && typeof str === "string") {
       for (const [varKey, value] of Object.entries(vars)) {
@@ -43,14 +41,12 @@ export function useT() {
 // 전체 언어 설정용 훅 (프로젝트 진입 전 화면에서 사용)
 export function useGlobalT() {
   const { globalLang } = useLangStore();
-  
-  return (
-    key: string,
-    vars?: Record<string, string | number>
-  ): string => {
+
+  return (key: string, vars?: Record<string, string | number>): string => {
     const parts = key.split(".");
     const res =
-      getNested(resources[globalLang], parts) || getNested(resources["en"], parts);
+      getNested(resources[globalLang], parts) ||
+      getNested(resources["en"], parts);
     let str = typeof res === "string" ? res : key;
     if (vars && typeof str === "string") {
       for (const [varKey, value] of Object.entries(vars)) {

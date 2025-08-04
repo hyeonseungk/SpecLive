@@ -1,8 +1,6 @@
 "use client";
 
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
-import { LanguageSelector } from "@/components/common/language-selector";
-import { OrganizationSelector } from "@/components/common/organization-selector";
 import { ProjectCreateModal } from "@/components/common/project-create-modal";
 import { Button } from "@/components/ui/button";
 import {
@@ -121,18 +119,7 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
     }
   };
 
-  const handleOrgChange = (newOrgId: string | null) => {
-    if (newOrgId) {
-      router.push(`/dashboard/organizations/${newOrgId}`);
-    } else {
-      router.push("/dashboard");
-    }
-  };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-  };
 
   if (loading) {
     return <FullScreenLoading message={t("common.loading")} />;
@@ -144,27 +131,6 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
 
   return (
     <div className="h-full bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">{t("common.brand")}</h1>
-            <OrganizationSelector
-              user={user!}
-              selectedOrgId={params.orgId}
-              onOrgChange={handleOrgChange}
-              onOrgCreated={handleModalSuccess}
-            />
-          </div>
-          <div className="flex items-center gap-4">
-            <LanguageSelector />
-            <span className="text-sm text-muted-foreground">{user?.email}</span>
-            <Button variant="outline" onClick={handleSignOut}>
-              {t("common.logout")}
-            </Button>
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">{organization.name}</h2>

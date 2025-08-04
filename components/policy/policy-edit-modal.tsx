@@ -209,12 +209,12 @@ export default function PolicyEditModal({
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
                 <span className="ml-2 text-sm text-gray-500">
-                  기능 로딩 중...
+                  {t("policyAddModal.loadingFeatures")}
                 </span>
               </div>
             ) : allFeatures.length === 0 ? (
               <p className="text-sm text-gray-500 py-2">
-                프로젝트에 기능이 아직 없습니다.
+                {t("policyEditModal.noFeatures")}
               </p>
             ) : (
               <>
@@ -266,7 +266,7 @@ export default function PolicyEditModal({
               <div className="mt-3 p-3 bg-blue-50 rounded-md border">
                 <p className="text-sm font-medium text-gray-700 mb-2">
                   {t("policyAddModal.selectedFeatures")} (
-                  {editSelectedFeatureIds.length}개):
+                  {editSelectedFeatureIds.length}{t("dashboard.count_unit")}):
                 </p>
                 <div className="space-y-1">
                   {editSelectedFeatureIds.map((id) => {
@@ -394,12 +394,12 @@ export default function PolicyEditModal({
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
                 <span className="ml-2 text-sm text-gray-500">
-                  용어 로딩 중...
+                  {t("policyAddModal.termsLoading")}
                 </span>
               </div>
             ) : glossaries.length === 0 ? (
               <p className="text-sm text-gray-500 py-2">
-                프로젝트에 용어가 아직 없습니다.
+                {t("policyAddModal.noTerms")}
               </p>
             ) : (
               <>

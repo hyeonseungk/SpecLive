@@ -93,6 +93,9 @@ export default function OrganizationLayout({
           <div className="flex items-center gap-6">
             <span className="text-sm text-muted-foreground">{user?.email}</span>
             <LanguageSelector />
+            <Button variant="outline" onClick={handleSignOut}>
+              {t("common.logout")}
+            </Button>
           </div>
         </div>
       </header>

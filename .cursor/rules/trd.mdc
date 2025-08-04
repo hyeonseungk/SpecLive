@@ -6,13 +6,13 @@ alwaysApply: true
 
 ## 1. 기술 스택 요약
 
-| 레이어          | 기술                                                                                            | 비고                                      |
-| --------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| **프론트엔드**  | Next.js (App Router, **클라이언트 컴포넌트만**)<br/>TypeScript, Tailwind CSS, Radix UI / shadcn | 서버 컴포넌트 및 API Route 금지           |
-| **백엔드**      | Supabase (PostgreSQL + Auth + Edge Functions + Realtime + Storage)                              | Supabase JS v2                            |
-| **이메일 발송** | Supabase Edge Functions + Resend API                                                            | DB 트리거 → Edge Function → Resend        |
-| **배포**        | Vercel (프론트) / Supabase (백엔드)                                                             | Supabase Project URL 및 anon key 환경변수 |
-| **모니터링**    | Vercel Analytics, Supabase Logs + Logflare, Sentry                                              |                                           |
+| 레이어          | 기술                                                                                                          | 비고                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| **프론트엔드**  | Next.js (App Router, **무조건 클라이언트 컴포넌트만 사용해**)<br/>TypeScript, Tailwind CSS, Radix UI / shadcn | 서버 컴포넌트 및 API Route 금지           |
+| **백엔드**      | Supabase (PostgreSQL + Auth + Edge Functions + Realtime + Storage)                                            | Supabase JS v2                            |
+| **이메일 발송** | Supabase Edge Functions + Resend API                                                                          | DB 트리거 → Edge Function → Resend        |
+| **배포**        | Vercel (프론트) / Supabase (백엔드)                                                                           | Supabase Project URL 및 anon key 환경변수 |
+| **모니터링**    | Vercel Analytics, Supabase Logs + Logflare, Sentry                                                            |                                           |
 
 ---
 

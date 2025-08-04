@@ -19,7 +19,7 @@ export default function RootLayout({
   }, [globalLang]);
 
   return (
-    <html lang={globalLang}>
+    <html lang={globalLang} suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
