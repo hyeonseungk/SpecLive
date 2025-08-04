@@ -4,6 +4,7 @@ import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { LanguageSelector } from "@/components/common/language-selector";
 import { LogoutConfirmModal } from "@/components/common/logout-confirm-modal";
 import { OrganizationCreateModal } from "@/components/common/organization-create-modal";
+import OrganizationEditModal from "@/components/common/organization-edit-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGlobalT } from "@/lib/i18n";
@@ -32,6 +33,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showOrgCreateModal, setShowOrgCreateModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showOrgEditModal, setShowOrgEditModal] = useState(false);
+  const [editingOrg, setEditingOrg] = useState<OrganizationWithStats | null>(
+    null
+  );
+  const [editMode, setEditMode] = useState<"edit" | "delete">("edit");
   const t = useGlobalT();
   const { lang } = useLangStore();
   const locale = lang;
@@ -180,6 +186,23 @@ export default function Dashboard() {
     }
   };
 
+  const handleOrgEdit = (org: OrganizationWithStats) => {
+    setEditingOrg(org);
+    setEditMode("edit");
+    setShowOrgEditModal(true);
+  };
+
+  const handleOrgDelete = (org: OrganizationWithStats) => {
+    setEditingOrg(org);
+    setEditMode("delete");
+    setShowOrgEditModal(true);
+  };
+
+  const handleOrgEditClose = () => {
+    setShowOrgEditModal(false);
+    setEditingOrg(null);
+  };
+
   if (loading) {
     return <FullScreenLoading message={t("common.loading")} />;
   }
@@ -268,7 +291,7 @@ export default function Dashboard() {
               {organizations.map((org) => (
                 <Card
                   key={org.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className="group relative cursor-pointer hover:shadow-md transition-shadow"
                   onClick={() =>
                     router.push(`/dashboard/organizations/${org.id}`)
                   }
@@ -281,11 +304,62 @@ export default function Dashboard() {
                         </div>
                         {org.name}
                       </div>
-                      {org.isOwner && (
-                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
-                          {t("dashboard.owner_badge")}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {org.isOwner && (
+                          <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                            {t("dashboard.owner_badge")}
+                          </span>
+                        )}
+                        {/* Edit/Delete buttons (visible on hover, owner only) */}
+                        {org.isOwner && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOrgEdit(org);
+                              }}
+                              className="p-1 hover:bg-gray-200 rounded transition-colors"
+                              title="조직 이름 수정"
+                            >
+                              <svg
+                                className="w-3 h-3 text-gray-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOrgDelete(org);
+                              }}
+                              className="p-1 hover:bg-red-100 rounded transition-colors"
+                              title="조직 삭제"
+                            >
+                              <svg
+                                className="w-3 h-3 text-red-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -328,6 +402,15 @@ export default function Dashboard() {
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleLogoutConfirm}
+      />
+
+      {/* 조직 편집/삭제 모달 */}
+      <OrganizationEditModal
+        isOpen={showOrgEditModal}
+        onClose={handleOrgEditClose}
+        onSuccess={handleModalSuccess}
+        organization={editingOrg}
+        mode={editMode}
       />
     </div>
   );
