@@ -322,6 +322,9 @@
     "abort": "Abort",
     "sending": "Sending...",
     "input_placeholder": "Type a message...",
+    "reset_conversation": "Reset Conversation",
+    "reset_confirm_title": "Reset Conversation",
+    "reset_confirm_desc": "Do you want to reset the conversation so far?",
     "initial_message": "Tell me briefly about your project, then we can craft a PRD together via Q&A.",
     "invalid_response": "Invalid AI response.",
     "error_title": "Error during chat with AI"

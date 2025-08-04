@@ -363,7 +363,10 @@
     "error_title": "AI와의 대화 중 오류가 발생했습니다.",
     "abort": "중단하기",
     "sending": "전송 중...",
-    "input_placeholder": "메시지를 입력하세요..."
+    "input_placeholder": "메시지를 입력하세요...",
+    "reset_conversation": "대화 초기화",
+    "reset_confirm_title": "대화 초기화",
+    "reset_confirm_desc": "이때까지의 대화를 초기화하시겠어요?"
   },
   "prd": {
     "loading": "PRD를 불러오는 중...",

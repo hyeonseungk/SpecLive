@@ -306,22 +306,24 @@ export default function AiChatModal({
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" disabled={messages.length <= 1}>
-                  대화 초기화
+                  {t("ai.reset_conversation")}
                 </Button>
               </AlertDialogTrigger>
 
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>대화 초기화</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {t("ai.reset_confirm_title")}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    이때까지의 대화를 초기화하시겠어요?
+                    {t("ai.reset_confirm_desc")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
 
                 <AlertDialogFooter>
                   <AlertDialogCancel>취소</AlertDialogCancel>
                   <AlertDialogAction onClick={handleResetConversation}>
-                    초기화
+                    {t("ai.reset_conversation")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
