@@ -266,7 +266,7 @@ export default function PolicyEditModal({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium">
-                컨텍스트 링크들
+                {t("policyEditModal.contextLinksLabel")}
               </label>
               <Button
                 type="button"
@@ -276,7 +276,7 @@ export default function PolicyEditModal({
                 disabled={policySaving}
                 className="text-blue-600 hover:text-blue-700 text-sm"
               >
-                + 링크 추가
+                {t("policyAddModal.addLink")}
               </Button>
             </div>
             <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
@@ -310,7 +310,10 @@ export default function PolicyEditModal({
           {/* 일반 링크 */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium">일반 링크들 </label>
+              <label className="block text-sm font-medium">
+                {" "}
+                {t("policyAddModal.generalLinksLabel")}
+              </label>
               <Button
                 type="button"
                 size="sm"
@@ -319,7 +322,7 @@ export default function PolicyEditModal({
                 disabled={policySaving}
                 className="text-blue-600 hover:text-blue-700 text-sm"
               >
-                + 링크 추가
+                {t("policyAddModal.addLink")}
               </Button>
             </div>
             <div className="mb-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600 whitespace-pre-line">
@@ -353,9 +356,9 @@ export default function PolicyEditModal({
           {/* 용어 선택 */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              관련 용어들{" "}
+              {t("policyAddModal.glossariesLabel")}
               <span className="text-xs text-gray-500 ml-1">
-                (이 정책과 연관된 용어를 선택하세요)
+                {t("policyAddModal.glossariesHint")}
               </span>
             </label>
             {glossariesLoading ? (

@@ -232,7 +232,8 @@ export default function PolicyAddModal({
             {selectedFeatureIds.length > 0 && (
               <div className="mt-3 p-3 bg-blue-50 rounded-md border">
                 <p className="text-sm font-medium text-gray-700 mb-2">
-                  선택된 기능 ({selectedFeatureIds.length}개):
+                  {t("policyAddModal.selectedFeatures")} (
+                  {selectedFeatureIds.length}개):
                 </p>
                 <div className="space-y-1">
                   {selectedFeatureIds.map((id) => {
@@ -346,9 +347,9 @@ export default function PolicyAddModal({
           {/* 용어 선택 */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              관련 용어들
+              {t("policyAddModal.glossariesLabel")}
               <span className="text-xs text-gray-500 font-normal ml-1">
-                (이 정책과 연관된 용어를 선택하세요)
+                {t("policyAddModal.glossariesHint")}
               </span>
             </label>
             {glossariesLoading ? (
