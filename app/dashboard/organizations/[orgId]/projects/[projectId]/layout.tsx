@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useGlobalT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { PanelLeft, PanelLeftClose } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -113,7 +113,7 @@ export default function ProjectLayout({
             className="mt-4 mx-auto p-1 rounded hover:bg-accent"
             onClick={() => setIsCollapsed(false)}
           >
-            <ChevronRight className="w-4 h-4" />
+            <PanelLeft className="w-4 h-4" />
           </button>
         ) : (
           <>
@@ -123,7 +123,7 @@ export default function ProjectLayout({
                 className="absolute top-4 right-4 p-1 rounded hover:bg-accent"
                 onClick={() => setIsCollapsed(true)}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <PanelLeftClose className="w-4 h-4" />
               </button>
               <div className="flex items-center gap-2 mb-2">
                 <Button
