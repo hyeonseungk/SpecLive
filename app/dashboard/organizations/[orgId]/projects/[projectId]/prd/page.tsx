@@ -1,6 +1,7 @@
 "use client";
 
 import AiChatModal from "@/components/common/ai-chat-modal";
+import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError } from "@/lib/error-store";
@@ -190,6 +191,10 @@ export default function PrdPage({ params }: PrdPageProps) {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  if (loading) {
+    return <FullScreenLoading message={t("common.loading")} />;
   }
 
   if (!project || !membership) {

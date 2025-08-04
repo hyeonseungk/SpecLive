@@ -1,5 +1,7 @@
 "use client";
 
+import { FullScreenLoading } from "@/components/common/full-screen-loading";
+import { useGlobalT } from "@/lib/i18n";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -12,6 +14,7 @@ interface ProjectPageProps {
 
 export default function ProjectPage({ params }: ProjectPageProps) {
   const router = useRouter();
+  const t = useGlobalT();
 
   useEffect(() => {
     // PRD 페이지로 리다이렉트
@@ -20,9 +23,5 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     );
   }, [params.orgId, params.projectId, router]);
 
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-    </div>
-  );
+  return <FullScreenLoading message={t("common.redirecting")} />;
 }

@@ -5,6 +5,7 @@
     "language": "Language",
     "no_access": "No access rights",
     "loading": "Loading...",
+    "redirecting": "Redirecting...",
     "processing": "Processing...",
     "error_generic": "An error occurred.",
     "unknown_error": "An unknown error has occurred.",

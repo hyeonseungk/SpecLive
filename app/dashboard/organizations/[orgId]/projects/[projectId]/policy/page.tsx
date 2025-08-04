@@ -13,6 +13,7 @@ import PolicyAddModal from "@/components/policy/policy-add-modal";
 import PolicyAiRecommendationModal from "@/components/policy/policy-ai-recommendation-modal";
 import PolicyEditModal from "@/components/policy/policy-edit-modal";
 import SortablePolicyCard from "@/components/policy/sortable-policy-card";
+import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SortableUsecaseCard from "@/components/usecase/sortable-usecase-card";
@@ -2186,11 +2187,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   }, [featurePolicies, searchParams]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <FullScreenLoading message={t("common.loading")} />;
   }
 
   if (!project || !membership) {

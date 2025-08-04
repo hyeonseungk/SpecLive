@@ -147,21 +147,11 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
               <CardContent className="pt-8 pb-8">
                 <Button
                   onClick={() => setShowProjectModal(true)}
-                  className="w-full mb-6"
+                  className="w-full"
                   size="lg"
                 >
                   {t("org.first_project_button")}
                 </Button>
-                <div className="text-sm text-muted-foreground">
-                  <p className="mb-3 font-medium">
-                    {t("dashboard.after_title")}
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 text-left max-w-xs mx-auto">
-                    <li>{t("dashboard.after_list.project")}</li>
-                    <li>{t("dashboard.after_list.invite")}</li>
-                    <li>{t("dashboard.after_list.manage")}</li>
-                  </ul>
-                </div>
               </CardContent>
             </Card>
           </div>
