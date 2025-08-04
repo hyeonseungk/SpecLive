@@ -126,7 +126,7 @@
   },
   "policy": {
     "header": "Policy Management",
-    "sub": "Create and manage project policies and guidelines.",
+    "sub": "Manage features and various policies required for the service.",
     "search_placeholder": "Search policies...",
     "all_categories": "All categories",
     "add_button": "Add Policy",
