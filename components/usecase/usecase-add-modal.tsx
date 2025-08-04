@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useProjectT } from "@/lib/i18n";
 
 interface UsecaseAddModalProps {
   isOpen: boolean;
