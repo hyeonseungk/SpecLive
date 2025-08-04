@@ -2208,7 +2208,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       {/* 고정 영역: 헤더와 액터/유즈케이스 선택 */}
       <div className="flex-shrink-0 p-6 pb-0">
         {/* 헤더 영역 */}
@@ -2370,12 +2370,12 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         }
       </div>
 
-      {/* 스크롤 영역: 기능과 정책 영역 */}
-      <div className="flex-1 px-6 pb-6 overflow-y-auto min-h-0">
+      {/* 기능과 정책 영역 - 나머지 전체 높이 차지, 화면을 넘지 않음 */}
+      <div className="flex-1 px-6 pb-6 min-h-0 overflow-hidden">
         {/* 기능과 정책 섹션 */}
         {selectedActor && selectedUsecase && (
           <div className="h-full flex flex-col">
-            <div className="mb-4">
+            <div className="mb-4 flex-shrink-0">
               <h3 className="text-xl font-semibold">
                 {t("policy.features_and_policies")}
               </h3>
@@ -2387,8 +2387,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
             </div>
 
             <div className="flex-1 grid grid-cols-4 gap-6 min-h-0">
-              {/* 좌측: 기능 목록 (1/3) */}
-              <div className="col-span-1 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
+              {/* 좌측: 기능 목록 (1/4) */}
+              <div className="col-span-1 bg-gray-200 rounded-lg p-4 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">{t("policy.features_header")}</h4>
                   {membership?.role === "admin" && (
@@ -2403,7 +2403,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </div>
 
                 {/* 기능 검색창 */}
-                <div className="mb-3 flex-shrink-0, px-2">
+                <div className="mb-3 flex-shrink-0 px-2">
                   <input
                     type="text"
                     value={featureListSearchTerm}
@@ -2420,6 +2420,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                   )}
                 </div>
 
+                {/* 기능 목록 스크롤 영역 */}
                 <div className="flex-1 overflow-y-auto min-h-0">
                   {featuresLoading ? (
                     <div className="flex items-center justify-center h-32">
@@ -2474,8 +2475,8 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 </div>
               </div>
 
-              {/* 우측: 정책 목록 (2/3) */}
-              <div className="col-span-3 bg-gray-200 rounded-lg p-4 flex flex-col h-full min-h-0">
+              {/* 우측: 정책 목록 (3/4) */}
+              <div className="col-span-3 bg-gray-200 rounded-lg p-4 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">
                     {selectedFeature
@@ -2536,6 +2537,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                     </div>
                   )}
 
+                {/* 정책 목록 스크롤 영역 */}
                 <div className="flex-1 overflow-y-auto min-h-0">
                   {!selectedFeature ? (
                     <div className="flex items-center justify-center h-32">
