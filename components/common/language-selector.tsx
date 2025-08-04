@@ -16,8 +16,8 @@ export function LanguageSelector() {
   const { globalLang, setGlobalLanguage } = useLangStore();
 
   const languages = [
-    { code: "ko", name: "한국어", flag: "🇰🇷" },
-    { code: "en", name: "English", flag: "🇺🇸" },
+    { code: "ko", name: "한국어" },
+    { code: "en", name: "English" },
   ] as const;
 
   return (
@@ -25,7 +25,6 @@ export function LanguageSelector() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Globe className="h-4 w-4" />
-          {languages.find((lang) => lang.code === globalLang)?.flag}
           {languages.find((lang) => lang.code === globalLang)?.name}
         </Button>
       </DropdownMenuTrigger>
@@ -34,10 +33,8 @@ export function LanguageSelector() {
           <DropdownMenuItem
             key={language.code}
             onClick={() => setGlobalLanguage(language.code)}
-            className="gap-2"
           >
-            <span>{language.flag}</span>
-            <span>{language.name}</span>
+            {language.name}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
