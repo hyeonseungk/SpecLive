@@ -10,6 +10,11 @@ const languageMap: Record<LangCode, LocaleCode> = {
 
 // 브라우저 언어를 기반으로 초기 언어 설정
 function getInitialLanguage(): LangCode {
+  // 서버 사이드에서는 기본값 반환
+  if (typeof window === "undefined") {
+    return "ko";
+  }
+
   // localStorage에서 저장된 전체 언어 설정 확인
   const storedGlobalLang = localStorage.getItem(
     "global_lang"
@@ -32,6 +37,11 @@ function getInitialLanguage(): LangCode {
 
 // 프로젝트별 언어 설정을 위한 함수
 function getProjectLanguage(): LangCode {
+  // 서버 사이드에서는 기본값 반환
+  if (typeof window === "undefined") {
+    return "ko";
+  }
+
   const stored = localStorage.getItem("lang") as LangCode | null;
   if (stored === "en" || stored === "ko") {
     return stored;
@@ -58,14 +68,18 @@ export const useLangStore = create<LangState>((set) => {
     lang: initialLang,
     locale: languageMap[initialLang],
     setLanguage: (code) => {
-      localStorage.setItem("lang", code);
-      document.documentElement.lang = code;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("lang", code);
+        document.documentElement.lang = code;
+      }
       set({ lang: code, locale: languageMap[code] });
     },
     globalLang: initialGlobalLang,
     setGlobalLanguage: (code) => {
-      localStorage.setItem("global_lang", code);
-      document.documentElement.lang = code;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("global_lang", code);
+        document.documentElement.lang = code;
+      }
       set({ globalLang: code });
     },
   };
