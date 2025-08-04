@@ -439,7 +439,7 @@
     "title": "새 조직 생성",
     "description": "새로운 조직을 생성하고 프로젝트들을 관리하세요. 당신이 조직의 소유자가 됩니다.",
     "name_label": "조직 이름",
-    "name_placeholder": "예: 우리회사, ABC팀",
+    "name_placeholder": "예: 네이버, 카카오, 토스",
     "input_error_title": "입력 오류",
     "input_name_required": "조직 이름을 입력해주세요.",
     "creating": "생성 중...",
@@ -478,7 +478,7 @@
     "org_select_no_orgs": "사용 가능한 조직이 없습니다. 먼저 조직을 생성해주세요.",
     "org_select_placeholder": "조직을 선택하세요",
     "name_label": "프로젝트 이름",
-    "name_placeholder": "예: OOO 커머스, XXX 채팅 서비스 등",
+    "name_placeholder": "예: 쇼핑몰 앱, 고객 관리 시스템",
     "creating": "생성 중...",
     "create": "생성"
   },

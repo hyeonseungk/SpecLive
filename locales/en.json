@@ -441,7 +441,7 @@
     "title": "Create Organization",
     "description": "Create a new organization to manage projects. You will become the owner.",
     "name_label": "Organization name",
-    "name_placeholder": "e.g. MyCompany, ABC Team",
+    "name_placeholder": "e.g. Google, Apple, Microsoft",
     "input_error_title": "Input Error",
     "input_name_required": "Please enter organization name.",
     "creating": "Creating...",
@@ -480,7 +480,7 @@
     "org_select_no_orgs": "No organizations available. Please create one first.",
     "org_select_placeholder": "Select organization",
     "name_label": "Project name",
-    "name_placeholder": "e.g. E-commerce, Chat service",
+    "name_placeholder": "e.g. Shopping App, CRM System",
     "creating": "Creating...",
     "create": "Create"
   },
