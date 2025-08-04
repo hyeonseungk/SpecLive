@@ -2675,6 +2675,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         }}
         onAdd={() => addFeature(featureLinks)}
         saving={featureSaving}
+        selectedActorName={selectedActor?.name}
         selectedUsecaseName={selectedUsecase?.name}
         featureLinks={featureLinks}
         addLinkField={addFeatureLinkField}
