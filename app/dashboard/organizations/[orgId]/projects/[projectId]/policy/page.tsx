@@ -6,6 +6,7 @@ import ActorEditModal from "@/components/actor/actor-edit-modal";
 import SortableActorCard from "@/components/actor/sortable-actor-card";
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import FeatureAddModal from "@/components/feature/feature-add-modal";
+import FeatureAiRecommendationModal from "@/components/feature/feature-ai-recommendation-modal";
 import FeatureDeleteModal from "@/components/feature/feature-delete-modal";
 import FeatureEditModal from "@/components/feature/feature-edit-modal";
 import SortableFeatureCard from "@/components/feature/sortable-feature-card";
@@ -147,6 +148,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
   // 기능 추가 모달 상태
   const [showFeatureModal, setShowFeatureModal] = useState(false);
+  const [showFeatureAiModal, setShowFeatureAiModal] = useState(false);
   const [featureName, setFeatureName] = useState("");
   const [featureSaving, setFeatureSaving] = useState(false);
   // 관련 링크 입력 상태 (for feature add/edit)
@@ -2392,13 +2394,24 @@ export default function PolicyPage({ params }: PolicyPageProps) {
                 <div className="flex items-center justify-between mb-3 flex-shrink-0">
                   <h4 className="font-medium">{t("policy.features_header")}</h4>
                   {membership?.role === "admin" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowFeatureModal(true)}
-                    >
-                      {t("feature.add_new_button")}
-                    </Button>
+                    <div className="flex gap-2">
+                      {selectedUsecase && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowFeatureAiModal(true)}
+                        >
+                          {t("feature.ai_get_recommendations")}
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowFeatureModal(true)}
+                      >
+                        {t("feature.add_new_button")}
+                      </Button>
+                    </div>
                   )}
                 </div>
 
@@ -2711,6 +2724,30 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         onDelete={deleteFeature}
         deleting={featureDeleting}
       />
+
+      {showFeatureAiModal && selectedUsecase && (
+        <FeatureAiRecommendationModal
+          projectId={params.projectId}
+          userId={user!.id}
+          selectedUsecaseId={selectedUsecase.id}
+          onClose={() => setShowFeatureAiModal(false)}
+          onFeaturesAdded={(newFeatures) => {
+            // 새로 추가된 기능들을 현재 기능 목록에 추가
+            setFeatures((prev) => [
+              ...prev,
+              ...newFeatures.map((feature) => ({
+                ...feature,
+                feature_links: [],
+              })),
+            ]);
+            // 첫 번째 기능이라면 자동 선택
+            if (features.length === 0 && newFeatures.length > 0) {
+              setSelectedFeature(newFeatures[0]);
+              loadPoliciesForTheFeature(newFeatures[0].id);
+            }
+          }}
+        />
+      )}
 
       <PolicyAddModal
         isOpen={showPolicyModal}

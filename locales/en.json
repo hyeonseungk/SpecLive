@@ -526,7 +526,16 @@
     "delete": "Delete",
     "deleting": "Deleting...",
     "delete_confirm_message": "Are you sure you want to delete the \"{featureName}\" feature?",
-    "delete_warning": "Deleted features cannot be recovered.\nAll policies within the feature will also be deleted."
+    "delete_warning": "Deleted features cannot be recovered.\nAll policies within the feature will also be deleted.",
+    "ai_modal_title": "AI Feature Recommendations",
+    "ai_modal_desc": "We can recommend additional features based on your existing PRD, terms, actors, use cases, features, and policies. Would you like to get recommendations?",
+    "ai_get_recommendations": "Get AI Recommendations",
+    "ai_loading": "AI is analyzing and recommending features...",
+    "ai_select_features": "Select features you want from the recommendations",
+    "ai_add_selected": "Add Selected Features",
+    "ai_retry": "Retry",
+    "ai_error": "An error occurred while getting AI recommendations.",
+    "ai_features_added": " features have been added."
   },
   "placeholders": {
     "search_features": "Search by feature name...",
