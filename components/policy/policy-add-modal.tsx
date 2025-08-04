@@ -416,7 +416,7 @@ export default function PolicyAddModal({
                     filteredGlossaries.map((g) => (
                       <label
                         key={g.id}
-                        className="flex items-start gap-2 p-2 hover:bg-white rounded cursor-pointer"
+                        className="flex items-start gap-2 p-2 hover:bg-white rounded cursor-pointer items-center"
                       >
                         <input
                           type="checkbox"
