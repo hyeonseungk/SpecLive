@@ -205,19 +205,19 @@ export default function SortablePolicyCard({
           </div>
         )}
 
-        {/* Context Links */}
+        {/* General Links */}
         {policy.policy_links &&
-          policy.policy_links.filter((l) => l.type === "context").length >
+          policy.policy_links.filter((l) => l.type === "general").length >
             0 && (
             <div
               className={`mb-3 ${membership?.role === "admin" ? "ml-8" : ""}`}
             >
               <h5 className="text-xs font-medium text-gray-700 mb-1">
-                {t("sortablePolicyCard.contextLinks")}
+                {t("sortablePolicyCard.generalLinks")}
               </h5>
               <div className="flex flex-wrap gap-1">
                 {policy.policy_links
-                  .filter((l) => l.type === "context")
+                  .filter((l) => l.type === "general")
                   .map((link, idx) => (
                     <a
                       key={idx}
@@ -236,19 +236,17 @@ export default function SortablePolicyCard({
             </div>
           )}
 
-        {/* General Links */}
+        {/* Context Links */}
         {policy.policy_links &&
-          policy.policy_links.filter((l) => l.type === "general").length >
+          policy.policy_links.filter((l) => l.type === "context").length >
             0 && (
-            <div
-              className={`mb-3 ${membership?.role === "admin" ? "ml-8" : ""}`}
-            >
+            <div className="absolute bottom-16 right-4 flex flex-col items-start">
               <h5 className="text-xs font-medium text-gray-700 mb-1">
-                {t("sortablePolicyCard.generalLinks")}
+                {t("sortablePolicyCard.contextLinks")}
               </h5>
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-col gap-1 items-start">
                 {policy.policy_links
-                  .filter((l) => l.type === "general")
+                  .filter((l) => l.type === "context")
                   .map((link, idx) => (
                     <a
                       key={idx}
