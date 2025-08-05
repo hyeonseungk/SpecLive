@@ -453,6 +453,12 @@
     "failure_title": "조직 생성 실패",
     "failure_message": "조직 생성 중 오류가 발생했습니다. 다시 시도해주세요."
   },
+  "orgEdit": {
+    "update_success_title": "조직 수정 완료",
+    "update_success_message": "조직 이름이 수정되었습니다.",
+    "delete_success_title": "조직 삭제 완료",
+    "delete_success_message": "조직이 삭제되었습니다."
+  },
   "orgSelector": {
     "loading": "로딩 중...",
     "all_orgs": "모든 조직",
@@ -485,6 +491,12 @@
     "name_placeholder": "예: 쇼핑몰 앱, 고객 관리 시스템",
     "creating": "생성 중...",
     "create": "생성"
+  },
+  "projectEdit": {
+    "update_success_title": "프로젝트 수정 완료",
+    "update_success_message": "프로젝트 이름이 수정되었습니다.",
+    "delete_success_title": "프로젝트 삭제 완료",
+    "delete_success_message": "프로젝트가 삭제되었습니다."
   },
   "feature": {
     "label": "기능:",

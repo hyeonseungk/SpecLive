@@ -455,6 +455,12 @@
     "failure_title": "Creation failed",
     "failure_message": "Error occurred while creating organization. Please try again."
   },
+  "orgEdit": {
+    "update_success_title": "Organization Updated",
+    "update_success_message": "The organization name has been updated.",
+    "delete_success_title": "Organization Deleted",
+    "delete_success_message": "The organization has been deleted."
+  },
   "orgSelector": {
     "loading": "Loading...",
     "all_orgs": "All organizations",
@@ -487,6 +493,12 @@
     "name_placeholder": "e.g. Shopping App, CRM System",
     "creating": "Creating...",
     "create": "Create"
+  },
+  "projectEdit": {
+    "update_success_title": "Project Updated",
+    "update_success_message": "The project name has been updated.",
+    "delete_success_title": "Project Deleted",
+    "delete_success_message": "The project has been deleted."
   },
   "feature": {
     "label": "Feature:",

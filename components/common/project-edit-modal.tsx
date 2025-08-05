@@ -53,12 +53,15 @@ export default function ProjectEditModal({
 
         if (error) throw error;
 
-        showSuccess("프로젝트 이름이 수정되었습니다.");
+        showSuccess(
+          t("projectEdit.update_success_title"),
+          t("projectEdit.update_success_message")
+        );
         onSuccess();
         onClose();
       } catch (error) {
         console.error("Error updating project:", error);
-        showError("프로젝트 수정 중 오류가 발생했습니다.", error);
+        showError("프로젝트 수정 중 오류가 발생했습니다.", String(error));
       } finally {
         setLoading(false);
       }
@@ -81,12 +84,15 @@ export default function ProjectEditModal({
 
         if (projectError) throw projectError;
 
-        showSuccess("프로젝트가 삭제되었습니다.");
+        showSuccess(
+          t("projectEdit.delete_success_title"),
+          t("projectEdit.delete_success_message")
+        );
         onSuccess();
         onClose();
       } catch (error) {
         console.error("Error deleting project:", error);
-        showError("프로젝트 삭제 중 오류가 발생했습니다.", error);
+        showError("프로젝트 삭제 중 오류가 발생했습니다.", String(error));
       } finally {
         setLoading(false);
       }
