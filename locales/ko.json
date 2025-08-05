@@ -24,7 +24,8 @@
     "clear_search": "검색어 초기화"
   },
   "home": {
-    "tagline": "IT 서비스를 만드는 팀을 위한 서비스 용어/기능/정책 관리 툴",
+    "tagline_1": "IT 서비스를 만드는 팀을 위한",
+    "tagline_2": "서비스 용어/기능/정책 관리 툴",
     "what_is_service": "무슨 서비스인가요?"
   },
   "auth": {

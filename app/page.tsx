@@ -174,7 +174,9 @@ export default function Home() {
             </CardTitle>
           </div>
           <CardDescription className="text-center">
-            {t("home.tagline")}
+            {t("home.tagline_1")}
+            <br />
+            {t("home.tagline_2")}
           </CardDescription>
         </CardHeader>
         <CardContent>

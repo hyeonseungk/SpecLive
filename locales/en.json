@@ -400,7 +400,8 @@
     "created_date": "Created"
   },
   "home": {
-    "tagline": "Service terminology/feature/policy management tool for teams building IT services",
+    "tagline_1": "Service terminology/feature/policy management tool",
+    "tagline_2": "for teams building IT services",
     "what_is_service": "What is this service?"
   },
   "auth": {
