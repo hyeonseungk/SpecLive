@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import { Tables } from "@/types/database";
 import { useState } from "react";
 
@@ -107,7 +107,7 @@ export default function GlossaryAddModal({
       };
 
       onGlossaryAdded(glossaryWithLinks);
-      showSimpleSuccess(t("glossary.add_success"));
+      showSuccessToast(t("glossary.add_success"));
       handleClose();
     } catch (err) {
       console.error("Error adding glossary:", err);

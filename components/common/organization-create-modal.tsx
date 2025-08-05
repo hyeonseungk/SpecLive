@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useErrorStore } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { useSuccessStore } from "@/lib/success-store";
+import { showSuccessToast } from "@/lib/toast-store";
 import supabase from "@/lib/supabase-browser";
 import type { User } from "@supabase/supabase-js";
 import { useState } from "react";
@@ -34,7 +34,7 @@ export function OrganizationCreateModal({
   const [organizationName, setOrganizationName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { showError } = useErrorStore();
-  const { showSuccess } = useSuccessStore();
+
   const t = useGlobalT();
 
   const handleSubmit = async () => {
@@ -63,8 +63,7 @@ export function OrganizationCreateModal({
         throw orgError;
       }
 
-      showSuccess(
-        t("orgCreate.success_title"),
+      showSuccessToast(
         t("orgCreate.success_message", { org: organizationName })
       );
 

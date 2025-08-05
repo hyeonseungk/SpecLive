@@ -17,7 +17,7 @@ import {
 import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { showSimpleSuccess } from "@/lib/success-store";
+import { showSuccessToast } from "@/lib/toast-store";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import {
@@ -298,7 +298,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
     try {
       await navigator.clipboard.writeText(urlWithHash);
-      showSimpleSuccess(t("glossary.url_copied"));
+              showSuccessToast(t("glossary.url_copied"));
     } catch (error) {
       console.error("URL 복사 실패:", error);
       showError(

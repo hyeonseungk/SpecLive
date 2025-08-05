@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { showSimpleSuccess } from "@/lib/success-store";
+import { showSuccessToast } from "@/lib/toast-store";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import { useRouter } from "next/navigation";
@@ -170,7 +170,7 @@ export default function PrdPage({ params }: PrdPageProps) {
         setPrd(newPrd);
       }
 
-      showSimpleSuccess(t("prd.save_success"));
+              showSuccessToast(t("prd.save_success"));
     } catch (error) {
       console.error("Error saving PRD:", error);
       showError(t("prd.save_error_title"), t("prd.save_error_desc"));

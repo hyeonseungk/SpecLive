@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { useGlobalT } from "@/lib/i18n";
-import { showSimpleSuccess } from "@/lib/success-store";
+import { showSuccessToast } from "@/lib/toast-store";
 import { Tables } from "@/types/database";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -125,7 +125,7 @@ export default function SortablePolicyCard({
               url.searchParams.set("featureId", feature.id);
               url.searchParams.set("policyId", policy.id);
               navigator.clipboard.writeText(url.toString());
-              showSimpleSuccess(t("sortablePolicyCard.copyLinkSuccess"));
+              showSuccessToast(t("sortablePolicyCard.copyLinkSuccess"));
             }}
             className="absolute top-3 right-10 transform -translate-y-1 w-8 h-8 bg-white shadow-md hover:shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all"
             title={t("glossary.copy_url")}

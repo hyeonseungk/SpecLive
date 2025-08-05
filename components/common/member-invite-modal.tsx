@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useErrorStore } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { useSuccessStore } from "@/lib/success-store";
+import { showSuccessToast } from "@/lib/toast-store";
 import type { Tables } from "@/types/database";
 import { useState } from "react";
 
@@ -36,7 +36,7 @@ export function MemberInviteModal({
   const [role, setRole] = useState<"admin" | "member">("member");
   const [isLoading, setIsLoading] = useState(false);
   const { showError } = useErrorStore();
-  const { showSuccess } = useSuccessStore();
+
   const t = useGlobalT();
 
   const validateEmail = (email: string) => {
@@ -70,8 +70,7 @@ export function MemberInviteModal({
       // 3. 사용자가 있으면 멤버십 직접 생성
 
       // 현재는 시연용으로 간단하게 구현
-      showSuccess(
-        t("invite.success_title"),
+      showSuccessToast(
         t("invite.success_message", { email, project: project.name })
       );
 

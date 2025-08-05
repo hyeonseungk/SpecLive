@@ -25,8 +25,8 @@ import UsecaseEditModal from "@/components/usecase/usecase-edit-modal";
 import { showError, showSimpleError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import { Tables } from "@/types/database";
 import {
   closestCenter,
@@ -807,7 +807,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         updateURL(actor.id);
       }
 
-      showSimpleSuccess(t("actor.add_success"));
+      showSuccessToast(t("actor.add_success"));
     } catch (error) {
       console.error("Error adding actor:", error);
       showError(t("actor.add_error_title"), t("actor.add_error_desc"));
@@ -860,7 +860,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setEditingActor(null);
       setEditActorName("");
 
-      showSimpleSuccess(t("actor.update_success"));
+      showSuccessToast(t("actor.update_success"));
     } catch (error) {
       console.error("Error updating actor:", error);
       showError(t("actor.update_error_title"), t("actor.update_error_desc"));
@@ -1018,7 +1018,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setShowDeleteActorModal(false);
       setDeletingActor(null);
 
-      showSimpleSuccess("액터가 성공적으로 삭제되었습니다.");
+      showSuccessToast("액터가  삭제되었습니다.");
     } catch (error) {
       console.error("Error deleting actor:", error);
       showError("액터 삭제 실패", "액터를 삭제하는 중 오류가 발생했습니다.");
@@ -1062,7 +1062,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setShowEditUsecaseModal(false);
       setEditingUsecase(null);
       setEditUsecaseName("");
-      showSimpleSuccess(t("usecase.update_success_detailed"));
+      showSuccessToast(t("usecase.update_success_detailed"));
     } catch (error) {
       console.error("Error updating usecase:", error);
       showError(
@@ -1177,7 +1177,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setShowDeleteUsecaseModal(false);
       setDeletingUsecase(null);
-      showSimpleSuccess(t("usecase.delete_success"));
+      showSuccessToast(t("usecase.delete_success"));
     } catch (error) {
       console.error("Error deleting usecase:", error);
       showError(
@@ -1234,7 +1234,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         updateURL(selectedActor?.id, usecase.id);
       }
 
-      showSimpleSuccess(t("usecase.add_success"));
+      showSuccessToast(t("usecase.add_success"));
     } catch (error) {
       console.error("Error adding usecase:", error);
       showError(t("usecase.add_error_title"), t("usecase.add_error_desc"));
@@ -1318,7 +1318,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         await loadPoliciesForTheFeature(completeFeature.id);
       }
 
-      showSimpleSuccess(t("feature.add_success"));
+      showSuccessToast(t("feature.add_success"));
     } catch (error) {
       console.error("Error adding feature:", error);
       showError(t("feature.add_error_title"), t("feature.add_error_desc"));
@@ -1403,7 +1403,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setEditFeatureName("");
       setEditFeatureLinks([]); // 링크 필드 초기화
 
-      showSimpleSuccess(t("feature.update_success"));
+      showSuccessToast(t("feature.update_success"));
     } catch (error) {
       console.error("Error updating feature:", error);
       showError(
@@ -1590,7 +1590,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setFeatureSearchTerm("");
       setShowPolicyModal(false);
 
-      showSimpleSuccess(t("policy.add_success"));
+      showSuccessToast(t("policy.add_success"));
     } catch (error) {
       console.error("Error adding policy:", error);
       showError(t("policy.add_error_title"), t("policy.add_error_desc"));
@@ -1676,7 +1676,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setShowDeleteFeatureModal(false);
       setDeletingFeature(null);
 
-      showSimpleSuccess(t("feature.delete_success"));
+      showSuccessToast(t("feature.delete_success"));
     } catch (error) {
       console.error("Error deleting feature:", error);
       showError(
@@ -1922,7 +1922,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setEditSelectedFeatureIds([]);
       setEditFeatureSearchTerm("");
 
-      showSimpleSuccess(t("policy.update_success"));
+      showSuccessToast(t("policy.update_success"));
     } catch (error) {
       console.error("Error updating policy:", error);
       showError(t("policy.update_error_title"), t("policy.update_error_desc"));
@@ -1976,7 +1976,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       setDeletingPolicy(null);
 
-      showSimpleSuccess(t("policy.delete_success"));
+      showSuccessToast(t("policy.delete_success"));
     } catch (error) {
       console.error("Error deleting policy:", error);
       showError(t("policy.delete_error_title"), t("policy.delete_error_desc"));

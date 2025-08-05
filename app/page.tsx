@@ -15,8 +15,8 @@ import { Input } from "@/components/ui/input";
 import { showError, showSimpleError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { showSuccess } from "@/lib/success-store";
 import supabase from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import type { User } from "@supabase/supabase-js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -87,16 +87,11 @@ export default function Home() {
           password,
         });
         if (error) throw error;
-        showSuccess(
-          t("auth.signup_complete_title"),
-          t("auth.signup_complete_desc"),
-          () => {
-            setEmail("");
-            setPassword("");
-            setPasswordConfirm("");
-            setIsSignUp(false);
-          }
-        );
+        showSuccessToast(t("auth.signup_complete_desc"));
+        setEmail("");
+        setPassword("");
+        setPasswordConfirm("");
+        setIsSignUp(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,

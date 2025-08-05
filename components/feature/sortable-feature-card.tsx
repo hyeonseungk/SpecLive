@@ -1,6 +1,6 @@
 "use client";
 
-import { showSimpleSuccess } from "@/lib/success-store";
+import { showSuccessToast } from "@/lib/toast-store";
 import { Tables } from "@/types/database";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -156,7 +156,7 @@ export default function SortableFeatureCard({
                   url.searchParams.delete("policyId");
 
                   navigator.clipboard.writeText(url.toString());
-                  showSimpleSuccess(t("common.link_copied"));
+                  showSuccessToast(t("common.link_copied"));
                 }}
                 className="p-1 hover:bg-gray-200 rounded transition-colors"
                 title="링크 복사"

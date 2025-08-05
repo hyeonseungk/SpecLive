@@ -13,8 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useErrorStore } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { useSuccessStore } from "@/lib/success-store";
 import supabase from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import type { Tables } from "@/types/database";
 import type { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
@@ -42,7 +42,7 @@ export function ProjectCreateModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(false);
   const { showError } = useErrorStore();
-  const { showSuccess } = useSuccessStore();
+
   const t = useGlobalT();
 
   // 조직 목록 로드 (organizationId가 없는 경우에만)
@@ -129,8 +129,7 @@ export function ProjectCreateModal({
 
       if (membershipError) throw membershipError;
 
-      showSuccess(
-        t("projectCreate.success_title"),
+      showSuccessToast(
         t("projectCreate.success_message", { project: projectName })
       );
 

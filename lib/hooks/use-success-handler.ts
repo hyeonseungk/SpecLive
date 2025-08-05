@@ -1,23 +1,22 @@
+import { showSuccessToast } from "@/lib/toast-store";
 import { useCallback } from "react";
-import { showSuccess, showSimpleSuccess } from "@/lib/success-store";
 
 export const useSuccessHandler = () => {
   const handleSuccess = useCallback(
     (title: string, message: string, onConfirm?: () => void) => {
-      showSuccess(title, message, onConfirm);
+      showSuccessToast(message);
     },
     []
   );
 
   const handleSimpleSuccess = useCallback((message: string) => {
-    showSimpleSuccess(message);
+    showSuccessToast(message);
   }, []);
 
   return {
     handleSuccess,
     handleSimpleSuccess,
-    showSuccess,
-    showSimpleSuccess,
+    showSuccessToast,
   };
 };
 
@@ -27,5 +26,5 @@ export const globalSuccessHandler = (
   message: string,
   onConfirm?: () => void
 ) => {
-  showSuccess(title, message, onConfirm);
+  showSuccessToast(message);
 };

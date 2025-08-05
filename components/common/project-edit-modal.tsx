@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { showError, showSimpleError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { showSuccess } from "@/lib/success-store";
+import { showSuccessToast } from "@/lib/toast-store";
 import supabase from "@/lib/supabase-browser";
 import type { Tables } from "@/types/database";
 import { useState } from "react";
@@ -53,8 +53,7 @@ export default function ProjectEditModal({
 
         if (error) throw error;
 
-        showSuccess(
-          t("projectEdit.update_success_title"),
+        showSuccessToast(
           t("projectEdit.update_success_message")
         );
         onSuccess();
@@ -84,8 +83,7 @@ export default function ProjectEditModal({
 
         if (projectError) throw projectError;
 
-        showSuccess(
-          t("projectEdit.delete_success_title"),
+        showSuccessToast(
           t("projectEdit.delete_success_message")
         );
         onSuccess();

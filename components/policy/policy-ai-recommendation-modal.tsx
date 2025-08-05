@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { showSimpleSuccess } from "@/lib/success-store";
+import { showSuccessToast } from "@/lib/toast-store";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import { useState } from "react";
@@ -136,7 +136,7 @@ export default function PolicyAiRecommendationModal({
       }
       onPoliciesAdded(addedPolicies);
       setAiRecommendations((prev) => prev.filter((r) => !r.selected));
-      showSimpleSuccess(`${selected.length}${t("policy.ai_policies_added")}`);
+              showSuccessToast(`${selected.length}${t("policy.ai_policies_added")}`);
       if (aiRecommendations.filter((r) => !r.selected).length === 0) {
         onClose();
       }

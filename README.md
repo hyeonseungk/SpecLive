@@ -191,7 +191,7 @@ showError(
 ```typescript
 import { showSuccess } from "@/lib/success-store";
 
-showSuccess("저장 완료", "데이터가 성공적으로 저장되었습니다.", () => {
+showSuccess("저장 완료", "데이터가  저장되었습니다.", () => {
   // 성공 후 콜백 (선택사항)
 });
 ```

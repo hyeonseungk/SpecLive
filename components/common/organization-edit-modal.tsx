@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { showError, showSimpleError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { showSuccess } from "@/lib/success-store";
 import supabase from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import type { Tables } from "@/types/database";
 import { useState } from "react";
 
@@ -49,10 +49,7 @@ export default function OrganizationEditModal({
 
         if (error) throw error;
 
-        showSuccess(
-          t("orgEdit.update_success_title"),
-          t("orgEdit.update_success_message")
-        );
+        showSuccessToast(t("orgEdit.update_success_message"));
         onSuccess();
         onClose();
       } catch (error) {
@@ -80,8 +77,7 @@ export default function OrganizationEditModal({
 
         if (orgError) throw orgError;
 
-        showSuccess(
-          t("orgEdit.delete_success_title"),
+        showSuccessToast(
           t("orgEdit.delete_success_message")
         );
         onSuccess();

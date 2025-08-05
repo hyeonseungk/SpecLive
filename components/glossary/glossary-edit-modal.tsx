@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { showSimpleSuccess } from "@/lib/success-store";
+import { showSuccessToast } from "@/lib/toast-store";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import { useState } from "react";
@@ -100,7 +100,7 @@ export default function GlossaryEditModal({
       };
 
       onGlossaryUpdated(glossaryWithLinks);
-      showSimpleSuccess(t("glossary.update_success"));
+              showSuccessToast(t("glossary.update_success"));
       onClose();
     } catch (err) {
       console.error("Error updating glossary:", err);
@@ -153,7 +153,7 @@ export default function GlossaryEditModal({
       }
 
       onGlossaryDeleted(glossary.id, deletedSequence);
-      showSimpleSuccess(t("glossary.delete_success"));
+              showSuccessToast(t("glossary.delete_success"));
       onClose();
     } catch (err) {
       console.error("Error deleting glossary:", err);

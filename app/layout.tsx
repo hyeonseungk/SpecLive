@@ -3,6 +3,7 @@
 import { ErrorModal } from "@/components/common/error-modal";
 import { MobileWarningModal } from "@/components/common/mobile-warning-modal";
 import { SuccessModal } from "@/components/common/success-modal";
+import { Toast } from "@/components/common/toast";
 import { useLangStore } from "@/lib/i18n-store";
 import { isMobileDevice, isMobileViewport } from "@/utils/mobile-detection";
 import { useEffect, useState } from "react";
@@ -58,6 +59,7 @@ export default function RootLayout({
         <div className="min-h-screen bg-background">{children}</div>
         <ErrorModal />
         <SuccessModal />
+        <Toast />
         <MobileWarningModal
           isOpen={showMobileWarning}
           onClose={() => {
