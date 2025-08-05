@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGlobalT } from "@/lib/i18n";
+import Image from "next/image";
 
 interface MobileWarningModalProps {
   isOpen: boolean;
@@ -22,18 +23,25 @@ export function MobileWarningModal({
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-lg">
-            📱 PC 최적화 서비스
+            {t("common.mobile_warning.title")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-center text-muted-foreground">
-            PC에 최적화된 서비스입니다.
-            <br />
-            PC로 접속해주세요.
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/images/turn_on_desktop_mode_ko_KR.jpeg"
+              alt="데스크톱 모드 활성화 안내"
+              width={200}
+              height={150}
+              className="rounded-lg"
+            />
+          </div>
+          <p className="text-center text-muted-foreground whitespace-pre-line">
+            {t("common.mobile_warning.message")}
           </p>
           <div className="flex justify-center">
             <Button onClick={onClose} variant="outline">
-              확인
+              {t("common.mobile_warning.confirm")}
             </Button>
           </div>
         </CardContent>

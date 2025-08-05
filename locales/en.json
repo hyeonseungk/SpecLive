@@ -21,7 +21,12 @@
     "error_title": "Error",
     "success_title": "Success",
     "no_search_results": "No search results found",
-    "clear_search": "Clear search"
+    "clear_search": "Clear search",
+    "mobile_warning": {
+      "title": "💻 PC Optimized Service",
+      "message": "This service is optimized for PC screens.\nTo view on mobile, please enable \"Desktop Mode\" in your mobile browser.",
+      "confirm": "OK"
+    }
   },
   "org": {
     "not_found": "Organization not found...",

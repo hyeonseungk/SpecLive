@@ -21,7 +21,12 @@
     "error_title": "오류",
     "success_title": "성공",
     "no_search_results": "검색 결과가 없습니다",
-    "clear_search": "검색어 초기화"
+    "clear_search": "검색어 초기화",
+    "mobile_warning": {
+      "title": "💻 PC 최적화 서비스",
+      "message": "PC 화면에 최적화되어 있습니다.\n모바일에서 확인하시려면 모바일 브라우저의 \"데스크톱 모드\"를 켜고 사용해주세요.",
+      "confirm": "확인"
+    }
   },
   "home": {
     "tagline_1": "IT 서비스를 만드는 팀을 위한",
