@@ -25,7 +25,15 @@ export default function RootLayout({
     // 모바일 디바이스 감지
     const checkMobile = () => {
       const isMobile = isMobileDevice() || isMobileViewport();
-      setShowMobileWarning(isMobile);
+
+      // 이미 모바일 경고를 본 적이 있는지 확인
+      const hasSeenMobileWarning = localStorage.getItem("hasSeenMobileWarning");
+
+      if (isMobile && !hasSeenMobileWarning) {
+        setShowMobileWarning(true);
+      } else {
+        setShowMobileWarning(false);
+      }
     };
 
     checkMobile();
@@ -51,7 +59,11 @@ export default function RootLayout({
         <SuccessModal />
         <MobileWarningModal
           isOpen={showMobileWarning}
-          onClose={() => setShowMobileWarning(false)}
+          onClose={() => {
+            setShowMobileWarning(false);
+            // 모바일 경고를 봤다고 표시
+            localStorage.setItem("hasSeenMobileWarning", "true");
+          }}
         />
       </body>
     </html>
