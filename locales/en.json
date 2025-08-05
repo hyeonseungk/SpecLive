@@ -426,7 +426,9 @@
     "email_already_exists": "Email already exists.",
     "weak_password": "Password is too weak.",
     "invalid_email": "Invalid email format.",
-    "email_not_confirmed": "Email not confirmed. Please check your email."
+    "email_not_confirmed": "Email not confirmed. Please check your email.",
+    "sign_in_with_google": "Sign in with Google",
+    "or": "or"
   },
   "lang": {
     "english": "English",

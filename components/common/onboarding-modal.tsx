@@ -19,22 +19,22 @@ interface OnboardingModalProps {
 
 const getOnboardingData = (t: any) => [
   {
-    image: "/images/onboarding/onboarding_glossary.png",
+    image: "/images/onboarding/onboarding_1_ko_KR.png",
     title: t("onboarding.slides.glossary.title"),
     description: t("onboarding.slides.glossary.description"),
   },
   {
-    image: "/images/onboarding/onboarding_policy.png",
+    image: "/images/onboarding/onboarding_2_ko_KR.png",
     title: t("onboarding.slides.policy.title"),
     description: t("onboarding.slides.policy.description"),
   },
   {
-    image: "/images/onboarding/onboarding_figma.png",
+    image: "/images/onboarding/onboarding_3_ko_KR.png",
     title: t("onboarding.slides.figma.title"),
     description: t("onboarding.slides.figma.description"),
   },
   {
-    image: "/images/onboarding/onboarding_ai.png",
+    image: "/images/onboarding/onboarding_4_ko_KR.png",
     title: t("onboarding.slides.ai.title"),
     description: t("onboarding.slides.ai.description"),
   },
@@ -83,7 +83,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   key={index}
                   className="w-full flex-shrink-0 flex flex-col items-center space-y-6 p-6"
                 >
-                  <div className="relative w-full max-w-4xl h-[500px]">
+                  <div className="relative w-full max-w-3xl h-[500px] mx-auto">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl shadow-lg transform rotate-1 scale-105 opacity-15"></div>
                     <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl shadow-lg transform -rotate-1 scale-105 opacity-15"></div>
                     <div className="relative w-full h-full bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
@@ -92,7 +92,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                         alt={`Onboarding slide ${index + 1}`}
                         fill
                         style={{ objectFit: "contain" }}
-                        className="rounded-2xl p-4"
+                        className="rounded-2xl p-2"
                       />
                     </div>
                   </div>
