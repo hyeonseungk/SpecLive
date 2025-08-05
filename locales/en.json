@@ -452,7 +452,9 @@
   },
   "orgCreate": {
     "title": "Create Organization",
-    "description": "Create a new organization to manage projects. You will become the owner.",
+    "description_1": "Create a new organization to manage projects.",
+    "description_2": "You will become the owner.",
+    "description_3": "Organization name can be modified anytime.",
     "name_label": "Organization name",
     "name_placeholder": "e.g. Google, Apple, Microsoft",
     "input_error_title": "Input Error",

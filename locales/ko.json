@@ -450,7 +450,9 @@
   },
   "orgCreate": {
     "title": "새 조직 생성",
-    "description": "새로운 조직을 생성하고 프로젝트들을 관리하세요. 당신이 조직의 소유자가 됩니다.",
+    "description_1": "새로운 조직을 생성하고 프로젝트들을 관리하세요.",
+    "description_2": "당신이 조직의 소유자가 됩니다.",
+    "description_3": "조직 이름은 언제든지 수정할 수 있습니다.",
     "name_label": "조직 이름",
     "name_placeholder": "예: 네이버, 카카오, 토스",
     "input_error_title": "입력 오류",

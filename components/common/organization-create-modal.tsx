@@ -13,8 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useErrorStore } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { showSuccessToast } from "@/lib/toast-store";
 import supabase from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import type { User } from "@supabase/supabase-js";
 import { useState } from "react";
 
@@ -90,8 +90,10 @@ export function OrganizationCreateModal({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{t("orgCreate.title")}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t("orgCreate.description")}
+          <AlertDialogDescription className="space-y-2">
+            <div>{t("orgCreate.description_1")}</div>
+            <div>{t("orgCreate.description_2")}</div>
+            <div>{t("orgCreate.description_3")}</div>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
