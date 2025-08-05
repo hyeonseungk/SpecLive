@@ -54,7 +54,7 @@ export default function UsecaseAddModal({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              {t("usecase.name_label")}
+              {t("usecase.name_label")} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"

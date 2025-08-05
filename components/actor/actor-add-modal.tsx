@@ -43,7 +43,7 @@ export default function ActorAddModal({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              {t("actor.name_label")}
+              {t("actor.name_label")} <span className="text-red-500">*</span>
             </label>
             <input
               id="add-actor-name-input"

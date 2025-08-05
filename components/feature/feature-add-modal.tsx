@@ -74,7 +74,7 @@ export default function FeatureAddModal({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              {t("feature.name_label")}
+              {t("feature.name_label")} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
