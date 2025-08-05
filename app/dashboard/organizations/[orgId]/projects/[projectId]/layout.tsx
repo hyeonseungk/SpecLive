@@ -159,22 +159,6 @@ export default function ProjectLayout({
                 <button
                   onClick={() =>
                     router.push(
-                      `/dashboard/organizations/${orgId}/projects/${projectId}/prd`
-                    )
-                  }
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
-                    pathname.includes("/prd")
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-accent"
-                  }`}
-                >
-                  <span className="text-lg">📄</span>
-                  <span>{t("sidebar.prd")}</span>
-                </button>
-
-                <button
-                  onClick={() =>
-                    router.push(
                       `/dashboard/organizations/${orgId}/projects/${projectId}/glossary`
                     )
                   }
@@ -202,6 +186,22 @@ export default function ProjectLayout({
                 >
                   <span className="text-lg">📋</span>
                   <span>{t("sidebar.policy")}</span>
+                </button>
+
+                <button
+                  onClick={() =>
+                    router.push(
+                      `/dashboard/organizations/${orgId}/projects/${projectId}/prd`
+                    )
+                  }
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
+                    pathname.includes("/prd")
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-accent"
+                  }`}
+                >
+                  <span className="text-lg">📄</span>
+                  <span>{t("sidebar.prd")}</span>
                 </button>
 
                 <button

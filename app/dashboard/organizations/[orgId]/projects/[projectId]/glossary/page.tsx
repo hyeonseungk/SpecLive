@@ -4,6 +4,7 @@ import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import GlossaryAddModal from "@/components/glossary/glossary-add-modal";
 import GlossaryAiRecommendationModal from "@/components/glossary/glossary-ai-recommendation-modal";
 import GlossaryEditModal from "@/components/glossary/glossary-edit-modal";
+import GlossaryImportanceModal from "@/components/glossary/glossary-importance-modal";
 import SortableGlossaryCard from "@/components/glossary/sortable-glossary-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,6 +80,9 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   // AI 추천 모달 상태
   const [showAiRecommendationModal, setShowAiRecommendationModal] =
     useState(false);
+
+  // 용어 관리 중요성 모달 상태
+  const [showImportanceModal, setShowImportanceModal] = useState(false);
 
   // 추가: 다국어 지원 훅
   const t = useGlobalT();
@@ -265,6 +269,15 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
     setShowAiRecommendationModal(false);
   };
 
+  // 용어 관리 중요성 모달 핸들러
+  const handleOpenImportanceModal = () => {
+    setShowImportanceModal(true);
+  };
+
+  const handleCloseImportanceModal = () => {
+    setShowImportanceModal(false);
+  };
+
   // 편집 모달 열기
   const handleEditGlossary = (glossary: Tables<"glossaries">) => {
     setEditingGlossary(glossary);
@@ -392,7 +405,13 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
         {/* 헤더 영역 */}
         <div className="mb-6">
           <h2 className="text-3xl font-bold mb-2">{t("glossary.header")}</h2>
-          <p className="text-muted-foreground">{t("glossary.sub")}</p>
+          <p className="text-muted-foreground mb-2">{t("glossary.sub")}</p>
+          <button
+            onClick={handleOpenImportanceModal}
+            className="text-sm text-blue-600 hover:text-blue-800 underline cursor-pointer"
+          >
+            {t("glossary.importance_link")}
+          </button>
         </div>
 
         {/* 뷰 선택, 개수 표시, 검색, 정렬 */}
@@ -581,6 +600,14 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
           onTermsAdded={(newGlossaries) =>
             setGlossaries((prev) => [...newGlossaries, ...prev])
           }
+        />
+      )}
+
+      {/* 용어 관리 중요성 모달 */}
+      {showImportanceModal && (
+        <GlossaryImportanceModal
+          isOpen={showImportanceModal}
+          onClose={handleCloseImportanceModal}
         />
       )}
     </div>

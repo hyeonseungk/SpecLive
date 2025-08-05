@@ -156,6 +156,16 @@ export default function Home() {
       {/* Content */}
       <Card className="relative z-10 w-full max-w-md backdrop-blur-sm bg-white/90">
         <CardHeader className="space-y-1">
+          {/* 온보딩 버튼 */}
+          <div className="flex justify-end">
+            <Button
+              variant="link"
+              onClick={() => setShowOnboarding(true)}
+              className="text-sm text-blue-600 hover:text-blue-800 p-0 h-auto"
+            >
+              {t("home.what_is_service")}
+            </Button>
+          </div>
           <div className="flex flex-col items-center space-y-2">
             <Image
               src="/images/logo/logo.png"
@@ -171,16 +181,6 @@ export default function Home() {
           <CardDescription className="text-center">
             {t("home.tagline")}
           </CardDescription>
-          {/* 온보딩 버튼 */}
-          <div className="flex justify-end">
-            <Button
-              variant="link"
-              onClick={() => setShowOnboarding(true)}
-              className="text-sm text-blue-600 hover:text-blue-800 p-0 h-auto"
-            >
-              {t("home.what_is_service")}
-            </Button>
-          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">

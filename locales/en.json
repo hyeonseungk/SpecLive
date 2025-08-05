@@ -40,7 +40,8 @@
   },
   "glossary": {
     "header": "Glossary",
-    "sub": "Define and manage terms used in the project.",
+    "sub": "Define and manage all terms related to the service.",
+    "importance_link": "Importance of Terminology Management",
     "grid_view": "Grid View",
     "list_view": "List View",
     "search_placeholder": "Search terms...",
@@ -107,7 +108,13 @@
     "copy_url": "Copy Link",
     "url_copied": "Term link has been copied.",
     "url_copy_error_title": "Failed to copy link",
-    "url_copy_error_desc": "An error occurred while copying the link."
+    "url_copy_error_desc": "An error occurred while copying the link.",
+    "importance_modal_title": "Importance of Terminology Management",
+    "importance_modal_content_1": "Terminology is the core of all service design.",
+    "importance_modal_content_2": "Well-chosen terms are immediately reflected in variable names in development, component names in design, etc., and determine the team's speed.",
+    "importance_modal_content_3": "Carelessly chosen inappropriate terms, or cases where terms are needed but missing, slow down the team and reduce the probability of success.",
+    "importance_modal_content_4": "Carefully decide on terms that are appropriate for the service, and make sure everyone is well aware of and can use the decided terms.",
+    "close": "Close"
   },
   "management": {
     "header": "Project Management",
