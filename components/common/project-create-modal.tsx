@@ -162,7 +162,13 @@ export function ProjectCreateModal({
         <AlertDialogHeader>
           <AlertDialogTitle>{t("projectCreate.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            {t("projectCreate.description")}
+            {t("projectCreate.description")
+              .split("\n")
+              .map((line, index) => (
+                <div key={index} className={index > 0 ? "mt-2" : ""}>
+                  {line}
+                </div>
+              ))}
           </AlertDialogDescription>
         </AlertDialogHeader>
 

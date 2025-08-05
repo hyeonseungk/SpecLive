@@ -495,7 +495,7 @@
     "failure_title": "Creation failed",
     "failure_message": "Error occurred while creating project. Please try again.",
     "title": "Create Project",
-    "description": "Create a new project in the organization. You will automatically become its admin.",
+    "description": "Create a new project in the organization.\nYou will automatically become its admin.\nProject name can be modified anytime.",
     "org_select_label": "Select organization",
     "org_select_loading": "Loading organizations...",
     "org_select_no_orgs": "No organizations available. Please create one first.",
