@@ -21,50 +21,46 @@ export default function TermExplanationModal({
   const terms = [
     {
       icon: Users,
-      title: "액터 (Actor)",
-      description:
-        "시스템과 상호작용하는 사용자나 외부 시스템을 의미합니다. 예를 들어, '관리자', '일반 사용자', '결제 시스템' 등이 액터가 될 수 있습니다.",
+      title: t("termExplanation.actor.title"),
+      description: t("termExplanation.actor.description"),
       examples: [
-        "• 웹사이트의 일반 사용자",
-        "• 시스템 관리자",
-        "• 외부 결제 서비스",
-        "• 모바일 앱 사용자",
+        t("termExplanation.actor.examples.0"),
+        t("termExplanation.actor.examples.1"),
+        t("termExplanation.actor.examples.2"),
+        t("termExplanation.actor.examples.3"),
       ],
     },
     {
       icon: Target,
-      title: "유즈케이스 (Use Case)",
-      description:
-        "액터가 시스템을 통해 달성하려는 목표나 수행하려는 작업을 의미합니다. 각 유즈케이스는 특정 액터와 연결되어 있습니다.",
+      title: t("termExplanation.usecase.title"),
+      description: t("termExplanation.usecase.description"),
       examples: [
-        "• 회원가입하기",
-        "• 상품 주문하기",
-        "• 결제 처리하기",
-        "• 주문 내역 조회하기",
+        t("termExplanation.usecase.examples.0"),
+        t("termExplanation.usecase.examples.1"),
+        t("termExplanation.usecase.examples.2"),
+        t("termExplanation.usecase.examples.3"),
       ],
     },
     {
       icon: Zap,
-      title: "기능 (Feature)",
-      description:
-        "유즈케이스를 구현하기 위해 필요한 구체적인 시스템 기능을 의미합니다. 각 기능은 특정 유즈케이스에 속하며, 실제로 개발되어야 할 기능들입니다.",
+      title: t("termExplanation.feature.title"),
+      description: t("termExplanation.feature.description"),
       examples: [
-        "• 이메일 인증 코드 발송",
-        "• 카드 결제 처리",
-        "• 주문 상태 업데이트",
-        "• 배송 정보 조회",
+        t("termExplanation.feature.examples.0"),
+        t("termExplanation.feature.examples.1"),
+        t("termExplanation.feature.examples.2"),
+        t("termExplanation.feature.examples.3"),
       ],
     },
     {
       icon: FileText,
-      title: "정책 (Policy)",
-      description:
-        "기능이 어떻게 동작해야 하는지에 대한 규칙과 가이드라인을 의미합니다. 정책은 기능의 구현 방향과 제약사항을 정의합니다.",
+      title: t("termExplanation.policy.title"),
+      description: t("termExplanation.policy.description"),
       examples: [
-        "• 비밀번호는 8자 이상이어야 함",
-        "• 결제 실패 시 3회까지 재시도 가능",
-        "• 개인정보는 암호화하여 저장",
-        "• 주문 취소는 배송 전까지만 가능",
+        t("termExplanation.policy.examples.0"),
+        t("termExplanation.policy.examples.1"),
+        t("termExplanation.policy.examples.2"),
+        t("termExplanation.policy.examples.3"),
       ],
     },
   ];
@@ -74,7 +70,9 @@ export default function TermExplanationModal({
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">용어 설명</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            {t("termExplanation.title")}
+          </h2>
           <Button
             variant="ghost"
             size="icon"
@@ -110,7 +108,9 @@ export default function TermExplanationModal({
                       {term.description}
                     </p>
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-2">예시:</h4>
+                      <h4 className="font-medium text-gray-900 mb-2">
+                        {t("termExplanation.examples_label")}
+                      </h4>
                       <ul className="space-y-1">
                         {term.examples.map((example, exampleIndex) => (
                           <li
@@ -133,13 +133,13 @@ export default function TermExplanationModal({
         <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-lg">
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-3">
-              이 용어들은 시스템 설계와 개발 과정에서 일관된 소통을 돕습니다.
+              {t("termExplanation.footer_description")}
             </p>
             <Button
               onClick={onClose}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              이해했습니다
+              {t("termExplanation.understand_button")}
             </Button>
           </div>
         </div>

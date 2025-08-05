@@ -583,5 +583,51 @@
         "description": "Get smart feature and policy suggestions from AI for any of them."
       }
     }
+  },
+  "termExplanation": {
+    "title": "Term Explanations",
+    "actor": {
+      "title": "Actor",
+      "description": "Refers to users or external systems that interact with the system. For example, 'administrator', 'regular user', 'payment system', etc. can be actors.",
+      "examples": {
+        "0": "• Regular user of a website",
+        "1": "• System administrator",
+        "2": "• External payment service",
+        "3": "• Mobile app user"
+      }
+    },
+    "usecase": {
+      "title": "Use Case",
+      "description": "Refers to the goals that actors want to achieve or tasks they want to perform through the system. Each use case is connected to a specific actor.",
+      "examples": {
+        "0": "• Sign up for membership",
+        "1": "• Place an order",
+        "2": "• Process payment",
+        "3": "• View order history"
+      }
+    },
+    "feature": {
+      "title": "Feature",
+      "description": "Refers to specific system functions needed to implement use cases. Each feature belongs to a specific use case and represents the actual functions that need to be developed.",
+      "examples": {
+        "0": "• Send email verification code",
+        "1": "• Process card payment",
+        "2": "• Update order status",
+        "3": "• Check delivery information"
+      }
+    },
+    "policy": {
+      "title": "Policy",
+      "description": "Refers to rules and guidelines for how features should operate. Policies define the implementation direction and constraints of features.",
+      "examples": {
+        "0": "• Password must be at least 8 characters long",
+        "1": "• Payment can be retried up to 3 times on failure",
+        "2": "• Personal information must be stored encrypted",
+        "3": "• Order cancellation is only possible before shipping"
+      }
+    },
+    "examples_label": "Examples:",
+    "footer_description": "These terms are the components needed when designing services based on use cases.",
+    "understand_button": "I Understand"
   }
 }
