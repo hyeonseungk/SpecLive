@@ -153,7 +153,7 @@ export default function GlossaryAddModal({
           {/* Definition */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              {t("glossary.definition_label")}
+              {t("glossary.definition_label")} *
             </label>
             <textarea
               value={glossaryDefinition}
