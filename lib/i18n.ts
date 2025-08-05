@@ -1,6 +1,7 @@
 import en from "@/locales/en.json";
 import ko from "@/locales/ko.json";
 import { useLangStore } from "./i18n-store";
+import { useEffect } from "react";
 
 // 더 유연한 타입 정의
 type TranslationMap = Record<string, any>;
@@ -33,4 +34,17 @@ export function useGlobalT() {
     }
     return str;
   };
+}
+
+// 언어 hydration을 처리하는 훅
+export function useLanguageHydration() {
+  const { isHydrated, hydrateLanguage } = useLangStore();
+
+  useEffect(() => {
+    if (!isHydrated) {
+      hydrateLanguage();
+    }
+  }, [isHydrated, hydrateLanguage]);
+
+  return isHydrated;
 }

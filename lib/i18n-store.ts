@@ -8,9 +8,19 @@ const languageMap: Record<LangCode, LocaleCode> = {
   "ko-KR": "ko-KR",
 };
 
-// 브라우저 언어를 기반으로 초기 언어 설정
+// 서버와 클라이언트에서 일관된 초기값 사용
 function getInitialLanguage(): LangCode {
   // 서버 사이드에서는 기본값 반환
+  if (typeof window === "undefined") {
+    return "ko-KR";
+  }
+
+  // 클라이언트에서도 기본값으로 시작 (hydration 후에 실제 값으로 업데이트)
+  return "ko-KR";
+}
+
+// 클라이언트에서 실제 언어 설정을 가져오는 함수
+function getClientLanguage(): LangCode {
   if (typeof window === "undefined") {
     return "ko-KR";
   }
@@ -36,7 +46,9 @@ function getInitialLanguage(): LangCode {
 interface LangState {
   lang: LangCode;
   locale: LocaleCode;
+  isHydrated: boolean;
   setLanguage: (code: LangCode) => void;
+  hydrateLanguage: () => void;
 }
 
 export const useLangStore = create<LangState>((set) => {
@@ -45,12 +57,25 @@ export const useLangStore = create<LangState>((set) => {
   return {
     lang: initialLang,
     locale: languageMap[initialLang],
+    isHydrated: false,
     setLanguage: (code) => {
       if (typeof window !== "undefined") {
         localStorage.setItem("lang", code);
         document.documentElement.lang = code;
       }
       set({ lang: code, locale: languageMap[code] });
+    },
+    hydrateLanguage: () => {
+      const clientLang = getClientLanguage();
+      if (typeof window !== "undefined") {
+        localStorage.setItem("lang", clientLang);
+        document.documentElement.lang = clientLang;
+      }
+      set({
+        lang: clientLang,
+        locale: languageMap[clientLang],
+        isHydrated: true,
+      });
     },
   };
 });
