@@ -11,6 +11,7 @@ import type { User } from "@supabase/supabase-js";
 import { LogOut } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type Organization = Tables<"organizations">;
 
@@ -95,7 +96,16 @@ export default function OrganizationLayout({
       >
         <div className="px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">{t("common.brand")}</h1>
+            <div className="flex items-center gap-2">
+              <Image
+                src="/images/logo/logo.png"
+                alt="SpecLive Logo"
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+              <h1 className="text-2xl font-bold">{t("common.brand")}</h1>
+            </div>
             {user && (
               <OrganizationSelector
                 user={user}

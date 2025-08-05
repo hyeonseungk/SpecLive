@@ -154,9 +154,18 @@ export default function Home() {
       {/* Content */}
       <Card className="relative z-10 w-full max-w-md backdrop-blur-sm bg-white/90">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">
-            {t("common.brand")}
-          </CardTitle>
+          <div className="flex flex-col items-center space-y-2">
+            <Image
+              src="/images/logo/logo.png"
+              alt="SpecLive Logo"
+              width={48}
+              height={48}
+              className="rounded-full"
+            />
+            <CardTitle className="text-2xl text-center">
+              {t("common.brand")}
+            </CardTitle>
+          </div>
           <CardDescription className="text-center">
             {t("home.tagline")}
           </CardDescription>

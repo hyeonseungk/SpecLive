@@ -14,6 +14,7 @@ import type { Tables } from "@/types/database";
 import { formatDateWithSuffix } from "@/utils/date-format";
 import type { User } from "@supabase/supabase-js";
 import { LogOut } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -212,7 +213,16 @@ export default function Dashboard() {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">{t("common.brand")}</h1>
+            <div className="flex items-center gap-2">
+              <Image
+                src="/images/logo/logo.png"
+                alt="SpecLive Logo"
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+              <h1 className="text-2xl font-bold">{t("common.brand")}</h1>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <LanguageSelector />

@@ -5,6 +5,7 @@ import { useGlobalT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import { PanelLeft, PanelLeftClose } from "lucide-react";
+import Image from "next/image";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -139,7 +140,16 @@ export default function ProjectLayout({
                   {t("sidebar.project")}
                 </span>
               </div>
-              <h1 className="text-xl font-bold">{project.name}</h1>
+              <div className="flex items-center gap-2 mb-2">
+                <Image
+                  src="/images/logo/logo.png"
+                  alt="SpecLive Logo"
+                  width={24}
+                  height={24}
+                  className="rounded-full"
+                />
+                <h1 className="text-xl font-bold">{project.name}</h1>
+              </div>
             </div>
 
             {/* 네비게이션 */}
