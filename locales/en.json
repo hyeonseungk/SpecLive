@@ -133,7 +133,7 @@
   },
   "policy": {
     "header": "Policy Management",
-    "sub": "Manage features and various policies required for the service.",
+    "sub": "Manage all features and various policies of the service.",
     "search_placeholder": "Search policies...",
     "all_categories": "All categories",
     "add_button": "Add Policy",
@@ -179,7 +179,8 @@
     "select_feature": "Please select a feature",
     "no_features": "No features yet",
     "no_terms": "No terms available",
-    "first_policy_hint": "Add your first policy"
+    "first_policy_hint": "Add your first policy",
+    "term_explanation_link": "Term Explanations"
   },
   "policyAddModal": {
     "header": "Add New Policy",

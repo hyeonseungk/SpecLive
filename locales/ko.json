@@ -183,7 +183,7 @@
   },
   "policy": {
     "header": "정책 관리",
-    "sub": "서비스에 필요한 기능과 각종 정책들을 관리합니다.",
+    "sub": "서비스의 모든 기능들과 각종 정책들을 관리합니다.",
     "search_placeholder": "정책 검색...",
     "all_categories": "모든 카테고리",
     "add_button": "정책 추가",
@@ -229,7 +229,8 @@
     "select_feature": "기능을 선택해주세요",
     "no_features": "아직 기능이 없습니다",
     "no_terms": "용어가 없습니다",
-    "first_policy_hint": "첫 번째 정책을 추가해보세요"
+    "first_policy_hint": "첫 번째 정책을 추가해보세요",
+    "term_explanation_link": "각 용어 설명"
   },
   "policyAddModal": {
     "header": "새 정책 추가",
