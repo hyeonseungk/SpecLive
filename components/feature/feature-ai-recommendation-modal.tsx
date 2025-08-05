@@ -184,7 +184,7 @@ export default function FeatureAiRecommendationModal({
                   {t("buttons.close")}
                 </Button>
                 <Button onClick={handleAiRecommendation} disabled={aiLoading}>
-                  {t("feature.ai_get_recommendations")}
+                  {t("feature.ai_get_recommendations_modal")}
                 </Button>
               </div>
             )}

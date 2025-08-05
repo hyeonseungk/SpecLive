@@ -551,6 +551,7 @@
     "ai_modal_title": "AI Feature Recommendations",
     "ai_modal_desc": "We can recommend additional features based on your existing PRD, terms, actors, use cases, features, and policies. Would you like to get recommendations?",
     "ai_get_recommendations": "🤖 Get AI Recommendations",
+    "ai_get_recommendations_modal": "Get Recommendations",
     "ai_loading": "AI is analyzing and recommending features...",
     "ai_select_features": "Select features you want from the recommendations",
     "ai_add_selected": "Add Selected Features",
