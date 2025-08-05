@@ -392,7 +392,8 @@
     "created_date": "Created"
   },
   "home": {
-    "tagline": "Service terminology/feature/policy management tool for teams building IT services"
+    "tagline": "Service terminology/feature/policy management tool for teams building IT services",
+    "what_is_service": "What is this service?"
   },
   "auth": {
     "email_placeholder": "Email",
@@ -557,5 +558,22 @@
   "terms": {
     "load_error_title": "Failed to Load Terms",
     "load_error_desc": "An error occurred while loading terms."
+  },
+  "onboarding": {
+    "title": "SpecLive Introduction",
+    "slides": {
+      "glossary": {
+        "title": "Communication with agreed-upon terms increases team efficiency and service development speed.",
+        "description": "Properly manage your glossary with SpecLive."
+      },
+      "policy": {
+        "title": "Service features and policies that were scattered here and there,",
+        "description": "You can manage them systematically with SpecLive."
+      },
+      "ai": {
+        "title": "Planning a new service? Want to improve an existing service?",
+        "description": "Get smart feature and policy suggestions from AI for any of them."
+      }
+    }
   }
 }

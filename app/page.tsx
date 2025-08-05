@@ -178,7 +178,7 @@ export default function Home() {
               onClick={() => setShowOnboarding(true)}
               className="text-sm text-blue-600 hover:text-blue-800 p-0 h-auto"
             >
-              무슨 서비스인가요?
+              {t("home.what_is_service")}
             </Button>
           </div>
         </CardHeader>

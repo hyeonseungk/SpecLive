@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useGlobalT } from "@/lib/i18n";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -17,27 +17,28 @@ interface OnboardingModalProps {
   onClose: () => void;
 }
 
-const onboardingData = [
+const getOnboardingData = (t: any) => [
   {
     image: "/images/onboarding/onboarding_glossary.png",
-    title: "약속된 용어로 소통해야 팀의 효율과 서비스 개발 속도가 빨라집니다.",
-    description: "SpecLive에서 용어집을 제대로 관리해보세요.",
+    title: t("onboarding.slides.glossary.title"),
+    description: t("onboarding.slides.glossary.description"),
   },
   {
     image: "/images/onboarding/onboarding_policy.png",
-    title: "그동안 여기저기 흩어져있던 서비스 기능과 정책들,",
-    description: "SpecLive에서 체계적으로 관리할 수 있어요.",
+    title: t("onboarding.slides.policy.title"),
+    description: t("onboarding.slides.policy.description"),
   },
   {
     image: "/images/onboarding/onboarding_ai.png",
-    title: "새롭게 기획하는 서비스? 더 발전시킬 서비스?",
-    description: "어느 것이라도 AI의 스마트한 기능 및 정책 제안을 받아보세요.",
+    title: t("onboarding.slides.ai.title"),
+    description: t("onboarding.slides.ai.description"),
   },
 ];
 
 export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const t = useGlobalT();
+  const onboardingData = getOnboardingData(t);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % onboardingData.length);
@@ -56,19 +57,11 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
-        <DialogHeader className="relative">
+      <DialogContent className="max-w-6xl max-h-[98vh] overflow-hidden">
+        <DialogHeader>
           <DialogTitle className="text-center text-xl font-semibold">
-            SpecLive 소개
+            {t("onboarding.title")}
           </DialogTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClose}
-            className="absolute right-0 top-0 h-8 w-8 p-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </DialogHeader>
 
         <div className="relative">
@@ -85,16 +78,20 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   key={index}
                   className="w-full flex-shrink-0 flex flex-col items-center space-y-6 p-6"
                 >
-                  <div className="relative w-full max-w-md h-64">
-                    <Image
-                      src={slide.image}
-                      alt={`Onboarding slide ${index + 1}`}
-                      fill
-                      style={{ objectFit: "contain" }}
-                      className="rounded-lg"
-                    />
+                  <div className="relative w-full max-w-4xl h-[500px]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl shadow-lg transform rotate-1 scale-105 opacity-15"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl shadow-lg transform -rotate-1 scale-105 opacity-15"></div>
+                    <div className="relative w-full h-full bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+                      <Image
+                        src={slide.image}
+                        alt={`Onboarding slide ${index + 1}`}
+                        fill
+                        style={{ objectFit: "contain" }}
+                        className="rounded-2xl p-4"
+                      />
+                    </div>
                   </div>
-                  <div className="text-center space-y-2 max-w-md">
+                  <div className="text-center space-y-2 max-w-2xl">
                     <h3 className="text-lg font-medium text-gray-900 leading-relaxed">
                       {slide.title}
                     </h3>
