@@ -2244,7 +2244,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         element.classList.add("ring-2", "ring-primary", "ring-opacity-50");
         setTimeout(() => {
           element.classList.remove("ring-2", "ring-primary", "ring-opacity-50");
-        }, 3000);
+        }, 1000);
       }
     }, 300);
   }, [selectedFeature]);
@@ -2262,7 +2262,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         el.classList.add("ring-2", "ring-primary", "ring-opacity-50");
         setTimeout(() => {
           el.classList.remove("ring-2", "ring-primary", "ring-opacity-50");
-        }, 3000);
+        }, 1000);
       }
     }, 600);
   }, [featurePolicies, searchParams]);

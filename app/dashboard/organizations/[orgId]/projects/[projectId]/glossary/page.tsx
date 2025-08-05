@@ -17,8 +17,8 @@ import {
 import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { showSuccessToast } from "@/lib/toast-store";
 import { supabase } from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import { Tables } from "@/types/database";
 import {
   closestCenter,
@@ -202,7 +202,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
               "ring-primary",
               "ring-opacity-50"
             );
-          }, 3000);
+          }, 1000);
         }
       }, 300); // 시간을 좀 더 늘림
     }
@@ -298,7 +298,7 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
     try {
       await navigator.clipboard.writeText(urlWithHash);
-              showSuccessToast(t("glossary.url_copied"));
+      showSuccessToast(t("glossary.url_copied"));
     } catch (error) {
       console.error("URL 복사 실패:", error);
       showError(
