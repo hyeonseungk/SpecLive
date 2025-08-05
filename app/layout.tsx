@@ -4,6 +4,7 @@ import { ErrorModal } from "@/components/common/error-modal";
 import { MobileWarningModal } from "@/components/common/mobile-warning-modal";
 import { SuccessModal } from "@/components/common/success-modal";
 import { Toast } from "@/components/common/toast";
+import { useLanguageHydration } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
 import { isMobileDevice, isMobileViewport } from "@/utils/mobile-detection";
 import { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const { lang } = useLangStore();
+  const isHydrated = useLanguageHydration();
   const [showMobileWarning, setShowMobileWarning] = useState(false);
 
   useEffect(() => {
