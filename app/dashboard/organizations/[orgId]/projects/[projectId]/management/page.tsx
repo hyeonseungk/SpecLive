@@ -1,10 +1,9 @@
 "use client";
 
-import { MemberInviteModal } from "@/components/common/member-invite-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { showSimpleError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import { useRouter } from "next/navigation";
@@ -30,7 +29,6 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const [project, setProject] = useState<Project | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const t = useGlobalT();
 
   const router = useRouter();
@@ -87,9 +85,8 @@ export default function ManagementPage({ params }: ManagementPageProps) {
     router.push("/");
   };
 
-  const handleInviteSuccess = () => {
-    setShowInviteModal(false);
-    showSimpleSuccess(t("management.invite_success"));
+  const handleInviteClick = () => {
+    showSimpleError("준비 중인 기능입니다");
   };
 
   if (loading) {
@@ -139,7 +136,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
                 </p>
               </CardHeader>
               <CardContent>
-                <Button onClick={() => setShowInviteModal(true)}>
+                <Button onClick={handleInviteClick}>
                   {t("management.invite_button")}
                 </Button>
               </CardContent>
@@ -183,16 +180,6 @@ export default function ManagementPage({ params }: ManagementPageProps) {
           </Card>
         )}
       </div>
-
-      {/* 멤버 초대 모달 */}
-      {project && (
-        <MemberInviteModal
-          isOpen={showInviteModal}
-          onClose={() => setShowInviteModal(false)}
-          onSuccess={handleInviteSuccess}
-          project={project}
-        />
-      )}
     </div>
   );
 }
