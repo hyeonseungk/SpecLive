@@ -1,9 +1,11 @@
 "use client";
 
 import { ErrorModal } from "@/components/common/error-modal";
+import { MobileWarningModal } from "@/components/common/mobile-warning-modal";
 import { SuccessModal } from "@/components/common/success-modal";
 import { useLangStore } from "@/lib/i18n-store";
-import { useEffect } from "react";
+import { isMobileDevice, isMobileViewport } from "@/utils/mobile-detection";
+import { useEffect, useState } from "react";
 import "./globals.css";
 
 export default function RootLayout({
@@ -12,11 +14,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const { lang } = useLangStore();
+  const [showMobileWarning, setShowMobileWarning] = useState(false);
 
   useEffect(() => {
     // 전체 언어 설정에 따라 HTML lang 속성 설정
     document.documentElement.lang = lang;
   }, [lang]);
+
+  useEffect(() => {
+    // 모바일 디바이스 감지
+    const checkMobile = () => {
+      const isMobile = isMobileDevice() || isMobileViewport();
+      setShowMobileWarning(isMobile);
+    };
+
+    checkMobile();
+
+    // 윈도우 리사이즈 시에도 체크
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   return (
     <html lang={lang} suppressHydrationWarning>
@@ -32,6 +49,10 @@ export default function RootLayout({
         <div className="min-h-screen bg-background">{children}</div>
         <ErrorModal />
         <SuccessModal />
+        <MobileWarningModal
+          isOpen={showMobileWarning}
+          onClose={() => setShowMobileWarning(false)}
+        />
       </body>
     </html>
   );
