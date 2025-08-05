@@ -29,6 +29,11 @@ const getOnboardingData = (t: any) => [
     description: t("onboarding.slides.policy.description"),
   },
   {
+    image: "/images/onboarding/onboarding_figma.png",
+    title: t("onboarding.slides.figma.title"),
+    description: t("onboarding.slides.figma.description"),
+  },
+  {
     image: "/images/onboarding/onboarding_ai.png",
     title: t("onboarding.slides.ai.title"),
     description: t("onboarding.slides.ai.description"),
