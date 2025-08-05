@@ -261,7 +261,7 @@
   },
   "project": {
     "prd_header": "PRD",
-    "prd_sub": "Write the product requirements document accurately and in detail."
+    "prd_sub": "Write a detailed and accurate PRD for your existing or new service. This helps improve the accuracy of various AI recommendation features (terms/features/policies, etc.)."
   },
   "actor": {
     "label": "Actor:",
