@@ -2,6 +2,7 @@
 
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import { LanguageSelector } from "@/components/common/language-selector";
+import { OnboardingModal } from "@/components/common/onboarding-modal";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,6 +30,7 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const router = useRouter();
   const t = useGlobalT();
   const { lang } = useLangStore();
@@ -169,6 +171,16 @@ export default function Home() {
           <CardDescription className="text-center">
             {t("home.tagline")}
           </CardDescription>
+          {/* 온보딩 버튼 */}
+          <div className="flex justify-end">
+            <Button
+              variant="link"
+              onClick={() => setShowOnboarding(true)}
+              className="text-sm text-blue-600 hover:text-blue-800 p-0 h-auto"
+            >
+              무슨 서비스인가요?
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
@@ -252,6 +264,12 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* 온보딩 모달 */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+      />
     </main>
   );
 }
