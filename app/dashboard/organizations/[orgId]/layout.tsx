@@ -5,7 +5,7 @@ import { LogoutConfirmModal } from "@/components/common/logout-confirm-modal";
 import { OrganizationSelector } from "@/components/common/organization-selector";
 import { Button } from "@/components/ui/button";
 import { useGlobalT } from "@/lib/i18n";
-import { supabase } from "@/lib/supabase-browser";
+import { supabase, signOut } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import type { User } from "@supabase/supabase-js";
 import { LogOut } from "lucide-react";
@@ -64,7 +64,7 @@ export default function OrganizationLayout({
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     router.push("/");
   };
 

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import supabase from "@/lib/supabase-browser";
+import supabase, { signOut } from "@/lib/supabase-browser";
 import type { Tables } from "@/types/database";
 import { formatDateWithSuffix } from "@/utils/date-format";
 import type { User } from "@supabase/supabase-js";
@@ -168,7 +168,7 @@ export default function Dashboard() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     router.push("/");
   };
 
