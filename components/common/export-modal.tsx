@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase-browser";
 import { showSuccessToast } from "@/lib/toast-store";
 import { X } from "lucide-react";
 import { useState } from "react";
+import * as XLSX from "xlsx";
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -499,6 +500,139 @@ export default function ExportModal({
     }
   };
 
+  const exportAsExcel = async () => {
+    if (!projectId) {
+      showSimpleError("프로젝트 ID가 필요합니다.");
+      return;
+    }
+
+    setExportingType("excel");
+    try {
+      // 1. 프로젝트 정보 조회
+      const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", projectId)
+        .single();
+
+      if (projectError) throw projectError;
+
+      // 2. 액터, 유즈케이스, 기능, 정책 데이터 조회
+      const { data: actors, error: actorsError } = await supabase
+        .from("actors")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("sequence", { ascending: true });
+
+      if (actorsError) throw actorsError;
+
+      // 3. Excel 데이터 생성 (CSV와 동일한 형식)
+      const excelData = [["actor", "usecase", "feature", "policy"]];
+
+      for (const actor of actors || []) {
+        // 유즈케이스 조회
+        const { data: usecases, error: usecasesError } = await supabase
+          .from("usecases")
+          .select("*")
+          .eq("actor_id", actor.id)
+          .order("sequence", { ascending: true });
+
+        if (usecasesError) throw usecasesError;
+
+        for (const usecase of usecases || []) {
+          // 기능 조회
+          const { data: features, error: featuresError } = await supabase
+            .from("features")
+            .select("*")
+            .eq("usecase_id", usecase.id)
+            .order("sequence", { ascending: true });
+
+          if (featuresError) throw featuresError;
+
+          for (const feature of features || []) {
+            // 정책 조회
+            const { data: featurePolicies, error: policiesError } =
+              await supabase
+                .from("feature_policies")
+                .select(
+                  `
+                sequence,
+                policies (
+                  id,
+                  contents
+                )
+              `
+                )
+                .eq("feature_id", feature.id)
+                .order("sequence", { ascending: true });
+
+            if (policiesError) throw policiesError;
+
+            // 정책이 있는 경우
+            if (featurePolicies && featurePolicies.length > 0) {
+              for (const fp of featurePolicies) {
+                if (fp.policies) {
+                  excelData.push([
+                    actor.name,
+                    usecase.name,
+                    feature.name,
+                    fp.policies.contents,
+                  ]);
+                }
+              }
+            } else {
+              // 정책이 없는 경우 빈 정책으로 추가
+              excelData.push([actor.name, usecase.name, feature.name, ""]);
+            }
+          }
+        }
+      }
+
+      // 4. Excel 워크북 생성
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+
+      // 5. 컬럼 너비 자동 조정
+      const colWidths = [
+        { wch: Math.max(...excelData.map((row) => (row[0] || "").length)) },
+        { wch: Math.max(...excelData.map((row) => (row[1] || "").length)) },
+        { wch: Math.max(...excelData.map((row) => (row[2] || "").length)) },
+        { wch: Math.max(...excelData.map((row) => (row[3] || "").length)) },
+      ];
+      worksheet["!cols"] = colWidths;
+
+      // 6. 워크시트를 워크북에 추가
+      XLSX.utils.book_append_sheet(workbook, worksheet, "정책");
+
+      // 7. 파일 다운로드
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project.name}_정책_${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showSuccessToast("Excel 파일이 성공적으로 다운로드되었습니다.");
+      onClose();
+    } catch (error) {
+      console.error("Export error:", error);
+      showError("Export 실패", "Excel 파일 생성 중 오류가 발생했습니다.");
+    } finally {
+      setExportingType(null);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -591,13 +725,17 @@ export default function ExportModal({
           <Button
             variant="outline"
             className="w-full justify-start"
-            onClick={() => {
-              // TODO: Implement Excel export
-              console.log("Export as Excel");
-            }}
+            onClick={exportAsExcel}
             disabled={exportingType !== null}
           >
-            엑셀 (.xlsx)
+            {exportingType === "excel" ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                내보내는 중...
+              </div>
+            ) : (
+              "엑셀 (.xlsx)"
+            )}
           </Button>
         </div>
 
