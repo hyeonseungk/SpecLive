@@ -59,14 +59,14 @@ export default function ExportModal({
 
       if (glossaries && glossaries.length > 0) {
         for (const glossary of glossaries) {
-          markdownContent += `## ${glossary.name}\n\n`;
+          markdownContent += `# ${glossary.name}\n`;
 
           if (glossary.definition) {
-            markdownContent += `**정의:** ${glossary.definition}\n\n`;
+            markdownContent += `## ${glossary.definition}\n`;
           }
 
           if (glossary.examples) {
-            markdownContent += `**예시:** ${glossary.examples}\n\n`;
+            markdownContent += `### ex) ${glossary.examples}\n`;
           }
 
           if (glossary.glossary_links && glossary.glossary_links.length > 0) {
@@ -77,7 +77,7 @@ export default function ExportModal({
             markdownContent += `\n`;
           }
 
-          markdownContent += `---\n\n`;
+          markdownContent += `\n`;
         }
       } else {
         markdownContent += "등록된 용어가 없습니다.\n\n";
@@ -88,19 +88,16 @@ export default function ExportModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}_용어집.md`;
+      a.download = `${project.name}_${t("export.filename_glossary")}.md`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccessToast("마크다운 파일이 다운로드되었습니다.");
+      showSuccessToast(t("export.success_glossary_markdown"));
     } catch (error) {
       console.error("Error exporting as markdown:", error);
-      showError(
-        "내보내기 실패",
-        "마크다운 파일을 생성하는 중 오류가 발생했습니다."
-      );
+      showError("내보내기 실패", t("export.error_glossary_markdown"));
     } finally {
       setExportingType(null);
     }
@@ -139,13 +136,11 @@ export default function ExportModal({
 
       // 3. JSON 데이터 구성
       const exportData = {
-        project: {
-          id: project.id,
-          name: project.name,
-          created_at: project.created_at,
-        },
-        glossaries: glossaries || [],
-        exported_at: new Date().toISOString(),
+        terms: (glossaries || []).map((glossary) => ({
+          name: glossary.name,
+          definition: glossary.definition || "",
+          example: glossary.examples || "",
+        })),
       };
 
       // 4. 파일 다운로드
@@ -155,19 +150,16 @@ export default function ExportModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}_용어집.json`;
+      a.download = `${project.name}_${t("export.filename_glossary")}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccessToast("JSON 파일이 다운로드되었습니다.");
+      showSuccessToast(t("export.success_glossary_json"));
     } catch (error) {
       console.error("Error exporting as JSON:", error);
-      showError(
-        "내보내기 실패",
-        "JSON 파일을 생성하는 중 오류가 발생했습니다."
-      );
+      showError("내보내기 실패", t("export.error_glossary_json"));
     } finally {
       setExportingType(null);
     }
@@ -205,24 +197,14 @@ export default function ExportModal({
       if (glossariesError) throw glossariesError;
 
       // 3. CSV 데이터 구성
-      const csvData = [
-        ["용어명", "정의", "예시", "관련 링크", "순서", "생성일", "수정일"],
-      ];
+      const csvData = [["term", "definition", "example"]];
 
       if (glossaries && glossaries.length > 0) {
         for (const glossary of glossaries) {
-          const links =
-            glossary.glossary_links?.map((link: any) => link.url).join("; ") ||
-            "";
-
           csvData.push([
             glossary.name,
             glossary.definition || "",
             glossary.examples || "",
-            links,
-            glossary.sequence?.toString() || "",
-            glossary.created_at || "",
-            glossary.updated_at || "",
           ]);
         }
       }
@@ -239,16 +221,16 @@ export default function ExportModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}_용어집.csv`;
+      a.download = `${project.name}_${t("export.filename_glossary")}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccessToast("CSV 파일이 다운로드되었습니다.");
+      showSuccessToast(t("export.success_glossary_csv"));
     } catch (error) {
       console.error("Error exporting as CSV:", error);
-      showError("내보내기 실패", "CSV 파일을 생성하는 중 오류가 발생했습니다.");
+      showError("내보내기 실패", t("export.error_glossary_csv"));
     } finally {
       setExportingType(null);
     }
@@ -286,28 +268,19 @@ export default function ExportModal({
       if (glossariesError) throw glossariesError;
 
       // 3. 텍스트 내용 생성
-      let textContent = `${project.name} - 용어집\n`;
-      textContent += "=".repeat(project.name.length + 10) + "\n\n";
+      let textContent = "";
 
       if (glossaries && glossaries.length > 0) {
-        for (const glossary of glossaries) {
-          textContent += `${glossary.name}\n`;
-          textContent += "-".repeat(glossary.name.length) + "\n\n";
+        for (let i = 0; i < glossaries.length; i++) {
+          const glossary = glossaries[i];
+          textContent += `${i + 1}. ${glossary.name}\n`;
 
           if (glossary.definition) {
-            textContent += `정의: ${glossary.definition}\n\n`;
+            textContent += `${glossary.definition}\n`;
           }
 
           if (glossary.examples) {
-            textContent += `예시: ${glossary.examples}\n\n`;
-          }
-
-          if (glossary.glossary_links && glossary.glossary_links.length > 0) {
-            textContent += `관련 링크:\n`;
-            glossary.glossary_links.forEach((link: any) => {
-              textContent += `- ${link.url}\n`;
-            });
-            textContent += `\n`;
+            textContent += `ex. ${glossary.examples}\n`;
           }
 
           textContent += "\n";
@@ -321,19 +294,16 @@ export default function ExportModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}_용어집.txt`;
+      a.download = `${project.name}_${t("export.filename_glossary")}.txt`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccessToast("텍스트 파일이 다운로드되었습니다.");
+      showSuccessToast(t("export.success_glossary_text"));
     } catch (error) {
       console.error("Error exporting as text:", error);
-      showError(
-        "내보내기 실패",
-        "텍스트 파일을 생성하는 중 오류가 발생했습니다."
-      );
+      showError("내보내기 실패", t("export.error_glossary_text"));
     } finally {
       setExportingType(null);
     }
@@ -371,56 +341,77 @@ export default function ExportModal({
       if (glossariesError) throw glossariesError;
 
       // 3. Excel 데이터 구성
-      const excelData = [
-        ["용어명", "정의", "예시", "관련 링크", "순서", "생성일", "수정일"],
-      ];
+      const excelData = [["term", "definition", "example"]];
 
       if (glossaries && glossaries.length > 0) {
         for (const glossary of glossaries) {
-          const links =
-            glossary.glossary_links?.map((link: any) => link.url).join("; ") ||
-            "";
-
           excelData.push([
             glossary.name,
             glossary.definition || "",
             glossary.examples || "",
-            links,
-            glossary.sequence || 0,
-            glossary.created_at || "",
-            glossary.updated_at || "",
           ]);
         }
       }
 
       // 4. Excel 워크북 생성
-      const wb = XLSX.utils.book();
-      const ws = XLSX.utils.aoa_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet(excelData);
 
-      // 5. 열 너비 자동 조정
+      // 5. 빈 셀들을 완전히 제거
+      const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
+      const newRange = {
+        s: { r: 0, c: 0 },
+        e: { r: excelData.length - 1, c: 2 },
+      };
+
+      // 기존 셀 데이터를 새 범위에 맞게 복사
+      const newWorksheet: any = {};
+      for (let r = 0; r <= newRange.e.r; r++) {
+        for (let c = 0; c <= newRange.e.c; c++) {
+          const cellAddress = XLSX.utils.encode_cell({ r, c });
+          const originalCellAddress = XLSX.utils.encode_cell({ r, c });
+          if (worksheet[originalCellAddress]) {
+            newWorksheet[cellAddress] = worksheet[originalCellAddress];
+          }
+        }
+      }
+
+      // 새 워크시트로 교체
+      Object.assign(worksheet, newWorksheet);
+      worksheet["!ref"] = XLSX.utils.encode_range(newRange);
+
+      // 6. 컬럼 너비 자동 조정
       const colWidths = [
-        { wch: 20 }, // 용어명
-        { wch: 50 }, // 정의
-        { wch: 50 }, // 예시
-        { wch: 50 }, // 관련 링크
-        { wch: 10 }, // 순서
-        { wch: 20 }, // 생성일
-        { wch: 20 }, // 수정일
+        { wch: Math.max(...excelData.map((row) => (row[0] || "").length)) },
+        { wch: Math.max(...excelData.map((row) => (row[1] || "").length)) },
+        { wch: Math.max(...excelData.map((row) => (row[2] || "").length)) },
       ];
-      ws["!cols"] = colWidths;
+      worksheet["!cols"] = colWidths;
 
-      XLSX.utils.book_append_sheet(wb, ws, "용어집");
+      // 6. 워크시트를 워크북에 추가
+      XLSX.utils.book_append_sheet(workbook, worksheet, "용어집");
 
-      // 6. 파일 다운로드
-      XLSX.writeFile(wb, `${project.name}_용어집.xlsx`);
+      // 7. 파일 다운로드
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project.name}_${t("export.filename_glossary")}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
 
-      showSuccessToast("Excel 파일이 다운로드되었습니다.");
+      showSuccessToast(t("export.success_glossary_excel"));
     } catch (error) {
       console.error("Error exporting as Excel:", error);
-      showError(
-        "내보내기 실패",
-        "Excel 파일을 생성하는 중 오류가 발생했습니다."
-      );
+      showError("내보내기 실패", t("export.error_glossary_excel"));
     } finally {
       setExportingType(null);
     }
@@ -432,7 +423,7 @@ export default function ExportModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold mb-2">Export</h3>
+          <h3 className="text-xl font-semibold mb-2">{t("export.title")}</h3>
           <Button
             variant="ghost"
             size="icon"
@@ -445,8 +436,8 @@ export default function ExportModal({
 
         <div className="mb-6">
           <p className="text-gray-600 text-sm">
-            • 용어명, 정의, 예시, 관련 링크를 포함하여 내보냅니다.
-            <br />• 순서대로 정렬된 용어 목록을 다운로드합니다.
+            • {t("export.description_glossary_part1")}
+            <br />• {t("export.description_glossary_part2")}
           </p>
         </div>
 
@@ -457,20 +448,8 @@ export default function ExportModal({
             className="w-full justify-start"
             variant="outline"
           >
-            Markdown (.md)
+            {t("export.format_markdown")}
             {exportingType === "markdown" && (
-              <div className="ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-            )}
-          </Button>
-
-          <Button
-            onClick={exportAsJson}
-            disabled={exportingType !== null}
-            className="w-full justify-start"
-            variant="outline"
-          >
-            JSON (.json)
-            {exportingType === "json" && (
               <div className="ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
             )}
           </Button>
@@ -481,20 +460,8 @@ export default function ExportModal({
             className="w-full justify-start"
             variant="outline"
           >
-            CSV (.csv)
+            {t("export.format_csv")}
             {exportingType === "csv" && (
-              <div className="ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-            )}
-          </Button>
-
-          <Button
-            onClick={exportAsText}
-            disabled={exportingType !== null}
-            className="w-full justify-start"
-            variant="outline"
-          >
-            Text (.txt)
-            {exportingType === "text" && (
               <div className="ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
             )}
           </Button>
@@ -505,8 +472,32 @@ export default function ExportModal({
             className="w-full justify-start"
             variant="outline"
           >
-            Excel (.xlsx)
+            {t("export.format_excel")}
             {exportingType === "excel" && (
+              <div className="ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            )}
+          </Button>
+
+          <Button
+            onClick={exportAsJson}
+            disabled={exportingType !== null}
+            className="w-full justify-start"
+            variant="outline"
+          >
+            {t("export.format_json")}
+            {exportingType === "json" && (
+              <div className="ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            )}
+          </Button>
+
+          <Button
+            onClick={exportAsText}
+            disabled={exportingType !== null}
+            className="w-full justify-start"
+            variant="outline"
+          >
+            {t("export.format_text")}
+            {exportingType === "text" && (
               <div className="ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
             )}
           </Button>
@@ -518,7 +509,7 @@ export default function ExportModal({
             onClick={onClose}
             disabled={exportingType !== null}
           >
-            취소
+            {t("export.cancel")}
           </Button>
         </div>
       </div>

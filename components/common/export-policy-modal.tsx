@@ -116,7 +116,7 @@ export default function ExportModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}_정책_${
+      a.download = `${project.name}_${t("export.filename_policy")}_${
         new Date().toISOString().split("T")[0]
       }.md`;
       document.body.appendChild(a);
@@ -124,11 +124,11 @@ export default function ExportModal({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccessToast("마크다운 파일이 성공적으로 다운로드되었습니다.");
+      showSuccessToast(t("export.success_markdown"));
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", "마크다운 파일 생성 중 오류가 발생했습니다.");
+      showError("Export 실패", t("export.error_markdown"));
     } finally {
       setExportingType(null);
     }
@@ -245,7 +245,7 @@ export default function ExportModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}_정책_${
+      a.download = `${project.name}_${t("export.filename_policy")}_${
         new Date().toISOString().split("T")[0]
       }.json`;
       document.body.appendChild(a);
@@ -253,11 +253,11 @@ export default function ExportModal({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccessToast("JSON 파일이 성공적으로 다운로드되었습니다.");
+      showSuccessToast(t("export.success_json"));
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", "JSON 파일 생성 중 오류가 발생했습니다.");
+      showError("Export 실패", t("export.error_json"));
     } finally {
       setExportingType(null);
     }
@@ -367,7 +367,7 @@ export default function ExportModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}_정책_${
+      a.download = `${project.name}_${t("export.filename_policy")}_${
         new Date().toISOString().split("T")[0]
       }.csv`;
       document.body.appendChild(a);
@@ -375,11 +375,11 @@ export default function ExportModal({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccessToast("CSV 파일이 성공적으로 다운로드되었습니다.");
+      showSuccessToast(t("export.success_csv"));
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", "CSV 파일 생성 중 오류가 발생했습니다.");
+      showError("Export 실패", t("export.error_csv"));
     } finally {
       setExportingType(null);
     }
@@ -484,7 +484,7 @@ export default function ExportModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}_정책_${
+      a.download = `${project.name}_${t("export.filename_policy")}_${
         new Date().toISOString().split("T")[0]
       }.txt`;
       document.body.appendChild(a);
@@ -492,11 +492,11 @@ export default function ExportModal({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccessToast("텍스트 파일이 성공적으로 다운로드되었습니다.");
+      showSuccessToast(t("export.success_text"));
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", "텍스트 파일 생성 중 오류가 발생했습니다.");
+      showError("Export 실패", t("export.error_text"));
     } finally {
       setExportingType(null);
     }
@@ -617,7 +617,7 @@ export default function ExportModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}_정책_${
+      a.download = `${project.name}_${t("export.filename_policy")}_${
         new Date().toISOString().split("T")[0]
       }.xlsx`;
       document.body.appendChild(a);
@@ -625,11 +625,11 @@ export default function ExportModal({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccessToast("Excel 파일이 성공적으로 다운로드되었습니다.");
+      showSuccessToast(t("export.success_excel"));
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", "Excel 파일 생성 중 오류가 발생했습니다.");
+      showError("Export 실패", t("export.error_excel"));
     } finally {
       setExportingType(null);
     }
@@ -656,7 +656,7 @@ export default function ExportModal({
         </div>
 
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Export</h3>
+          <h3 className="text-xl font-semibold mb-2">{t("export.title")}</h3>
           <p className="text-gray-600 text-sm">
             • {t("export.description_part1")}
             <br />• {t("export.description_part2")}
@@ -673,10 +673,10 @@ export default function ExportModal({
             {exportingType === "markdown" ? (
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                내보내는 중...
+                {t("export.exporting")}
               </div>
             ) : (
-              "Markdown (.md)"
+              t("export.format_markdown")
             )}
           </Button>
           <Button
@@ -688,10 +688,10 @@ export default function ExportModal({
             {exportingType === "csv" ? (
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                내보내는 중...
+                {t("export.exporting")}
               </div>
             ) : (
-              "CSV (.csv)"
+              t("export.format_csv")
             )}
           </Button>
           <Button
@@ -703,10 +703,10 @@ export default function ExportModal({
             {exportingType === "excel" ? (
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                내보내는 중...
+                {t("export.exporting")}
               </div>
             ) : (
-              "Excel (.xlsx)"
+              t("export.format_excel")
             )}
           </Button>
           <Button
@@ -718,10 +718,10 @@ export default function ExportModal({
             {exportingType === "json" ? (
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                내보내는 중...
+                {t("export.exporting")}
               </div>
             ) : (
-              "JSON (.json)"
+              t("export.format_json")
             )}
           </Button>
           <Button
@@ -733,10 +733,10 @@ export default function ExportModal({
             {exportingType === "text" ? (
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                내보내는 중...
+                {t("export.exporting")}
               </div>
             ) : (
-              "Text (.txt)"
+              t("export.format_text")
             )}
           </Button>
         </div>
@@ -747,7 +747,7 @@ export default function ExportModal({
             onClick={onClose}
             disabled={exportingType !== null}
           >
-            취소
+            {t("export.cancel")}
           </Button>
         </div>
       </div>
