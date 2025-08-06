@@ -58,6 +58,50 @@ export default function RootLayout({
           crossOrigin=""
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"
         />
+
+        {/* Open Graph Meta Tags */}
+        <meta
+          property="og:title"
+          content="SpecLive - 전사 용어·정책 관리 SaaS"
+        />
+        <meta
+          property="og:description"
+          content="조직 내에서 사용하는 용어(Glossary)와 정책(Policy)을 구조화하여 한곳에서 관리하는 SaaS입니다."
+        />
+        <meta
+          property="og:image"
+          content="/images/onboarding/onboarding_1_ko_KR.png"
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://speclive.vercel.app" />
+
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="SpecLive - 전사 용어·정책 관리 SaaS"
+        />
+        <meta
+          name="twitter:description"
+          content="조직 내에서 사용하는 용어(Glossary)와 정책(Policy)을 구조화하여 한곳에서 관리하는 SaaS입니다."
+        />
+        <meta
+          name="twitter:image"
+          content="/images/onboarding/onboarding_1_ko_KR.png"
+        />
+
+        {/* Additional Meta Tags */}
+        <meta
+          name="description"
+          content="조직 내에서 사용하는 용어(Glossary)와 정책(Policy)을 구조화하여 한곳에서 관리하는 SaaS입니다."
+        />
+        <meta
+          name="keywords"
+          content="용어관리, 정책관리, SaaS, 협업도구, 조직관리"
+        />
+        <meta name="author" content="SpecLive" />
       </head>
       <body className="font-pretendard">
         <div className="min-h-screen bg-background">{children}</div>
