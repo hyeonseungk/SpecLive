@@ -3014,6 +3014,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       <ExportModal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
+        projectId={params.projectId}
       />
     </div>
   );
