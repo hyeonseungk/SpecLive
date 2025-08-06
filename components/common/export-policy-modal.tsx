@@ -676,7 +676,7 @@ export default function ExportModal({
                 내보내는 중...
               </div>
             ) : (
-              "마크다운 (.md)"
+              "Markdown (.md)"
             )}
           </Button>
           <Button
@@ -706,7 +706,7 @@ export default function ExportModal({
                 내보내는 중...
               </div>
             ) : (
-              "엑셀 (.xlsx)"
+              "Excel (.xlsx)"
             )}
           </Button>
           <Button
@@ -736,7 +736,7 @@ export default function ExportModal({
                 내보내는 중...
               </div>
             ) : (
-              "텍스트 (.txt)"
+              "Text (.txt)"
             )}
           </Button>
         </div>

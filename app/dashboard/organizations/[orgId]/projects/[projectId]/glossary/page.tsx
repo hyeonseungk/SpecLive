@@ -1,5 +1,6 @@
 "use client";
 
+import ExportModal from "@/components/common/export-glossary-modal";
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import GlossaryAddModal from "@/components/glossary/glossary-add-modal";
 import GlossaryAiRecommendationModal from "@/components/glossary/glossary-ai-recommendation-modal";
@@ -35,7 +36,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -83,6 +84,9 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
 
   // 용어 관리 중요성 모달 상태
   const [showImportanceModal, setShowImportanceModal] = useState(false);
+
+  // Export 모달 상태
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // 추가: 다국어 지원 훅
   const t = useGlobalT();
@@ -404,7 +408,18 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
       <div className="flex-shrink-0 p-6 pb-0">
         {/* 헤더 영역 */}
         <div className="mb-6">
-          <h2 className="text-3xl font-bold mb-2">{t("glossary.header")}</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-3xl font-bold">{t("glossary.header")}</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExportModal(true)}
+              className="flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </Button>
+          </div>
           <p className="text-muted-foreground mb-2">{t("glossary.sub")}</p>
           <button
             onClick={handleOpenImportanceModal}
@@ -610,6 +625,13 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
           onClose={handleCloseImportanceModal}
         />
       )}
+
+      {/* Export 모달 */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        projectId={params.projectId}
+      />
     </div>
   );
 }

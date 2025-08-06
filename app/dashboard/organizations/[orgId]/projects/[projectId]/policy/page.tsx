@@ -4,7 +4,7 @@ import ActorAddModal from "@/components/actor/actor-add-modal";
 import ActorDeleteModal from "@/components/actor/actor-delete-modal";
 import ActorEditModal from "@/components/actor/actor-edit-modal";
 import SortableActorCard from "@/components/actor/sortable-actor-card";
-import ExportModal from "@/components/common/export-modal";
+import ExportModal from "@/components/common/export-policy-modal";
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import TermExplanationModal from "@/components/common/term-explanation-modal";
 import FeatureAddModal from "@/components/feature/feature-add-modal";
