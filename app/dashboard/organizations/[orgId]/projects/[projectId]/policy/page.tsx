@@ -4,6 +4,7 @@ import ActorAddModal from "@/components/actor/actor-add-modal";
 import ActorDeleteModal from "@/components/actor/actor-delete-modal";
 import ActorEditModal from "@/components/actor/actor-edit-modal";
 import SortableActorCard from "@/components/actor/sortable-actor-card";
+import ExportModal from "@/components/common/export-modal";
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
 import TermExplanationModal from "@/components/common/term-explanation-modal";
 import FeatureAddModal from "@/components/feature/feature-add-modal";
@@ -44,7 +45,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Download } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -2267,6 +2268,9 @@ export default function PolicyPage({ params }: PolicyPageProps) {
     }, 600);
   }, [featurePolicies, searchParams]);
 
+  // Export 모달 상태
+  const [showExportModal, setShowExportModal] = useState(false);
+
   if (loading) {
     return <FullScreenLoading message={t("common.loading")} />;
   }
@@ -2294,7 +2298,18 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       <div className="flex-shrink-0 p-6 pb-0">
         {/* 헤더 영역 */}
         <div className="mb-6">
-          <h2 className="text-3xl font-bold mb-2">{t("policy.header")}</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-3xl font-bold">{t("policy.header")}</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExportModal(true)}
+              className="flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </Button>
+          </div>
           <p className="text-muted-foreground mb-2">{t("policy.sub")}</p>
           <button
             onClick={() => setShowTermExplanationModal(true)}
@@ -2993,6 +3008,12 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       <TermExplanationModal
         isOpen={showTermExplanationModal}
         onClose={() => setShowTermExplanationModal(false)}
+      />
+
+      {/* Export 모달 */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
       />
     </div>
   );
