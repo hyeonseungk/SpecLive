@@ -182,12 +182,13 @@ export default function ManagementPage({ params }: ManagementPageProps) {
         )}
 
         {/* 초대 모달 */}
-        {project && (
+        {project && user && (
           <MemberInviteModal
             isOpen={showInviteModal}
             onClose={() => setShowInviteModal(false)}
             projectId={project.id}
             projectName={project.name}
+            senderId={user.id}
           />
         )}
       </div>

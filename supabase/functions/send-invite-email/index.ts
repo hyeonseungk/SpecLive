@@ -13,6 +13,7 @@ interface InviteEmailRequest {
   email: string;
   projectId: string;
   projectName: string;
+  senderId: string; // 초대를 보내는 사용자의 ID
   role?: string; // 'admin' | 'member'
   language?: string; // 'ko-KR' | 'en-US'
 }
@@ -57,15 +58,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
     email,
     projectId,
     projectName,
+    senderId,
     role = "member",
     language = "ko-KR",
   } = body;
 
   // Validate required fields
-  if (!email || !projectId || !projectName) {
+  if (!email || !projectId || !projectName || !senderId) {
     return new Response(
       JSON.stringify({
-        error: "Missing required fields: email, projectId, projectName",
+        error:
+          "Missing required fields: email, projectId, projectName, senderId",
       }),
       {
         status: 400,
@@ -294,7 +297,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // ------------------------------------------------------------------
     try {
       await supabase.from("invitation_emails").insert({
-        sender_id: null, // Will be set when we have the sender's user ID
+        sender_id: senderId, // Now we have the sender's user ID
         receiver_id: null, // Will be set when the receiver signs up
         project_id: projectId,
         nonce: nonce,

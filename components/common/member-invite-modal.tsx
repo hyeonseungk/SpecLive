@@ -17,9 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { showError, showSuccess } from "@/lib/error-store";
+import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
+import { showSuccess } from "@/lib/success-store";
+import { supabase } from "@/lib/supabase-browser";
 import { useState } from "react";
 
 interface MemberInviteModalProps {
@@ -27,6 +29,7 @@ interface MemberInviteModalProps {
   onClose: () => void;
   projectId: string;
   projectName: string;
+  senderId: string; // 초대를 보내는 사용자의 ID
 }
 
 export function MemberInviteModal({
@@ -34,6 +37,7 @@ export function MemberInviteModal({
   onClose,
   projectId,
   projectName,
+  senderId,
 }: MemberInviteModalProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "member">("member");
@@ -60,25 +64,23 @@ export function MemberInviteModal({
     setIsLoading(true);
 
     try {
-      // Edge Function 호출하여 초대 이메일 발송
-      const response = await fetch("/api/send-invite-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          projectId,
-          projectName,
-          role,
-          language: lang,
-        }),
-      });
+      // Supabase Edge Function 직접 호출
+      const { data, error } = await supabase.functions.invoke(
+        "send-invite-email",
+        {
+          body: {
+            email: email.trim(),
+            projectId,
+            projectName,
+            senderId,
+            role,
+            language: lang,
+          },
+        }
+      );
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "초대 이메일 발송에 실패했습니다.");
+      if (error) {
+        throw new Error(error.message || "초대 이메일 발송에 실패했습니다.");
       }
 
       showSuccess(
