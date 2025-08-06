@@ -126,6 +126,132 @@ export default function ExportModal({
     }
   };
 
+  const exportAsJson = async () => {
+    if (!projectId) {
+      showSimpleError("프로젝트 ID가 필요합니다.");
+      return;
+    }
+
+    try {
+      // 1. 프로젝트 정보 조회
+      const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", projectId)
+        .single();
+
+      if (projectError) throw projectError;
+
+      // 2. 액터, 유즈케이스, 기능, 정책 데이터 조회
+      const { data: actors, error: actorsError } = await supabase
+        .from("actors")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("sequence", { ascending: true });
+
+      if (actorsError) throw actorsError;
+
+      // 3. JSON 구조 생성
+      const jsonData = {
+        actors: [] as any[],
+      };
+
+      for (const actor of actors || []) {
+        const actorData = {
+          name: actor.name,
+          usecases: [] as any[],
+        };
+
+        // 유즈케이스 조회
+        const { data: usecases, error: usecasesError } = await supabase
+          .from("usecases")
+          .select("*")
+          .eq("actor_id", actor.id)
+          .order("sequence", { ascending: true });
+
+        if (usecasesError) throw usecasesError;
+
+        for (const usecase of usecases || []) {
+          const usecaseData = {
+            name: usecase.name,
+            features: [] as any[],
+          };
+
+          // 기능 조회
+          const { data: features, error: featuresError } = await supabase
+            .from("features")
+            .select("*")
+            .eq("usecase_id", usecase.id)
+            .order("sequence", { ascending: true });
+
+          if (featuresError) throw featuresError;
+
+          for (const feature of features || []) {
+            const featureData = {
+              name: feature.name,
+              policies: [] as any[],
+            };
+
+            // 정책 조회
+            const { data: featurePolicies, error: policiesError } =
+              await supabase
+                .from("feature_policies")
+                .select(
+                  `
+                sequence,
+                policies (
+                  id,
+                  contents
+                )
+              `
+                )
+                .eq("feature_id", feature.id)
+                .order("sequence", { ascending: true });
+
+            if (policiesError) throw policiesError;
+
+            // 정책 데이터 추가
+            if (featurePolicies && featurePolicies.length > 0) {
+              for (const fp of featurePolicies) {
+                if (fp.policies) {
+                  featureData.policies.push({
+                    content: fp.policies.contents,
+                  });
+                }
+              }
+            }
+
+            usecaseData.features.push(featureData);
+          }
+
+          actorData.usecases.push(usecaseData);
+        }
+
+        jsonData.actors.push(actorData);
+      }
+
+      // 4. 파일 다운로드
+      const jsonContent = JSON.stringify(jsonData, null, 2);
+      const blob = new Blob([jsonContent], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project.name}_정책_${
+        new Date().toISOString().split("T")[0]
+      }.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showSuccessToast("JSON 파일이 성공적으로 다운로드되었습니다.");
+      onClose();
+    } catch (error) {
+      console.error("Export error:", error);
+      showError("Export 실패", "JSON 파일 생성 중 오류가 발생했습니다.");
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -175,10 +301,7 @@ export default function ExportModal({
           <Button
             variant="outline"
             className="w-full justify-start"
-            onClick={() => {
-              // TODO: Implement JSON export
-              console.log("Export as JSON");
-            }}
+            onClick={exportAsJson}
           >
             JSON (.json)
           </Button>
