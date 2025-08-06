@@ -38,6 +38,7 @@ export default function Home() {
   const locale = lang;
 
   // Check for invitation parameters
+  const from = searchParams.get("from");
   const nonce = searchParams.get("nonce");
   const projectId = searchParams.get("projectId");
 
@@ -50,7 +51,12 @@ export default function Home() {
       setInitialLoading(false);
 
       if (session?.user) {
-        router.push("/dashboard");
+        // Check if this is an invitation link
+        if (from === "member-invitation" && nonce && projectId) {
+          router.push(`/invite?nonce=${nonce}&projectId=${projectId}`);
+        } else {
+          router.push("/dashboard");
+        }
       }
     };
 
@@ -61,103 +67,120 @@ export default function Home() {
     } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        router.push("/dashboard");
+        // Check if this is an invitation link
+        if (from === "member-invitation" && nonce && projectId) {
+          router.push(`/invite?nonce=${nonce}&projectId=${projectId}`);
+        } else {
+          router.push("/dashboard");
+        }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [router]);
+  }, [router, from, nonce, projectId]);
 
-  // Auto-switch to signup mode if invitation parameters are present
-  useEffect(() => {
-    if (nonce && projectId) {
-      setIsSignUp(true);
-    }
-  }, [nonce, projectId]);
-
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
     try {
-      if (isSignUp) {
-        if (password !== passwordConfirm) {
-          showError(
-            t("auth.password_confirm_error_title"),
-            t("auth.password_mismatch")
-          );
-          setSubmitting(false);
-          return;
-        }
-        if (password.length < 8) {
-          showError(t("auth.password_min_error_title"), t("auth.password_min"));
-          setSubmitting(false);
-          return;
-        }
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-
-        // If this is an invitation signup, handle the invitation
-        if (nonce && projectId && data.user) {
-          try {
-            // Get invitation details to determine role
-            const { data: invitation } = await supabase
-              .from("invitation_emails")
-              .select("role")
-              .eq("nonce", nonce)
-              .eq("project_id", projectId)
-              .single();
-
-            // Add user to project with specified role
-            const { error: membershipError } = await supabase
-              .from("memberships")
-              .insert({
-                user_id: data.user.id,
-                project_id: projectId,
-                role: invitation?.role || "member",
-              });
-
-            if (membershipError) {
-              console.error("Failed to add user to project:", membershipError);
-            } else {
-              // Update invitation email with receiver_id
-              await supabase
-                .from("invitation_emails")
-                .update({ receiver_id: data.user.id })
-                .eq("nonce", nonce)
-                .eq("project_id", projectId);
-            }
-          } catch (inviteError) {
-            console.error("Error handling invitation:", inviteError);
-          }
-        }
-
-        showSuccessToast(t("auth.signup_complete_desc"));
-        setEmail("");
-        setPassword("");
-        setPasswordConfirm("");
-        setIsSignUp(false);
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
     } catch (error: any) {
-      console.error("Auth error:", error);
+      console.error("Sign in error:", error);
       let errorMessage = t("common.error_generic");
 
       if (error instanceof Error) {
-        // Supabase 에러 메시지를 다국어로 처리
         if (error.message.includes("Invalid login credentials")) {
           errorMessage = t("auth.invalid_credentials");
         } else if (error.message.includes("Email not confirmed")) {
           errorMessage = t("auth.email_not_confirmed");
-        } else if (error.message.includes("User already registered")) {
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      showSimpleError(errorMessage);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      // Password validation
+      if (password !== passwordConfirm) {
+        showError(
+          t("auth.password_confirm_error_title"),
+          t("auth.password_mismatch")
+        );
+        setSubmitting(false);
+        return;
+      }
+      if (password.length < 8) {
+        showError(t("auth.password_min_error_title"), t("auth.password_min"));
+        setSubmitting(false);
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) throw error;
+
+      // Handle invitation if this is an invitation signup
+      if (nonce && projectId && data.user) {
+        try {
+          // Get invitation details to determine role
+          const { data: invitation } = await supabase
+            .from("invitation_emails")
+            .select("role")
+            .eq("nonce", nonce)
+            .eq("project_id", projectId)
+            .single();
+
+          // Add user to project with specified role
+          const { error: membershipError } = await supabase
+            .from("memberships")
+            .insert({
+              user_id: data.user.id,
+              project_id: projectId,
+              role: invitation?.role || "member",
+            });
+
+          if (membershipError) {
+            console.error("Failed to add user to project:", membershipError);
+          } else {
+            // Update invitation email with receiver_id
+            await supabase
+              .from("invitation_emails")
+              .update({ receiver_id: data.user.id })
+              .eq("nonce", nonce)
+              .eq("project_id", projectId);
+          }
+        } catch (inviteError) {
+          console.error("Error handling invitation:", inviteError);
+        }
+      }
+
+      showSuccessToast(t("auth.signup_complete_desc"));
+      setEmail("");
+      setPassword("");
+      setPasswordConfirm("");
+      setIsSignUp(false);
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      let errorMessage = t("common.error_generic");
+
+      if (error instanceof Error) {
+        if (error.message.includes("User already registered")) {
           errorMessage = t("auth.email_already_exists");
         } else if (error.message.includes("Password should be at least")) {
           errorMessage = t("auth.weak_password");
@@ -171,6 +194,14 @@ export default function Home() {
       showSimpleError(errorMessage);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleAuth = async (e: React.FormEvent) => {
+    if (isSignUp) {
+      await handleSignUp(e);
+    } else {
+      await handleSignIn(e);
     }
   };
 

@@ -112,8 +112,8 @@ export default function InvitePage() {
       if (authError || !user) {
         console.log("User not authenticated, redirecting to signup");
         // User is not authenticated, redirect to sign up with invitation data
-        // const signUpUrl = `/?nonce=${nonce}&projectId=${projectId}`;
-        // router.push(signUpUrl);
+        const signUpUrl = `/?from=member-invitation&nonce=${nonce}&projectId=${projectId}`;
+        router.push(signUpUrl);
         return;
       }
 
