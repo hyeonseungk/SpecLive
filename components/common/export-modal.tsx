@@ -382,6 +382,123 @@ export default function ExportModal({
     }
   };
 
+  const exportAsText = async () => {
+    if (!projectId) {
+      showSimpleError("프로젝트 ID가 필요합니다.");
+      return;
+    }
+
+    setExportingType("text");
+    try {
+      // 1. 프로젝트 정보 조회
+      const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", projectId)
+        .single();
+
+      if (projectError) throw projectError;
+
+      // 2. 액터, 유즈케이스, 기능, 정책 데이터 조회
+      const { data: actors, error: actorsError } = await supabase
+        .from("actors")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("sequence", { ascending: true });
+
+      if (actorsError) throw actorsError;
+
+      // 3. 텍스트 내용 생성
+      let textContent = `${project.name}\n\n`;
+
+      for (let i = 0; i < (actors || []).length; i++) {
+        const actor = actors![i];
+        textContent += `${i + 1}. ${actor.name}\n`;
+
+        // 유즈케이스 조회
+        const { data: usecases, error: usecasesError } = await supabase
+          .from("usecases")
+          .select("*")
+          .eq("actor_id", actor.id)
+          .order("sequence", { ascending: true });
+
+        if (usecasesError) throw usecasesError;
+
+        for (let j = 0; j < (usecases || []).length; j++) {
+          const usecase = usecases![j];
+          textContent += `\t(${j + 1}) ${usecase.name}\n`;
+
+          // 기능 조회
+          const { data: features, error: featuresError } = await supabase
+            .from("features")
+            .select("*")
+            .eq("usecase_id", usecase.id)
+            .order("sequence", { ascending: true });
+
+          if (featuresError) throw featuresError;
+
+          for (let k = 0; k < (features || []).length; k++) {
+            const feature = features![k];
+            const featureLetter = String.fromCharCode(65 + k); // A, B, C, ...
+            textContent += `\t\t${featureLetter}. ${feature.name}\n`;
+
+            // 정책 조회
+            const { data: featurePolicies, error: policiesError } =
+              await supabase
+                .from("feature_policies")
+                .select(
+                  `
+                sequence,
+                policies (
+                  id,
+                  contents
+                )
+              `
+                )
+                .eq("feature_id", feature.id)
+                .order("sequence", { ascending: true });
+
+            if (policiesError) throw policiesError;
+
+            // 정책 내용 추가
+            if (featurePolicies && featurePolicies.length > 0) {
+              for (let l = 0; l < featurePolicies.length; l++) {
+                const fp = featurePolicies[l];
+                if (fp.policies) {
+                  const policyLetter = String.fromCharCode(97 + l); // a, b, c, ...
+                  textContent += `\t\t\t${policyLetter}. ${fp.policies.contents}\n`;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // 4. 파일 다운로드
+      const blob = new Blob([textContent], {
+        type: "text/plain;charset=utf-8;",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project.name}_정책_${
+        new Date().toISOString().split("T")[0]
+      }.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showSuccessToast("텍스트 파일이 성공적으로 다운로드되었습니다.");
+      onClose();
+    } catch (error) {
+      console.error("Export error:", error);
+      showError("Export 실패", "텍스트 파일 생성 중 오류가 발생했습니다.");
+    } finally {
+      setExportingType(null);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -459,13 +576,17 @@ export default function ExportModal({
           <Button
             variant="outline"
             className="w-full justify-start"
-            onClick={() => {
-              // TODO: Implement Text export
-              console.log("Export as Text");
-            }}
+            onClick={exportAsText}
             disabled={exportingType !== null}
           >
-            텍스트 (.txt)
+            {exportingType === "text" ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                내보내는 중...
+              </div>
+            ) : (
+              "텍스트 (.txt)"
+            )}
           </Button>
           <Button
             variant="outline"
