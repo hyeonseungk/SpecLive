@@ -5,6 +5,7 @@ import { showError, showSimpleError } from "@/lib/error-store";
 import { supabase } from "@/lib/supabase-browser";
 import { showSuccessToast } from "@/lib/toast-store";
 import { X } from "lucide-react";
+import { useState } from "react";
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -17,12 +18,14 @@ export default function ExportModal({
   onClose,
   projectId,
 }: ExportModalProps) {
+  const [exportingType, setExportingType] = useState<string | null>(null);
   const exportAsMarkdown = async () => {
     if (!projectId) {
       showSimpleError("프로젝트 ID가 필요합니다.");
       return;
     }
 
+    setExportingType("markdown");
     try {
       // 1. 프로젝트 정보 조회
       const { data: project, error: projectError } = await supabase
@@ -123,6 +126,8 @@ export default function ExportModal({
     } catch (error) {
       console.error("Export error:", error);
       showError("Export 실패", "마크다운 파일 생성 중 오류가 발생했습니다.");
+    } finally {
+      setExportingType(null);
     }
   };
 
@@ -132,6 +137,7 @@ export default function ExportModal({
       return;
     }
 
+    setExportingType("json");
     try {
       // 1. 프로젝트 정보 조회
       const { data: project, error: projectError } = await supabase
@@ -249,6 +255,130 @@ export default function ExportModal({
     } catch (error) {
       console.error("Export error:", error);
       showError("Export 실패", "JSON 파일 생성 중 오류가 발생했습니다.");
+    } finally {
+      setExportingType(null);
+    }
+  };
+
+  const exportAsCsv = async () => {
+    if (!projectId) {
+      showSimpleError("프로젝트 ID가 필요합니다.");
+      return;
+    }
+
+    setExportingType("csv");
+    try {
+      // 1. 프로젝트 정보 조회
+      const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", projectId)
+        .single();
+
+      if (projectError) throw projectError;
+
+      // 2. 액터, 유즈케이스, 기능, 정책 데이터 조회
+      const { data: actors, error: actorsError } = await supabase
+        .from("actors")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("sequence", { ascending: true });
+
+      if (actorsError) throw actorsError;
+
+      // 3. CSV 데이터 생성
+      const csvRows = ["actor,usecase,feature,policy"];
+
+      for (const actor of actors || []) {
+        // 유즈케이스 조회
+        const { data: usecases, error: usecasesError } = await supabase
+          .from("usecases")
+          .select("*")
+          .eq("actor_id", actor.id)
+          .order("sequence", { ascending: true });
+
+        if (usecasesError) throw usecasesError;
+
+        for (const usecase of usecases || []) {
+          // 기능 조회
+          const { data: features, error: featuresError } = await supabase
+            .from("features")
+            .select("*")
+            .eq("usecase_id", usecase.id)
+            .order("sequence", { ascending: true });
+
+          if (featuresError) throw featuresError;
+
+          for (const feature of features || []) {
+            // 정책 조회
+            const { data: featurePolicies, error: policiesError } =
+              await supabase
+                .from("feature_policies")
+                .select(
+                  `
+                sequence,
+                policies (
+                  id,
+                  contents
+                )
+              `
+                )
+                .eq("feature_id", feature.id)
+                .order("sequence", { ascending: true });
+
+            if (policiesError) throw policiesError;
+
+            // 정책이 있는 경우
+            if (featurePolicies && featurePolicies.length > 0) {
+              for (const fp of featurePolicies) {
+                if (fp.policies) {
+                  // CSV에서 쉼표와 따옴표를 처리
+                  const actorName = `"${actor.name.replace(/"/g, '""')}"`;
+                  const usecaseName = `"${usecase.name.replace(/"/g, '""')}"`;
+                  const featureName = `"${feature.name.replace(/"/g, '""')}"`;
+                  const policyContent = `"${fp.policies.contents.replace(
+                    /"/g,
+                    '""'
+                  )}"`;
+
+                  csvRows.push(
+                    `${actorName},${usecaseName},${featureName},${policyContent}`
+                  );
+                }
+              }
+            } else {
+              // 정책이 없는 경우 빈 정책으로 추가
+              const actorName = `"${actor.name.replace(/"/g, '""')}"`;
+              const usecaseName = `"${usecase.name.replace(/"/g, '""')}"`;
+              const featureName = `"${feature.name.replace(/"/g, '""')}"`;
+
+              csvRows.push(`${actorName},${usecaseName},${featureName},""`);
+            }
+          }
+        }
+      }
+
+      // 4. 파일 다운로드
+      const csvContent = csvRows.join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project.name}_정책_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showSuccessToast("CSV 파일이 성공적으로 다운로드되었습니다.");
+      onClose();
+    } catch (error) {
+      console.error("Export error:", error);
+      showError("Export 실패", "CSV 파일 생성 중 오류가 발생했습니다.");
+    } finally {
+      setExportingType(null);
     }
   };
 
@@ -285,25 +415,46 @@ export default function ExportModal({
             variant="outline"
             className="w-full justify-start"
             onClick={exportAsMarkdown}
+            disabled={exportingType !== null}
           >
-            마크다운 (.md)
+            {exportingType === "markdown" ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                내보내는 중...
+              </div>
+            ) : (
+              "마크다운 (.md)"
+            )}
           </Button>
           <Button
             variant="outline"
             className="w-full justify-start"
-            onClick={() => {
-              // TODO: Implement CSV export
-              console.log("Export as CSV");
-            }}
+            onClick={exportAsCsv}
+            disabled={exportingType !== null}
           >
-            CSV (.csv)
+            {exportingType === "csv" ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                내보내는 중...
+              </div>
+            ) : (
+              "CSV (.csv)"
+            )}
           </Button>
           <Button
             variant="outline"
             className="w-full justify-start"
             onClick={exportAsJson}
+            disabled={exportingType !== null}
           >
-            JSON (.json)
+            {exportingType === "json" ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                내보내는 중...
+              </div>
+            ) : (
+              "JSON (.json)"
+            )}
           </Button>
           <Button
             variant="outline"
@@ -312,6 +463,7 @@ export default function ExportModal({
               // TODO: Implement Text export
               console.log("Export as Text");
             }}
+            disabled={exportingType !== null}
           >
             텍스트 (.txt)
           </Button>
@@ -322,13 +474,18 @@ export default function ExportModal({
               // TODO: Implement Excel export
               console.log("Export as Excel");
             }}
+            disabled={exportingType !== null}
           >
             엑셀 (.xlsx)
           </Button>
         </div>
 
         <div className="mt-6 flex justify-end">
-          <Button variant="ghost" onClick={onClose}>
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            disabled={exportingType !== null}
+          >
             취소
           </Button>
         </div>
