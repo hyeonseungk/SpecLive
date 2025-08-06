@@ -1,86 +1,103 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useErrorStore } from "@/lib/error-store";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { showError, showSuccess } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { showSuccessToast } from "@/lib/toast-store";
-import type { Tables } from "@/types/database";
+import { useLangStore } from "@/lib/i18n-store";
 import { useState } from "react";
-
-type Project = Tables<"projects">;
 
 interface MemberInviteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
-  project: Project;
+  projectId: string;
+  projectName: string;
 }
 
 export function MemberInviteModal({
   isOpen,
   onClose,
-  onSuccess,
-  project,
+  projectId,
+  projectName,
 }: MemberInviteModalProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "member">("member");
   const [isLoading, setIsLoading] = useState(false);
-  const { showError } = useErrorStore();
-
   const t = useGlobalT();
+  const { lang } = useLangStore();
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleSubmit = async () => {
     if (!email.trim()) {
-      showError(
-        t("invite.input_error_title"),
-        t("invite.input_email_required")
-      );
+      showError("이메일 주소를 입력해주세요", "이메일 주소는 필수입니다.");
       return;
     }
 
-    if (!validateEmail(email.trim())) {
-      showError(t("invite.input_error_title"), t("invite.input_email_invalid"));
+    if (!email.includes("@")) {
+      showError(
+        "올바른 이메일 주소를 입력해주세요",
+        "이메일 형식이 올바르지 않습니다."
+      );
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // 이메일로 사용자 찾기 (실제로는 Supabase Auth에서 사용자를 찾아야 하지만,
-      // 현재는 간단하게 이메일을 입력받는 것으로 구현)
+      // Edge Function 호출하여 초대 이메일 발송
+      const response = await fetch("/api/send-invite-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          projectId,
+          projectName,
+          role,
+          language: lang,
+        }),
+      });
 
-      // 실제 구현에서는 다음과 같은 단계가 필요합니다:
-      // 1. Supabase Admin API를 사용해 이메일로 사용자 검색
-      // 2. 사용자가 없으면 초대 이메일 발송
-      // 3. 사용자가 있으면 멤버십 직접 생성
+      const result = await response.json();
 
-      // 현재는 시연용으로 간단하게 구현
-      showSuccessToast(
-        t("invite.success_message", { email, project: project.name })
+      if (!response.ok) {
+        throw new Error(result.error || "초대 이메일 발송에 실패했습니다.");
+      }
+
+      showSuccess(
+        "초대 이메일이 발송되었습니다",
+        `${email}로 초대 이메일을 발송했습니다.`
       );
 
+      // 폼 초기화
       setEmail("");
       setRole("member");
-      onSuccess();
       onClose();
     } catch (error) {
-      console.error("Member invitation error:", error);
-      showError(t("invite.failure_title"), t("invite.failure_message"));
+      console.error("Error sending invite email:", error);
+      showError(
+        "초대 이메일 발송 실패",
+        error instanceof Error
+          ? error.message
+          : "알 수 없는 오류가 발생했습니다."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -95,68 +112,70 @@ export function MemberInviteModal({
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t("invite.title")}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t("invite.description_prefix", { project: project.name })}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>멤버 초대</DialogTitle>
+          <DialogDescription>
+            새로운 멤버를 {projectName} 프로젝트에 초대합니다.
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="py-4 space-y-4">
-          <div>
-            <label
-              htmlFor="member-email"
-              className="text-sm font-medium mb-2 block"
-            >
-              {t("invite.email_label")}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-medium">
+              이메일 주소
             </label>
             <Input
-              id="member-email"
+              id="email"
               type="email"
+              placeholder="example@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={t("invite.email_placeholder")}
               disabled={isLoading}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              required
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="member-role"
-              className="text-sm font-medium mb-2 block"
-            >
-              {t("invite.role_label")}
+          <div className="space-y-2">
+            <label htmlFor="role" className="text-sm font-medium">
+              역할
             </label>
-            <select
-              id="member-role"
+            <Select
               value={role}
-              onChange={(e) => setRole(e.target.value as "admin" | "member")}
+              onValueChange={(value: "admin" | "member") => setRole(value)}
               disabled={isLoading}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="member">{t("invite.role_member")}</option>
-              <option value="admin">{t("invite.role_admin")}</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="역할을 선택하세요" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="member">멤버</SelectItem>
+                <SelectItem value="admin">관리자</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {role === "admin"
+                ? "관리자는 프로젝트 설정을 변경하고 멤버를 초대할 수 있습니다."
+                : "멤버는 프로젝트의 용어집과 정책을 확인하고 기여할 수 있습니다."}
+            </p>
           </div>
-        </div>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleClose} disabled={isLoading}>
-            {t("buttons.cancel")}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleSubmit}
-            disabled={
-              isLoading || !email.trim() || !validateEmail(email.trim())
-            }
-          >
-            {isLoading ? t("invite.inviting") : t("invite.send")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isLoading}
+            >
+              취소
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "발송 중..." : "초대 이메일 발송"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

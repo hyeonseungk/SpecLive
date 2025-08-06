@@ -40,11 +40,11 @@ Resend API
 
 ### 3.1 조직·프로젝트
 
-| 테이블        | 주요 컬럼                                                               | 설명              |
-| ------------- | ----------------------------------------------------------------------- | ----------------- |
-| organizations | id, name, created_at                                                    | 조직              |
-| projects      | id, organization_id, name, created_at                                   | 조직 1‑N 프로젝트 |
-| memberships   | id, project_id, user_id, role (`admin`/`member`), receive_emails (bool) | 알림 토글 포함    |
+| 테이블        | 주요 컬럼                                        | 설명              |
+| ------------- | ------------------------------------------------ | ----------------- |
+| organizations | id, name, created_at                             | 조직              |
+| projects      | id, organization_id, name, created_at            | 조직 1‑N 프로젝트 |
+| memberships   | id, project_id, user_id, role (`admin`/`member`) | 멤버십 관리       |
 
 ### 3.2 Glossary / Policy
 
@@ -88,9 +88,9 @@ Resend API
 | 컨텍스트·일반 링크 | URL 필드 + 외부 링크 컴포넌트                 |
 | 검색·필터          | 클라이언트 Fuse.js + PostgREST `ilike`        |
 | 제안 흐름          | `status` (`draft`/`pending`/`approved`)       |
-| 알림 토글          | `memberships.receive_emails`                  |
-| 이메일 발송        | PG Trigger → Edge Function → Resend           |
-| 온보딩 템플릿      | `templates_*` → INSERT … SELECT               |
+
+| 이메일 발송 | PG Trigger → Edge Function → Resend |
+| 온보딩 템플릿 | `templates_*` → INSERT … SELECT |
 
 ---
 

@@ -52,29 +52,57 @@ export type Database = {
           }
         ];
       };
-      email_events: {
+      invitation_emails: {
         Row: {
-          event_type: string;
           id: string;
-          resource_id: string;
-          sent_at: string | null;
-          target_user_id: string | null;
+          sender_id: string | null;
+          receiver_id: string | null;
+          project_id: string | null;
+          nonce: string;
+          role: string | null;
+          created_at: string | null;
         };
         Insert: {
-          event_type: string;
           id?: string;
-          resource_id: string;
-          sent_at?: string | null;
-          target_user_id?: string | null;
+          sender_id?: string | null;
+          receiver_id?: string | null;
+          project_id?: string | null;
+          nonce: string;
+          role?: string | null;
+          created_at?: string | null;
         };
         Update: {
-          event_type?: string;
           id?: string;
-          resource_id?: string;
-          sent_at?: string | null;
-          target_user_id?: string | null;
+          sender_id?: string | null;
+          receiver_id?: string | null;
+          project_id?: string | null;
+          nonce?: string;
+          role?: string | null;
+          created_at?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "invitation_emails_sender_id_fkey";
+            columns: ["sender_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invitation_emails_receiver_id_fkey";
+            columns: ["receiver_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invitation_emails_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       feature_policies: {
         Row: {
@@ -260,7 +288,6 @@ export type Database = {
           created_at: string | null;
           id: string;
           project_id: string | null;
-          receive_emails: boolean | null;
           role: string | null;
           user_id: string | null;
         };
@@ -268,7 +295,6 @@ export type Database = {
           created_at?: string | null;
           id?: string;
           project_id?: string | null;
-          receive_emails?: boolean | null;
           role?: string | null;
           user_id?: string | null;
         };
@@ -276,7 +302,6 @@ export type Database = {
           created_at?: string | null;
           id?: string;
           project_id?: string | null;
-          receive_emails?: boolean | null;
           role?: string | null;
           user_id?: string | null;
         };

@@ -1,8 +1,8 @@
 "use client";
 
+import { MemberInviteModal } from "@/components/common/member-invite-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { showSimpleError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
@@ -29,6 +29,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const [project, setProject] = useState<Project | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const t = useGlobalT();
 
   const router = useRouter();
@@ -86,7 +87,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   };
 
   const handleInviteClick = () => {
-    showSimpleError("준비 중인 기능입니다");
+    setShowInviteModal(true);
   };
 
   if (loading) {
@@ -178,6 +179,16 @@ export default function ManagementPage({ params }: ManagementPageProps) {
               </p>
             </CardContent>
           </Card>
+        )}
+
+        {/* 초대 모달 */}
+        {project && (
+          <MemberInviteModal
+            isOpen={showInviteModal}
+            onClose={() => setShowInviteModal(false)}
+            projectId={project.id}
+            projectName={project.name}
+          />
         )}
       </div>
     </div>

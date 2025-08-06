@@ -63,7 +63,7 @@ CREATE TABLE memberships (
   project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   role TEXT CHECK (role IN ('admin', 'member')) DEFAULT 'member',
-  receive_emails BOOLEAN DEFAULT true,
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(project_id, user_id)
 );

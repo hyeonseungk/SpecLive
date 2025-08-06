@@ -19,7 +19,7 @@ import supabase from "@/lib/supabase-browser";
 import { showSuccessToast } from "@/lib/toast-store";
 import type { User } from "@supabase/supabase-js";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -32,9 +32,14 @@ export default function Home() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useGlobalT();
   const { lang } = useLangStore();
   const locale = lang;
+
+  // Check for invitation parameters
+  const nonce = searchParams.get("nonce");
+  const projectId = searchParams.get("projectId");
 
   useEffect(() => {
     const getSession = async () => {
@@ -63,6 +68,13 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, [router]);
 
+  // Auto-switch to signup mode if invitation parameters are present
+  useEffect(() => {
+    if (nonce && projectId) {
+      setIsSignUp(true);
+    }
+  }, [nonce, projectId]);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -82,11 +94,47 @@ export default function Home() {
           setSubmitting(false);
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
         if (error) throw error;
+
+        // If this is an invitation signup, handle the invitation
+        if (nonce && projectId && data.user) {
+          try {
+            // Get invitation details to determine role
+            const { data: invitation } = await supabase
+              .from("invitation_emails")
+              .select("role")
+              .eq("nonce", nonce)
+              .eq("project_id", projectId)
+              .single();
+
+            // Add user to project with specified role
+            const { error: membershipError } = await supabase
+              .from("memberships")
+              .insert({
+                user_id: data.user.id,
+                project_id: projectId,
+                role: invitation?.role || "member",
+              });
+
+            if (membershipError) {
+              console.error("Failed to add user to project:", membershipError);
+            } else {
+              // Update invitation email with receiver_id
+              await supabase
+                .from("invitation_emails")
+                .update({ receiver_id: data.user.id })
+                .eq("nonce", nonce)
+                .eq("project_id", projectId);
+            }
+          } catch (inviteError) {
+            console.error("Error handling invitation:", inviteError);
+          }
+        }
+
         showSuccessToast(t("auth.signup_complete_desc"));
         setEmail("");
         setPassword("");
