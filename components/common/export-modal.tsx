@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { showError, showSimpleError } from "@/lib/error-store";
+import { useGlobalT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
 import { showSuccessToast } from "@/lib/toast-store";
 import { X } from "lucide-react";
@@ -20,6 +21,7 @@ export default function ExportModal({
   projectId,
 }: ExportModalProps) {
   const [exportingType, setExportingType] = useState<string | null>(null);
+  const t = useGlobalT();
   const exportAsMarkdown = async () => {
     if (!projectId) {
       showSimpleError("프로젝트 ID가 필요합니다.");
@@ -656,8 +658,8 @@ export default function ExportModal({
         <div className="mb-6">
           <h3 className="text-xl font-semibold mb-2">Export</h3>
           <p className="text-gray-600 text-sm">
-            서비스의 기능 및 정책을 적절한 포맷으로 익스포트하고 팀의 효율 및 AI
-            코딩 툴의 성능을 높여보세요
+            • {t("export.description_part1")}
+            <br />• {t("export.description_part2")}
           </p>
         </div>
 
@@ -695,6 +697,21 @@ export default function ExportModal({
           <Button
             variant="outline"
             className="w-full justify-start"
+            onClick={exportAsExcel}
+            disabled={exportingType !== null}
+          >
+            {exportingType === "excel" ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                내보내는 중...
+              </div>
+            ) : (
+              "엑셀 (.xlsx)"
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full justify-start"
             onClick={exportAsJson}
             disabled={exportingType !== null}
           >
@@ -720,21 +737,6 @@ export default function ExportModal({
               </div>
             ) : (
               "텍스트 (.txt)"
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={exportAsExcel}
-            disabled={exportingType !== null}
-          >
-            {exportingType === "excel" ? (
-              <div className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                내보내는 중...
-              </div>
-            ) : (
-              "엑셀 (.xlsx)"
             )}
           </Button>
         </div>

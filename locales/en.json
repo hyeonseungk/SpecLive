@@ -43,6 +43,10 @@
     "created_suffix": "created",
     "card_hint": "Click to manage terms and policies."
   },
+  "export": {
+    "description_part1": "Export service features and policies in appropriate formats.",
+    "description_part2": "Put the exported files into AI coding tools like Cursor, Claude Code, etc. to improve development speed and accuracy."
+  },
   "glossary": {
     "header": "Glossary",
     "sub": "Define and manage all terms related to the service.",

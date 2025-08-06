@@ -96,6 +96,10 @@
     "member_unit": "명",
     "created_date": "생성일"
   },
+  "export": {
+    "description_part1": "서비스의 기능 및 정책을 적절한 포맷으로 Export해보세요.",
+    "description_part2": "Export한 파일을 Cursor, Claude Code 등과 같은 AI 코딩 툴에 넣고 개발 속도와 정확도를 높여보세요."
+  },
   "glossary": {
     "header": "용어 관리",
     "sub": "서비스에 관한 모든 용어들을 정의하고 관리합니다.",
