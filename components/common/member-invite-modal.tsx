@@ -49,14 +49,17 @@ export function MemberInviteModal({
     e.preventDefault();
 
     if (!email.trim()) {
-      showError("이메일 주소를 입력해주세요", "이메일 주소는 필수입니다.");
+      showError(
+        t("memberInviteModal.email_required_title"),
+        t("memberInviteModal.email_required_desc")
+      );
       return;
     }
 
     if (!email.includes("@")) {
       showError(
-        "올바른 이메일 주소를 입력해주세요",
-        "이메일 형식이 올바르지 않습니다."
+        t("memberInviteModal.email_invalid_title"),
+        t("memberInviteModal.email_invalid_desc")
       );
       return;
     }
@@ -80,12 +83,12 @@ export function MemberInviteModal({
       );
 
       if (error) {
-        throw new Error(error.message || "초대 이메일 발송에 실패했습니다.");
+        throw new Error(error.message || t("memberInviteModal.error_desc"));
       }
 
       showSuccess(
-        "초대 이메일이 발송되었습니다",
-        `${email}로 초대 이메일을 발송했습니다.`
+        t("memberInviteModal.success_title"),
+        t("memberInviteModal.success_desc", { email: email.trim() })
       );
 
       // 폼 초기화
@@ -95,10 +98,10 @@ export function MemberInviteModal({
     } catch (error) {
       console.error("Error sending invite email:", error);
       showError(
-        "초대 이메일 발송 실패",
+        t("memberInviteModal.error_title"),
         error instanceof Error
           ? error.message
-          : "알 수 없는 오류가 발생했습니다."
+          : t("memberInviteModal.error_desc")
       );
     } finally {
       setIsLoading(false);
@@ -117,21 +120,21 @@ export function MemberInviteModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>멤버 초대</DialogTitle>
+          <DialogTitle>{t("memberInviteModal.title")}</DialogTitle>
           <DialogDescription>
-            새로운 멤버를 {projectName} 프로젝트에 초대합니다.
+            {t("memberInviteModal.description", { projectName })}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              이메일 주소
+              {t("memberInviteModal.email_label")}
             </label>
             <Input
               id="email"
               type="email"
-              placeholder="example@company.com"
+              placeholder={t("memberInviteModal.email_placeholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
@@ -141,7 +144,7 @@ export function MemberInviteModal({
 
           <div className="space-y-2">
             <label htmlFor="role" className="text-sm font-medium">
-              역할
+              {t("memberInviteModal.role_label")}
             </label>
             <Select
               value={role}
@@ -149,17 +152,23 @@ export function MemberInviteModal({
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="역할을 선택하세요" />
+                <SelectValue
+                  placeholder={t("memberInviteModal.role_placeholder")}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="member">멤버</SelectItem>
-                <SelectItem value="admin">관리자</SelectItem>
+                <SelectItem value="member">
+                  {t("memberInviteModal.role_member")}
+                </SelectItem>
+                <SelectItem value="admin">
+                  {t("memberInviteModal.role_admin")}
+                </SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
               {role === "admin"
-                ? "관리자는 프로젝트 설정을 변경하고 멤버를 초대할 수 있습니다."
-                : "멤버는 프로젝트의 용어집과 정책을 확인하고 기여할 수 있습니다."}
+                ? t("memberInviteModal.role_admin_desc")
+                : t("memberInviteModal.role_member_desc")}
             </p>
           </div>
 
@@ -170,10 +179,12 @@ export function MemberInviteModal({
               onClick={handleClose}
               disabled={isLoading}
             >
-              취소
+              {t("memberInviteModal.cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "발송 중..." : "초대 이메일 발송"}
+              {isLoading
+                ? t("memberInviteModal.sending")
+                : t("memberInviteModal.send")}
             </Button>
           </DialogFooter>
         </form>

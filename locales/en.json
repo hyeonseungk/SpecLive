@@ -714,5 +714,28 @@
     "joining_project": "Joining Project...",
     "decline": "Decline",
     "failed_load_info": "Failed to load invitation information."
+  },
+  "memberInviteModal": {
+    "title": "Invite Member",
+    "description": "Invite a new member to {{projectName}} project.",
+    "email_label": "Email Address",
+    "email_placeholder": "example@company.com",
+    "email_required_title": "Input Error",
+    "email_required_desc": "Please enter an email address.",
+    "email_invalid_title": "Email Format Error",
+    "email_invalid_desc": "Please enter a valid email format.",
+    "role_label": "Role",
+    "role_placeholder": "Select a role",
+    "role_member": "Member",
+    "role_admin": "Admin",
+    "role_member_desc": "Members can view and contribute to the project's glossary and policies.",
+    "role_admin_desc": "Admins can change project settings and invite members.",
+    "cancel": "Cancel",
+    "send": "Send Invitation Email",
+    "sending": "Sending...",
+    "success_title": "Invitation Email Sent",
+    "success_desc": "Invitation email has been sent to {{email}}.",
+    "error_title": "Failed to Send Invitation Email",
+    "error_desc": "An unknown error occurred."
   }
 }
