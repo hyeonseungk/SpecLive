@@ -14,7 +14,7 @@ interface ServiceMapping {
 
 const SERVICE_MAPPINGS: ServiceMapping[] = [
   {
-    domain: "www.figma.com",
+    domain: "figma.com",
     icon: { src: "/images/service-logos/figma.png", alt: "Figma" },
   },
   {
@@ -22,7 +22,7 @@ const SERVICE_MAPPINGS: ServiceMapping[] = [
     icon: { src: "/images/service-logos/slack.png", alt: "Slack" },
   },
   {
-    domain: "www.notion.so",
+    domain: "notion.so",
     icon: { src: "/images/service-logos/notion.png", alt: "Notion" },
   },
   {

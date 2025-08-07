@@ -1880,37 +1880,10 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         if (featurePolicyError) throw featurePolicyError;
       }
 
-      // 7. 수정된 정책 데이터를 다시 조회하여 로컬 상태 업데이트
-      const { data: updatedPolicy, error: fetchUpdatedError } = await supabase
-        .from("policies")
-        .select(
-          `
-          *,
-          policy_links (id, url, type),
-          policy_terms (
-            glossary_id,
-            glossaries (name)
-          )
-        `
-        )
-        .eq("id", editingPolicy.id)
-        .single();
-
-      if (fetchUpdatedError) throw fetchUpdatedError;
-
-      // 기존 정책 목록에서 해당 정책만 업데이트 (전체 리로드 없이)
-      setFeaturePolicies((prev) =>
-        prev.map((p) => {
-          if (p.id === editingPolicy.id) {
-            // FeaturePolicy 타입에 맞게 sequence 정보 유지
-            return {
-              ...updatedPolicy,
-              sequence: p.sequence, // 기존 sequence 유지
-            } as FeaturePolicy;
-          }
-          return p;
-        })
-      );
+      // 7. 현재 선택된 기능의 정책 목록을 완전히 다시 로드
+      if (selectedFeature) {
+        await loadPoliciesForTheFeature(selectedFeature.id);
+      }
 
       // 9. 모달 초기화 및 닫기
       setShowEditPolicyModal(false);
