@@ -147,7 +147,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
               .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
               .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 8px 8px; }
-              .button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+              .button { display: inline-block; background: #667eea; color: white !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
               .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
             </style>
           </head>
@@ -204,7 +204,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
               .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
               .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 8px 8px; }
-              .button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+              .button { display: inline-block; background: #667eea; color: white !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
               .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
             </style>
           </head>

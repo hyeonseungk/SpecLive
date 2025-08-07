@@ -708,7 +708,7 @@
     "invalid_invitation_title": "Invalid or expired invitation",
     "invalid_invitation_desc": "The invitation link is no longer valid or has expired.",
     "expired_invitation_title": "Invitation email has expired",
-    "expired_invitation_desc": "The invitation email has expired after 2 days. Please request a new invitation.",
+    "expired_invitation_desc": "The invitation email has expired after 2 days. Please ask the project administrator to send a new invitation.",
     "failed_process_title": "Failed to process invitation",
     "failed_process_desc": "An error occurred while processing the invitation.",
     "failed_load_project_title": "Failed to load project information",

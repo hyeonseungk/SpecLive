@@ -708,7 +708,7 @@
     "invalid_invitation_title": "잘못되었거나 만료된 초대",
     "invalid_invitation_desc": "초대 링크가 더 이상 유효하지 않거나 만료되었습니다.",
     "expired_invitation_title": "초대 이메일이 만료되었어요",
-    "expired_invitation_desc": "초대 이메일이 2일이 지나 만료되었습니다. 새로운 초대를 요청해주세요.",
+    "expired_invitation_desc": "초대 이메일이 2일이 지나 만료되었습니다. 프로젝트 관리자에게 다시 초대를 해달라고 요청하세요.",
     "failed_process_title": "초대 처리 실패",
     "failed_process_desc": "초대를 처리하는 중 오류가 발생했습니다.",
     "failed_load_project_title": "프로젝트 정보 로드 실패",
