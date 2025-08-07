@@ -53,8 +53,14 @@ export default function Home() {
       if (session?.user) {
         // Check if this is an invitation link
         if (from === "member-invitation" && nonce && projectId) {
+          console.log(
+            "getSession redirect to invite:",
+            `/invite?nonce=${nonce}&projectId=${projectId}`
+          );
+          console.log("getSession URL params:", { from, nonce, projectId });
           router.push(`/invite?nonce=${nonce}&projectId=${projectId}`);
         } else {
+          console.log("getSession redirect to dashboard");
           router.push("/dashboard");
         }
       }
@@ -69,8 +75,18 @@ export default function Home() {
       if (session?.user) {
         // Check if this is an invitation link
         if (from === "member-invitation" && nonce && projectId) {
+          console.log(
+            "onAuthStateChange redirect to invite:",
+            `/invite?nonce=${nonce}&projectId=${projectId}`
+          );
+          console.log("onAuthStateChange URL params:", {
+            from,
+            nonce,
+            projectId,
+          });
           router.push(`/invite?nonce=${nonce}&projectId=${projectId}`);
         } else {
+          console.log("onAuthStateChange redirect to dashboard");
           router.push("/dashboard");
         }
       }
@@ -129,46 +145,27 @@ export default function Home() {
         return;
       }
 
+      // Check if this is an invitation link for email redirect
+      let emailRedirectUrl = `${window.location.origin}/dashboard`;
+      if (from === "member-invitation" && nonce && projectId) {
+        emailRedirectUrl = `${window.location.origin}/invite?nonce=${nonce}&projectId=${projectId}`;
+      }
+
+      console.log("SignUp emailRedirectUrl:", emailRedirectUrl);
+      console.log("SignUp URL params:", { from, nonce, projectId });
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: emailRedirectUrl,
+        },
       });
       if (error) throw error;
 
-      // Handle invitation if this is an invitation signup
-      if (nonce && projectId && data.user) {
-        try {
-          // Get invitation details to determine role
-          const { data: invitation } = await supabase
-            .from("invitation_emails")
-            .select("role")
-            .eq("nonce", nonce)
-            .eq("project_id", projectId)
-            .single();
-
-          // Add user to project with specified role
-          const { error: membershipError } = await supabase
-            .from("memberships")
-            .insert({
-              user_id: data.user.id,
-              project_id: projectId,
-              role: invitation?.role || "member",
-            });
-
-          if (membershipError) {
-            console.error("Failed to add user to project:", membershipError);
-          } else {
-            // Update invitation email with receiver_id
-            await supabase
-              .from("invitation_emails")
-              .update({ receiver_id: data.user.id })
-              .eq("nonce", nonce)
-              .eq("project_id", projectId);
-          }
-        } catch (inviteError) {
-          console.error("Error handling invitation:", inviteError);
-        }
-      }
+      console.log("SignUp result:", { data, error });
+      console.log("SignUp session:", data.session);
+      console.log("SignUp user:", data.user);
 
       showSuccessToast(t("auth.signup_complete_desc"));
       setEmail("");
@@ -208,10 +205,19 @@ export default function Home() {
   const handleGoogleSignIn = async () => {
     setSubmitting(true);
     try {
+      // Check if this is an invitation link
+      let redirectUrl = `${window.location.origin}/dashboard`;
+      if (from === "member-invitation" && nonce && projectId) {
+        redirectUrl = `${window.location.origin}/invite?nonce=${nonce}&projectId=${projectId}`;
+      }
+
+      console.log("Google OAuth redirectUrl:", redirectUrl);
+      console.log("URL params:", { from, nonce, projectId });
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: redirectUrl,
         },
       });
       if (error) throw error;
