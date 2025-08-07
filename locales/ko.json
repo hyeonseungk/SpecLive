@@ -632,6 +632,10 @@
       "ai": {
         "title": "새롭게 기획하는 서비스? 더 발전시킬 서비스?",
         "description": "어느 것이라도 AI의 스마트한 기능 및 정책 제안을 받아보세요."
+      },
+      "export": {
+        "title": "작성한 내용을 원하는 포맷으로 Export해보세요.",
+        "description": "Cursor, Claude Code 같은 AI 코딩 툴에 컨텍스트로 넣고, 개발 정확도와 속도를 올려보세요"
       }
     }
   },

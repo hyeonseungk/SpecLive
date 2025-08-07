@@ -632,6 +632,10 @@
       "ai": {
         "title": "Planning a new service? Want to improve an existing service?",
         "description": "Get smart feature and policy suggestions from AI for any of them."
+      },
+      "export": {
+        "title": "Export your written content in your desired format.",
+        "description": "Use it as context in AI coding tools like Cursor and Claude Code to improve development accuracy and speed."
       }
     }
   },

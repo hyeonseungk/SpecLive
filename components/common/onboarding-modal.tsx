@@ -38,6 +38,11 @@ const getOnboardingData = (t: any) => [
     title: t("onboarding.slides.ai.title"),
     description: t("onboarding.slides.ai.description"),
   },
+  {
+    image: "/images/onboarding/onboarding_5_ko_KR.png",
+    title: t("onboarding.slides.export.title"),
+    description: t("onboarding.slides.export.description"),
+  },
 ];
 
 export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
