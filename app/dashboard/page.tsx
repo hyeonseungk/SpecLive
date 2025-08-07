@@ -1,6 +1,7 @@
 "use client";
 
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
+import { InquiryButton } from "@/components/common/inquiry-button";
 import { LanguageSelector } from "@/components/common/language-selector";
 import { LogoutConfirmModal } from "@/components/common/logout-confirm-modal";
 import { OrganizationCreateModal } from "@/components/common/organization-create-modal";
@@ -422,6 +423,9 @@ export default function Dashboard() {
         organization={editingOrg}
         mode={editMode}
       />
+      
+      {/* 문의하기 버튼 - 로그인된 사용자에게만 표시 */}
+      {user && <InquiryButton />}
     </div>
   );
 }

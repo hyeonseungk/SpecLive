@@ -791,5 +791,17 @@
     "success_desc": "{{email}}로 초대 이메일을 발송했습니다.",
     "error_title": "초대 이메일 발송 실패",
     "error_desc": "알 수 없는 오류가 발생했습니다."
+  },
+  "inquiry": {
+    "button": "문의하기",
+    "modal_title": "문의 & 피드백",
+    "content_label": "문의 내용",
+    "content_placeholder": "문의사항이나 피드백을 자유롭게 작성해주세요...",
+    "content_required": "문의 내용을 입력해주세요.",
+    "cancel": "취소",
+    "send": "보내기",
+    "sending": "전송 중...",
+    "success": "문의가 성공적으로 전송되었습니다.",
+    "error": "문의 전송 중 오류가 발생했습니다. 다시 시도해주세요."
   }
 }

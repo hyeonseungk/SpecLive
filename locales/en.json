@@ -791,5 +791,17 @@
     "success_desc": "Invitation email has been sent to {{email}}.",
     "error_title": "Failed to Send Invitation Email",
     "error_desc": "An unknown error occurred."
+  },
+  "inquiry": {
+    "button": "Ask",
+    "modal_title": "Inquiry & Feedback",
+    "content_label": "Inquiry Content",
+    "content_placeholder": "Please write your inquiry or feedback freely...",
+    "content_required": "Please enter inquiry content.",
+    "cancel": "Cancel",
+    "send": "Send",
+    "sending": "Sending...",
+    "success": "Inquiry has been sent successfully.",
+    "error": "An error occurred while sending the inquiry. Please try again."
   }
 }

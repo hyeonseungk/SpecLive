@@ -210,6 +210,35 @@ export type Database = {
           }
         ];
       };
+      inquiries: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          contents: string;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          contents: string;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          contents?: string;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       glossaries: {
         Row: {
           author_id: string | null;

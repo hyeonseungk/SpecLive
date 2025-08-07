@@ -1,5 +1,6 @@
 "use client";
 
+import { InquiryButton } from "@/components/common/inquiry-button";
 import { Button } from "@/components/ui/button";
 import { useGlobalT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase-browser";
@@ -219,6 +220,9 @@ export default function ProjectLayout({
 
       {/* 메인 콘텐츠 영역 */}
       <div className="flex-1 overflow-hidden">{children}</div>
+
+      {/* 문의하기 버튼 - 로그인된 사용자에게만 표시 */}
+      {user && <InquiryButton />}
     </div>
   );
 }
