@@ -102,7 +102,7 @@ export default function ProjectLayout({
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-screen max-h-screen">
       {/* 사이드바: collapsed 여부에 따라 얇은 바 또는 전체 메뉴 표시 */}
       <div
         className={`flex flex-col bg-card border-r transition-all duration-200 ${
@@ -224,7 +224,7 @@ export default function ProjectLayout({
       </div>
 
       {/* 메인 콘텐츠 영역 */}
-      <div className="flex-1 overflow-hidden">{children}</div>
+      <div className="flex-1 overflow-auto bg-background">{children}</div>
     </div>
   );
 }

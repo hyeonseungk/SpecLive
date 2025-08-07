@@ -336,8 +336,8 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const isAdmin = membership?.role === "admin";
 
   return (
-    <div className="p-6">
-      <div>
+    <div className="h-full flex flex-col p-6 bg-background">
+      <div className="flex-1">
         {/* 헤더 영역 */}
         <div className="mb-6">
           <h2 className="text-3xl font-bold mb-2">{t("management.header")}</h2>

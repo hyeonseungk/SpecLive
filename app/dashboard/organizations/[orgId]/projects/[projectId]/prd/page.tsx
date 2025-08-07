@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { showSuccessToast } from "@/lib/toast-store";
 import { supabase } from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import { Tables } from "@/types/database";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -170,7 +170,7 @@ export default function PrdPage({ params }: PrdPageProps) {
         setPrd(newPrd);
       }
 
-              showSuccessToast(t("prd.save_success"));
+      showSuccessToast(t("prd.save_success"));
     } catch (error) {
       console.error("Error saving PRD:", error);
       showError(t("prd.save_error_title"), t("prd.save_error_desc"));
@@ -217,8 +217,8 @@ export default function PrdPage({ params }: PrdPageProps) {
   const canEditPrd = membership?.role === "admin";
 
   return (
-    <div className="p-6">
-      <div>
+    <div className="h-full flex flex-col p-6 bg-background">
+      <div className="flex-1">
         {/* 헤더 영역 */}
         <div className="mb-6">
           <h2 className="text-3xl font-bold mb-2">{t("project.prd_header")}</h2>
