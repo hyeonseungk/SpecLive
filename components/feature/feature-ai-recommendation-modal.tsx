@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
 import { useLangStore } from "@/lib/i18n-store";
-import { showSuccessToast } from "@/lib/toast-store";
 import { supabase } from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import { Tables } from "@/types/database";
 import { useState } from "react";
 
@@ -102,9 +102,23 @@ export default function FeatureAiRecommendationModal({
 
     setAiLoading(true);
     try {
+      // 1. 현재 유즈케이스의 최대 sequence 값 조회
+      const { data: maxSequenceData, error: maxSequenceError } = await supabase
+        .from("features")
+        .select("sequence")
+        .eq("usecase_id", selectedUsecaseId)
+        .order("sequence", { ascending: false })
+        .limit(1);
+
+      if (maxSequenceError) throw maxSequenceError;
+
+      // 다음 sequence 값 계산 (최대값 + 1부터 시작)
+      let nextSequence = (maxSequenceData?.[0]?.sequence || 0) + 1;
+
       const addedFeatures: (Tables<"features"> & {
         feature_actors: any[];
       })[] = [];
+
       for (const rec of selected) {
         const { data: feature, error: featureError } = await supabase
           .from("features")
@@ -112,6 +126,7 @@ export default function FeatureAiRecommendationModal({
             name: rec.name,
             author_id: userId,
             usecase_id: selectedUsecaseId,
+            sequence: nextSequence,
           })
           .select()
           .single();
@@ -120,10 +135,11 @@ export default function FeatureAiRecommendationModal({
           ...feature,
           feature_actors: [],
         });
+        nextSequence++; // 다음 feature를 위한 sequence 증가
       }
       onFeaturesAdded(addedFeatures);
       setAiRecommendations((prev) => prev.filter((r) => !r.selected));
-              showSuccessToast(`${selected.length}${t("feature.ai_features_added")}`);
+      showSuccessToast(`${selected.length}${t("feature.ai_features_added")}`);
       if (aiRecommendations.filter((r) => !r.selected).length === 0) {
         onClose();
       }
