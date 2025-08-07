@@ -51,7 +51,11 @@ export default function SortableGlossaryCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Card className="cursor-pointer hover:shadow-md transition-shadow relative group">
+      <Card
+        className={`relative group transition-shadow ${
+          membership?.role === "admin" ? "cursor-pointer hover:shadow-md" : ""
+        }`}
+      >
         {/* 드래그 핸들 (시퀀스 정렬일 때만, 항상 표시, 호버 시 진하게, 관리자만) */}
         {showSequence && membership?.role === "admin" && (
           <div
@@ -112,7 +116,7 @@ export default function SortableGlossaryCard({
         )}
 
         <div
-          onClick={() => onEdit(glossary)}
+          onClick={() => membership?.role === "admin" && onEdit(glossary)}
           className={showSequence && membership?.role === "admin" ? "ml-8" : ""}
         >
           <CardHeader>
