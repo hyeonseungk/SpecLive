@@ -47,7 +47,7 @@ import {
 } from "@dnd-kit/sortable";
 import { ChevronDown, ChevronRight, Download } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type User = {
   id: string;
@@ -1830,9 +1830,6 @@ export default function PolicyPage({ params }: PolicyPageProps) {
 
       const existingFeatureIds =
         existingFeaturePolicies?.map((fp) => fp.feature_id) || [];
-      const existingFeatureMap = new Map(
-        existingFeaturePolicies?.map((fp) => [fp.feature_id, fp.sequence]) || []
-      );
 
       // 삭제할 기능들 (기존에 있었지만 새로운 선택에서 제외된 것들)
       const featuresToRemove = existingFeatureIds.filter(
@@ -2146,28 +2143,32 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   };
 
   // 기능 목록 필터링
-  const filteredFeatureList = features.filter((feature) => {
-    if (!featureListSearchTerm.trim()) return true;
-    const searchTerm = featureListSearchTerm.toLowerCase().trim();
-    return feature.name.toLowerCase().includes(searchTerm);
-  });
+  const filteredFeatureList = useMemo(() => {
+    return features.filter((feature) => {
+      if (!featureListSearchTerm.trim()) return true;
+      const searchTerm = featureListSearchTerm.toLowerCase().trim();
+      return feature.name.toLowerCase().includes(searchTerm);
+    });
+  }, [features, featureListSearchTerm]);
 
   // 정책 목록 필터링
-  const filteredPolicyList = featurePolicies.filter((policy) => {
-    if (!policyListSearchTerm.trim()) return true;
-    const searchTerm = policyListSearchTerm.toLowerCase().trim();
+  const filteredPolicyList = useMemo(() => {
+    return featurePolicies.filter((policy) => {
+      if (!policyListSearchTerm.trim()) return true;
+      const searchTerm = policyListSearchTerm.toLowerCase().trim();
 
-    // 정책 내용으로 검색
-    const contentMatches = policy.contents.toLowerCase().includes(searchTerm);
+      // 정책 내용으로 검색
+      const contentMatches = policy.contents.toLowerCase().includes(searchTerm);
 
-    // 연결된 용어 이름으로 검색
-    const termMatches =
-      policy.policy_terms?.some((term) =>
-        term.glossaries?.name.toLowerCase().includes(searchTerm)
-      ) || false;
+      // 연결된 용어 이름으로 검색
+      const termMatches =
+        policy.policy_terms?.some((term) =>
+          term.glossaries?.name.toLowerCase().includes(searchTerm)
+        ) || false;
 
-    return contentMatches || termMatches;
-  });
+      return contentMatches || termMatches;
+    });
+  }, [featurePolicies, policyListSearchTerm]);
 
   // Add handleActorDragEnd next to other drag handlers
   /**
