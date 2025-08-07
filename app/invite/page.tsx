@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError } from "@/lib/error-store";
+import { useGlobalT } from "@/lib/i18n";
 import { showSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,6 +22,7 @@ interface Project {
 export default function InvitePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useGlobalT();
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
@@ -32,8 +34,8 @@ export default function InvitePage() {
   useEffect(() => {
     if (!nonce || !projectId) {
       showError(
-        "Invalid invitation link",
-        "The invitation link is missing required parameters."
+        t("invitePage.invalid_link_title"),
+        t("invitePage.invalid_link_desc")
       );
       router.push("/");
       return;
@@ -87,8 +89,8 @@ export default function InvitePage() {
       if (invitationError) {
         console.error("Invitation lookup error:", invitationError);
         showError(
-          "Invalid or expired invitation",
-          "The invitation link is no longer valid or has expired."
+          t("invitePage.invalid_invitation_title"),
+          t("invitePage.invalid_invitation_desc")
         );
         router.push("/");
         return;
@@ -97,8 +99,8 @@ export default function InvitePage() {
       if (!invitationData) {
         console.error("Invitation not found:", { nonce, projectId });
         showError(
-          "Invalid or expired invitation",
-          "The invitation link is no longer valid or has expired."
+          t("invitePage.invalid_invitation_title"),
+          t("invitePage.invalid_invitation_desc")
         );
         router.push("/");
         return;
@@ -124,8 +126,8 @@ export default function InvitePage() {
     } catch (error) {
       console.error("Unexpected error in handleInvite:", error);
       showError(
-        "Failed to process invitation",
-        "An error occurred while processing the invitation."
+        t("invitePage.failed_process_title"),
+        t("invitePage.failed_process_desc")
       );
       router.push("/");
     } finally {
@@ -154,8 +156,8 @@ export default function InvitePage() {
       if (error) {
         console.error("Project lookup error:", error);
         showError(
-          "Failed to load project information",
-          "Could not load the project details."
+          t("invitePage.failed_load_project_title"),
+          t("invitePage.failed_load_project_desc")
         );
         router.push("/");
         return;
@@ -164,8 +166,8 @@ export default function InvitePage() {
       if (!data) {
         console.error("Project not found:", { projectId });
         showError(
-          "Project not found",
-          "The project associated with this invitation could not be found."
+          t("invitePage.project_not_found_title"),
+          t("invitePage.project_not_found_desc")
         );
         router.push("/");
         return;
@@ -175,8 +177,8 @@ export default function InvitePage() {
     } catch (error) {
       console.error("Unexpected error in loadProjectInfo:", error);
       showError(
-        "Failed to load project information",
-        "Could not load the project details."
+        t("invitePage.failed_load_project_title"),
+        t("invitePage.failed_load_project_desc")
       );
       router.push("/");
     }
@@ -190,8 +192,8 @@ export default function InvitePage() {
       if (authError) {
         console.error("Auth error in handleAcceptInvite:", authError);
         showError(
-          "Authentication error",
-          "Failed to verify your authentication status."
+          t("invitePage.auth_error_title"),
+          t("invitePage.auth_error_desc")
         );
         return;
       }
@@ -199,8 +201,8 @@ export default function InvitePage() {
       if (!user) {
         console.error("User not authenticated in handleAcceptInvite");
         showError(
-          "Authentication required",
-          "Please log in to accept this invitation."
+          t("invitePage.auth_required_title"),
+          t("invitePage.auth_required_desc")
         );
         return;
       }
@@ -217,8 +219,8 @@ export default function InvitePage() {
       if (membershipCheckError && membershipCheckError.code !== "PGRST116") {
         console.error("Membership check error:", membershipCheckError);
         showError(
-          "Failed to check membership",
-          "An error occurred while checking your membership status."
+          t("invitePage.membership_check_error_title"),
+          t("invitePage.membership_check_error_desc")
         );
         return;
       }
@@ -226,8 +228,8 @@ export default function InvitePage() {
       if (existingMembership) {
         console.log("User already a member:", { userId: user.id, projectId });
         showSuccess(
-          "You are already a member of this project",
-          "You have already joined this project."
+          t("invitePage.already_member_title"),
+          t("invitePage.already_member_desc")
         );
         if (project?.organization_id) {
           router.push(
@@ -251,8 +253,8 @@ export default function InvitePage() {
       if (membershipError) {
         console.error("Membership insert error:", membershipError);
         showError(
-          "Failed to join project",
-          "An error occurred while adding you to the project."
+          t("invitePage.join_failed_title"),
+          t("invitePage.join_failed_desc")
         );
         return;
       }
@@ -278,8 +280,8 @@ export default function InvitePage() {
         projectId,
       });
       showSuccess(
-        "Successfully joined the project!",
-        "You have been added to the project successfully."
+        t("invitePage.join_success_title"),
+        t("invitePage.join_success_desc")
       );
       if (project?.organization_id) {
         router.push(
@@ -291,8 +293,8 @@ export default function InvitePage() {
     } catch (error) {
       console.error("Unexpected error in handleAcceptInvite:", error);
       showError(
-        "Failed to join project",
-        "An error occurred while adding you to the project."
+        t("invitePage.join_failed_title"),
+        t("invitePage.join_failed_desc")
       );
     } finally {
       setIsProcessing(false);
@@ -308,7 +310,7 @@ export default function InvitePage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Processing invitation...</p>
+          <p className="text-gray-600">{t("invitePage.processing")}</p>
         </div>
       </div>
     );
@@ -318,9 +320,7 @@ export default function InvitePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">
-            Failed to load invitation information.
-          </p>
+          <p className="text-gray-600">{t("invitePage.failed_load_info")}</p>
         </div>
       </div>
     );
@@ -332,7 +332,7 @@ export default function InvitePage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-center text-xl">
-              Project Invitation
+              {t("invitePage.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -342,19 +342,19 @@ export default function InvitePage() {
               </h3>
               <div className="text-sm text-gray-500 space-y-1">
                 <p>
-                  Organization:{" "}
+                  {t("invitePage.organization")}{" "}
                   <span className="font-medium">
-                    {project.organizations?.name || "Unknown"}
+                    {project.organizations?.name || t("invitePage.unknown")}
                   </span>
                 </p>
                 <p>
-                  Role:{" "}
+                  {t("invitePage.role")}{" "}
                   <span className="font-medium capitalize">
                     {invitation.role || "member"}
                   </span>
                 </p>
                 <p>
-                  Created:{" "}
+                  {t("invitePage.created")}{" "}
                   {new Date(project.created_at || "").toLocaleDateString()}
                 </p>
               </div>
@@ -370,10 +370,10 @@ export default function InvitePage() {
                 {isProcessing ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Joining Project...
+                    {t("invitePage.joining_project")}
                   </>
                 ) : (
-                  "Accept Invitation"
+                  t("invitePage.accept_invitation")
                 )}
               </Button>
               <Button
@@ -383,7 +383,7 @@ export default function InvitePage() {
                 className="w-full"
                 size="lg"
               >
-                Decline
+                {t("invitePage.decline")}
               </Button>
             </div>
           </CardContent>

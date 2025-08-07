@@ -22,6 +22,14 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+/**
+ * 초대 페이지 관련
+ * 1. 로그인된 상태: 초대 페이지에서 바로 초대 수락 가능
+ * 2. 로그인 안 된 상태
+ * (1) 비회원인 경우: signUp 또는 googleSignIn에서 redirectUrl을 초대 페이지로 설정하면 로그인 마친 후 초대 페이지로 이동해서 1.과 같이 진행
+ * (2) 회원인 경우: 로그인 하면 onAuthStateChange에서 초대 페이지로 이동해서 1.과 같이 진행
+ */
+
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
