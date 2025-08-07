@@ -106,6 +106,35 @@ export default function InvitePage() {
         return;
       }
 
+      // 2. Check if invitation is expired (2 days)
+      if (!invitationData.created_at) {
+        console.error("Invitation has no created_at date");
+        showError(
+          t("invitePage.invalid_invitation_title"),
+          t("invitePage.invalid_invitation_desc")
+        );
+        router.push("/");
+        return;
+      }
+
+      const invitationDate = new Date(invitationData.created_at);
+      const currentDate = new Date();
+      const timeDifference = currentDate.getTime() - invitationDate.getTime();
+      const daysDifference = timeDifference / (1000 * 3600 * 24);
+
+      if (daysDifference > 2) {
+        console.error("Invitation expired:", {
+          created_at: invitationData.created_at,
+          daysDifference,
+        });
+        showError(
+          t("invitePage.expired_invitation_title"),
+          t("invitePage.expired_invitation_desc")
+        );
+        router.push("/");
+        return;
+      }
+
       setInvitation(invitationData);
 
       // 2. Check if user is authenticated with improved auth check
