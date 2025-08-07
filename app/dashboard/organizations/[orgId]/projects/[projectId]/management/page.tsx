@@ -1,6 +1,7 @@
 "use client";
 
 import { MemberInviteModal } from "@/components/common/member-invite-modal";
+import { MemberRemoveModal } from "@/components/common/member-remove-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -49,8 +50,12 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [removingMember, setRemovingMember] = useState<ProjectMember | null>(
+    null
+  );
   const [updatingMember, setUpdatingMember] = useState<string | null>(null);
-  const [removingMember, setRemovingMember] = useState<string | null>(null);
+  const [isRemovingLoading, setIsRemovingLoading] = useState(false);
   const t = useGlobalT();
 
   const router = useRouter();
@@ -244,29 +249,32 @@ export default function ManagementPage({ params }: ManagementPageProps) {
     }
   };
 
-  // 멤버 제거 핸들러
-  const handleRemoveMember = async (memberId: string) => {
-    if (removingMember) return; // 이미 제거 중이면 무시
+  // 멤버 제거 모달 열기 핸들러
+  const handleRemoveMemberClick = (member: ProjectMember) => {
+    // 마지막 관리자 보호 로직
+    if (member.role === "admin" && adminCount === 1) {
+      showError(
+        t("common.error_title"),
+        t("management.cannot_remove_last_admin")
+      );
+      return;
+    }
+
+    setRemovingMember(member);
+    setShowRemoveModal(true);
+  };
+
+  // 멤버 제거 확인 핸들러
+  const handleRemoveMemberConfirm = async () => {
+    if (!removingMember) return;
 
     try {
-      setRemovingMember(memberId);
-
-      const targetMember = projectMembers.find((m) => m.id === memberId);
-      if (!targetMember) return;
-
-      // 마지막 관리자 보호 로직
-      if (targetMember.role === "admin" && adminCount === 1) {
-        showError(
-          t("common.error_title"),
-          t("management.cannot_remove_last_admin")
-        );
-        return;
-      }
+      setIsRemovingLoading(true);
 
       const { error } = await supabase
         .from("memberships")
         .delete()
-        .eq("id", memberId);
+        .eq("id", removingMember.id);
 
       if (error) {
         throw error;
@@ -274,7 +282,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
 
       // 로컬 상태 업데이트
       setProjectMembers((prev) =>
-        prev.filter((member) => member.id !== memberId)
+        prev.filter((member) => member.id !== removingMember.id)
       );
 
       showSuccess(
@@ -288,8 +296,16 @@ export default function ManagementPage({ params }: ManagementPageProps) {
         t("management.failed_to_remove_member")
       );
     } finally {
+      setIsRemovingLoading(false);
       setRemovingMember(null);
+      setShowRemoveModal(false);
     }
+  };
+
+  // 멤버 제거 모달 닫기 핸들러
+  const handleRemoveModalClose = () => {
+    setShowRemoveModal(false);
+    setRemovingMember(null);
   };
 
   if (loading) {
@@ -358,7 +374,7 @@ export default function ManagementPage({ params }: ManagementPageProps) {
                     const isLastAdmin =
                       member.role === "admin" && adminCount === 1;
                     const isUpdating = updatingMember === member.id;
-                    const isRemoving = removingMember === member.id;
+                    const isRemoving = removingMember?.id === member.id;
 
                     return (
                       <div
@@ -392,11 +408,9 @@ export default function ManagementPage({ params }: ManagementPageProps) {
                             variant="outline"
                             size="sm"
                             disabled={isUpdating || isRemoving || isLastAdmin}
-                            onClick={() => handleRemoveMember(member.id)}
+                            onClick={() => handleRemoveMemberClick(member)}
                           >
-                            {isRemoving
-                              ? t("common.loading")
-                              : t("management.remove_member")}
+                            {t("management.remove_member")}
                           </Button>
                         </div>
                       </div>
@@ -424,6 +438,17 @@ export default function ManagementPage({ params }: ManagementPageProps) {
             projectId={project.id}
             projectName={project.name}
             senderId={user.id}
+          />
+        )}
+
+        {/* 멤버 제거 모달 */}
+        {removingMember && (
+          <MemberRemoveModal
+            isOpen={showRemoveModal}
+            onClose={handleRemoveModalClose}
+            onConfirm={handleRemoveMemberConfirm}
+            memberEmail={removingMember.email || ""}
+            isLoading={isRemovingLoading}
           />
         )}
       </div>

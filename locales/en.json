@@ -183,6 +183,11 @@
     "notifications_button": "Notification Settings (Coming Soon)",
     "admin_only_note": "Project management features are available only to admins."
   },
+  "memberRemove": {
+    "title": "Remove Member Confirmation",
+    "description": "Are you sure you want to remove {{email}} from the project?",
+    "confirm": "Remove"
+  },
   "policy": {
     "header": "Policy Management",
     "sub": "Manage all features and various policies of the service.",
