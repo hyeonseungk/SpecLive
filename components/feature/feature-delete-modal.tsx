@@ -37,10 +37,7 @@ export default function FeatureDeleteModal({
           </button>
         </div>
         <p className="text-muted-foreground mb-6">
-          {t("feature.delete_confirm_message").replace(
-            "{featureName}",
-            featureName
-          )}
+          {t("feature.delete_confirm_message", { featureName })}
           <br />
           <span className="text-sm text-red-600 whitespace-pre-line">
             {t("feature.delete_warning")}

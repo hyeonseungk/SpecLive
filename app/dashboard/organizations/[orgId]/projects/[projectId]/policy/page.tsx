@@ -1877,10 +1877,86 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         if (featurePolicyError) throw featurePolicyError;
       }
 
-      // 7. 현재 선택된 기능의 정책 목록을 완전히 다시 로드
-      if (selectedFeature) {
-        await loadPoliciesForTheFeature(selectedFeature.id);
-      }
+      // 7. 해당 정책만 다시 조회하여 업데이트
+      const { data: policyData, error: fetchPolicyError } = await supabase
+        .from("policies")
+        .select(
+          `
+          id,
+          contents,
+          author_id,
+          created_at,
+          updated_at,
+          project_id,
+          policy_links(id, url, type),
+          policy_terms(
+            glossary_id,
+            glossaries(name)
+          )
+        `
+        )
+        .eq("id", editingPolicy.id)
+        .single();
+
+      if (fetchPolicyError) throw fetchPolicyError;
+
+      // 연결된 기능들 정보 가져오기
+      const { data: featureData, error: featureError } = await supabase
+        .from("feature_policies")
+        .select(
+          `
+          features(
+            id,
+            name,
+            usecase_id,
+            usecase:usecases(
+              id,
+              name,
+              actor_id,
+              actor:actors(id, name)
+            )
+          )
+        `
+        )
+        .eq("policy_id", editingPolicy.id);
+
+      if (featureError) throw featureError;
+
+      const connectedFeatures =
+        featureData
+          ?.map((item) => ({
+            id: item.features?.id || "",
+            name: item.features?.name || "",
+            usecase: {
+              id: item.features?.usecase?.id || "",
+              name: item.features?.usecase?.name || "",
+              actor_id: item.features?.usecase?.actor_id || "",
+              actor: {
+                id: item.features?.usecase?.actor?.id || "",
+                name: item.features?.usecase?.actor?.name || "",
+              },
+            },
+          }))
+          .filter((feature) => feature.name) || [];
+
+      const updatedPolicy: FeaturePolicy = {
+        ...policyData,
+        policy_terms:
+          policyData.policy_terms?.map((term) => ({
+            glossary_id: term.glossary_id || "",
+            glossaries: term.glossaries
+              ? { name: term.glossaries.name }
+              : undefined,
+          })) || [],
+        connected_features: connectedFeatures,
+      };
+
+      // featurePolicies 배열에서 해당 정책만 교체
+      setFeaturePolicies((prev) =>
+        prev.map((policy) =>
+          policy.id === editingPolicy.id ? updatedPolicy : policy
+        )
+      );
 
       // 9. 모달 초기화 및 닫기
       setShowEditPolicyModal(false);
