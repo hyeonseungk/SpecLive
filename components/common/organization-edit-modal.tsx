@@ -36,7 +36,7 @@ export default function OrganizationEditModal({
 
     if (mode === "edit") {
       if (!name.trim()) {
-        showSimpleError("조직 이름을 입력해주세요.");
+        showSimpleError(t("orgEdit.name_required"));
         return;
       }
 
@@ -54,7 +54,7 @@ export default function OrganizationEditModal({
         onClose();
       } catch (error) {
         console.error("Error updating organization:", error);
-        showError("조직 수정 중 오류가 발생했습니다.", String(error));
+        showError(t("orgEdit.update_error_title"), String(error));
       } finally {
         setLoading(false);
       }
@@ -77,14 +77,12 @@ export default function OrganizationEditModal({
 
         if (orgError) throw orgError;
 
-        showSuccessToast(
-          t("orgEdit.delete_success_message")
-        );
+        showSuccessToast(t("orgEdit.delete_success_message"));
         onSuccess();
         onClose();
       } catch (error) {
         console.error("Error deleting organization:", error);
-        showError("조직 삭제 중 오류가 발생했습니다.", String(error));
+        showError(t("orgEdit.delete_error_title"), String(error));
       } finally {
         setLoading(false);
       }
@@ -96,7 +94,9 @@ export default function OrganizationEditModal({
       <Card className="w-full max-w-md mx-4">
         <CardHeader>
           <CardTitle>
-            {mode === "edit" ? "조직 이름 수정" : "조직 삭제"}
+            {mode === "edit"
+              ? t("orgEdit.edit_title")
+              : t("orgEdit.delete_title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -104,12 +104,12 @@ export default function OrganizationEditModal({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  조직 이름
+                  {t("orgEdit.name_label")}
                 </label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="조직 이름을 입력하세요"
+                  placeholder={t("orgEdit.name_placeholder")}
                   disabled={loading}
                 />
               </div>
@@ -120,21 +120,22 @@ export default function OrganizationEditModal({
                   onClick={onClose}
                   disabled={loading}
                 >
-                  취소
+                  {t("orgEdit.cancel")}
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? "수정 중..." : "수정"}
+                  {loading ? t("orgEdit.updating") : t("orgEdit.update")}
                 </Button>
               </div>
             </form>
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
-                <strong>{organization.name}</strong> 조직을 삭제하시겠습니까?
+                {t("orgEdit.delete_confirm_message", {
+                  orgName: organization.name,
+                })}
               </p>
               <p className="text-xs text-red-600">
-                ⚠️ 이 작업은 되돌릴 수 없습니다. 조직과 관련된 모든 프로젝트가
-                함께 삭제됩니다.
+                {t("orgEdit.delete_warning")}
               </p>
               <div className="flex gap-2 justify-end">
                 <Button
@@ -143,7 +144,7 @@ export default function OrganizationEditModal({
                   onClick={onClose}
                   disabled={loading}
                 >
-                  취소
+                  {t("orgEdit.cancel")}
                 </Button>
                 <Button
                   type="button"
@@ -151,7 +152,7 @@ export default function OrganizationEditModal({
                   onClick={handleSubmit}
                   disabled={loading}
                 >
-                  {loading ? "삭제 중..." : "삭제"}
+                  {loading ? t("orgEdit.deleting") : t("orgEdit.delete")}
                 </Button>
               </div>
             </div>

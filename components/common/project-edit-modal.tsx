@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { showError, showSimpleError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
-import { showSuccessToast } from "@/lib/toast-store";
 import supabase from "@/lib/supabase-browser";
+import { showSuccessToast } from "@/lib/toast-store";
 import type { Tables } from "@/types/database";
 import { useState } from "react";
 
@@ -40,7 +40,7 @@ export default function ProjectEditModal({
 
     if (mode === "edit") {
       if (!name.trim()) {
-        showSimpleError("프로젝트 이름을 입력해주세요.");
+        showSimpleError(t("projectEdit.name_required"));
         return;
       }
 
@@ -53,14 +53,12 @@ export default function ProjectEditModal({
 
         if (error) throw error;
 
-        showSuccessToast(
-          t("projectEdit.update_success_message")
-        );
+        showSuccessToast(t("projectEdit.update_success_message"));
         onSuccess();
         onClose();
       } catch (error) {
         console.error("Error updating project:", error);
-        showError("프로젝트 수정 중 오류가 발생했습니다.", String(error));
+        showError(t("projectEdit.update_error_title"), String(error));
       } finally {
         setLoading(false);
       }
@@ -83,14 +81,12 @@ export default function ProjectEditModal({
 
         if (projectError) throw projectError;
 
-        showSuccessToast(
-          t("projectEdit.delete_success_message")
-        );
+        showSuccessToast(t("projectEdit.delete_success_message"));
         onSuccess();
         onClose();
       } catch (error) {
         console.error("Error deleting project:", error);
-        showError("프로젝트 삭제 중 오류가 발생했습니다.", String(error));
+        showError(t("projectEdit.delete_error_title"), String(error));
       } finally {
         setLoading(false);
       }
@@ -102,7 +98,9 @@ export default function ProjectEditModal({
       <Card className="w-full max-w-md mx-4">
         <CardHeader>
           <CardTitle>
-            {mode === "edit" ? "프로젝트 이름 수정" : "프로젝트 삭제"}
+            {mode === "edit"
+              ? t("projectEdit.edit_title")
+              : t("projectEdit.delete_title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -110,12 +108,12 @@ export default function ProjectEditModal({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  프로젝트 이름
+                  {t("projectEdit.name_label")}
                 </label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="프로젝트 이름을 입력하세요"
+                  placeholder={t("projectEdit.name_placeholder")}
                   disabled={loading}
                 />
               </div>
@@ -126,21 +124,24 @@ export default function ProjectEditModal({
                   onClick={onClose}
                   disabled={loading}
                 >
-                  취소
+                  {t("projectEdit.cancel")}
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? "수정 중..." : "수정"}
+                  {loading
+                    ? t("projectEdit.updating")
+                    : t("projectEdit.update")}
                 </Button>
               </div>
             </form>
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
-                <strong>{project.name}</strong> 프로젝트를 삭제하시겠습니까?
+                {t("projectEdit.delete_confirm_message", {
+                  projectName: project.name,
+                })}
               </p>
               <p className="text-xs text-red-600">
-                ⚠️ 이 작업은 되돌릴 수 없습니다. 프로젝트와 관련된 모든 데이터가
-                함께 삭제됩니다.
+                {t("projectEdit.delete_warning")}
               </p>
               <div className="flex gap-2 justify-end">
                 <Button
@@ -149,7 +150,7 @@ export default function ProjectEditModal({
                   onClick={onClose}
                   disabled={loading}
                 >
-                  취소
+                  {t("projectEdit.cancel")}
                 </Button>
                 <Button
                   type="button"
@@ -157,7 +158,9 @@ export default function ProjectEditModal({
                   onClick={handleSubmit}
                   disabled={loading}
                 >
-                  {loading ? "삭제 중..." : "삭제"}
+                  {loading
+                    ? t("projectEdit.deleting")
+                    : t("projectEdit.delete")}
                 </Button>
               </div>
             </div>
