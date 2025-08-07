@@ -803,7 +803,7 @@
     "cancel": "Cancel",
     "send": "Send",
     "sending": "Sending...",
-    "success": "Inquiry has been sent successfully.",
+    "success": "Inquiry has been sent successfully. We will respond to you as soon as possible.",
     "error": "An error occurred while sending the inquiry. Please try again."
   }
 }
