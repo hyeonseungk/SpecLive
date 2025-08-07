@@ -396,7 +396,7 @@ export default function Home() {
                 }}
                 className="text-sm"
               >
-                {isSignUp ? t("auth.have_account") : t("auth.no_account")}
+                {isSignUp ? t("auth.have_account") : t("auth.sign_up")}
               </Button>
             </div>
           </div>
