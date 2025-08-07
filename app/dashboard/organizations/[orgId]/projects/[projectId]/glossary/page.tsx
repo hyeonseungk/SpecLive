@@ -39,6 +39,7 @@ import {
 import { ChevronDown, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSEO } from "@/lib/hooks/use-seo";
 
 type User = {
   id: string;
@@ -94,6 +95,14 @@ export default function GlossaryPage({ params }: GlossaryPageProps) {
   const locale = lang;
 
   const router = useRouter();
+
+  // SEO 설정
+  useSEO({
+    title: project ? `${project.name} - 용어 관리 - SpecLive` : "용어 관리 - SpecLive",
+    description: "프로젝트에서 사용하는 용어들을 체계적으로 관리하고 정의하세요.",
+    keywords: "용어관리, 용어정의, 프로젝트용어, 협업도구",
+    noIndex: true, // 로그인 필요 페이지는 검색엔진에서 제외
+  });
 
   // 드래그 앤 드롭 센서
   const sensors = useSensors(

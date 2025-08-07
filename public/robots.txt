@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Allow all pages except those that require authentication
+Disallow: /dashboard/
+Disallow: /invite/
+Disallow: /api/
+
+# Allow static assets
+Allow: /images/
+Allow: /favicon.png
+
+# Sitemap location (when implemented)
+# Sitemap: https://speclive.vercel.app/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1 

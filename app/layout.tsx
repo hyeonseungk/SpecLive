@@ -51,7 +51,9 @@ export default function RootLayout({
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
+        <title>SpecLive - 전사 용어·정책 관리 SaaS</title>
         <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="manifest" href="/manifest.json" />
         <link
           rel="stylesheet"
           as="style"

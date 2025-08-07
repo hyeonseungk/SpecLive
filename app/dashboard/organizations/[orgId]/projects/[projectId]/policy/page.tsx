@@ -48,6 +48,7 @@ import {
 import { ChevronDown, ChevronRight, Download } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useSEO } from "@/lib/hooks/use-seo";
 
 type User = {
   id: string;
@@ -106,6 +107,14 @@ export default function PolicyPage({ params }: PolicyPageProps) {
   const t = useGlobalT();
   const { lang } = useLangStore();
   const locale = lang;
+
+  // SEO 설정
+  useSEO({
+    title: project ? `${project.name} - 정책 관리 - SpecLive` : "정책 관리 - SpecLive",
+    description: "프로젝트에서 사용하는 정책들을 체계적으로 관리하고 정의하세요.",
+    keywords: "정책관리, 정책정의, 프로젝트정책, 협업도구",
+    noIndex: true, // 로그인 필요 페이지는 검색엔진에서 제외
+  });
 
   // 액터와 유즈케이스 상태
   const [actors, setActors] = useState<Actor[]>([]);

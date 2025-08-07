@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError } from "@/lib/error-store";
+import { useSEO } from "@/lib/hooks/use-seo";
 import { useGlobalT } from "@/lib/i18n";
 import { showSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
@@ -27,6 +28,15 @@ export default function InvitePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
   const [invitation, setInvitation] = useState<any>(null);
+
+  // SEO 설정
+  useSEO({
+    title: "프로젝트 초대 - SpecLive",
+    description:
+      "SpecLive 프로젝트에 초대되었습니다. 팀과 함께 용어와 정책을 관리하세요.",
+    keywords: "프로젝트초대, 팀협업, 용어관리, 정책관리",
+    noIndex: true, // 초대 페이지는 검색엔진에서 제외
+  });
 
   const nonce = searchParams.get("nonce");
   const projectId = searchParams.get("projectId");

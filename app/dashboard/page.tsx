@@ -18,6 +18,7 @@ import { LogOut } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSEO } from "@/lib/hooks/use-seo";
 
 type Organization = Tables<"organizations">;
 
@@ -44,6 +45,14 @@ export default function Dashboard() {
   const { lang } = useLangStore();
   const locale = lang;
   const router = useRouter();
+
+  // SEO 설정
+  useSEO({
+    title: "대시보드 - SpecLive",
+    description: "조직과 프로젝트를 관리하고 용어·정책을 체계적으로 관리하세요.",
+    keywords: "대시보드, 조직관리, 프로젝트관리, 용어관리, 정책관리",
+    noIndex: true, // 로그인 필요 페이지는 검색엔진에서 제외
+  });
 
   useEffect(() => {
     const getSession = async () => {

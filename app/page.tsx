@@ -21,6 +21,7 @@ import type { User } from "@supabase/supabase-js";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSEO } from "@/lib/hooks/use-seo";
 
 /**
  * 초대 페이지 관련
@@ -44,6 +45,14 @@ export default function Home() {
   const t = useGlobalT();
   const { lang } = useLangStore();
   const locale = lang;
+
+  // SEO 설정
+  useSEO({
+    title: "SpecLive - 전사 용어·정책 관리 SaaS",
+    description: "조직 내에서 사용하는 용어(Glossary)와 정책(Policy)을 구조화하여 한곳에서 관리하는 SaaS입니다. Domain-Driven Design의 Ubiquitous Language 개념을 실무에 적용하기 위한 협업 도구입니다.",
+    keywords: "용어관리, 정책관리, SaaS, 협업도구, 조직관리, Domain-Driven Design, Ubiquitous Language",
+    ogUrl: typeof window !== "undefined" ? window.location.href : undefined,
+  });
 
   // Check for invitation parameters
   const from = searchParams.get("from");
