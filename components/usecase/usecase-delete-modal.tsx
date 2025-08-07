@@ -41,7 +41,11 @@ export default function UsecaseDeleteModal({
           {t("usecase.delete_confirm_message", { usecaseName })}
           <br />
           <span className="text-sm text-red-600 font-medium">
-            {t("usecase.delete_warning_message")}
+            {t("usecase.delete_warning")}
+          </span>
+          <br />
+          <span className="text-sm text-red-600 font-medium">
+            {t("usecase.delete_irreversible")}
           </span>
         </p>
         <div className="flex justify-end gap-2">

@@ -39,8 +39,12 @@ export default function FeatureDeleteModal({
         <p className="text-muted-foreground mb-6">
           {t("feature.delete_confirm_message", { featureName })}
           <br />
-          <span className="text-sm text-red-600 whitespace-pre-line">
+          <span className="text-sm text-red-600 font-medium">
             {t("feature.delete_warning")}
+          </span>
+          <br />
+          <span className="text-sm text-red-600 font-medium">
+            {t("feature.delete_irreversible")}
           </span>
         </p>
         <div className="flex justify-end gap-2">

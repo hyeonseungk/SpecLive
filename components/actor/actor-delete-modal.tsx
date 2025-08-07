@@ -44,7 +44,7 @@ export default function ActorDeleteModal({
             {t("actor.delete_warning")}
           </span>
           <br />
-          <span className="text-sm text-red-600">
+          <span className="text-sm text-red-600 font-medium">
             {t("actor.delete_irreversible")}
           </span>
         </p>
