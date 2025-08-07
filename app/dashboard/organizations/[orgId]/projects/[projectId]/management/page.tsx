@@ -10,7 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { showError } from "@/lib/error-store";
 import { useGlobalT } from "@/lib/i18n";
+import { showSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
 import { Tables } from "@/types/database";
 import { useRouter } from "next/navigation";
@@ -47,6 +49,8 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [updatingMember, setUpdatingMember] = useState<string | null>(null);
+  const [removingMember, setRemovingMember] = useState<string | null>(null);
   const t = useGlobalT();
 
   const router = useRouter();
@@ -185,6 +189,109 @@ export default function ManagementPage({ params }: ManagementPageProps) {
     setShowInviteModal(true);
   };
 
+  // 관리자 수 계산
+  const adminCount = projectMembers.filter(
+    (member) => member.role === "admin"
+  ).length;
+
+  // 멤버 역할 변경 핸들러
+  const handleRoleChange = async (
+    memberId: string,
+    newRole: "admin" | "member"
+  ) => {
+    if (updatingMember) return; // 이미 업데이트 중이면 무시
+
+    try {
+      setUpdatingMember(memberId);
+
+      // 마지막 관리자 보호 로직
+      if (newRole === "member") {
+        const targetMember = projectMembers.find((m) => m.id === memberId);
+        if (targetMember?.role === "admin" && adminCount === 1) {
+          showError(
+            t("common.error_title"),
+            t("management.cannot_demote_last_admin")
+          );
+          return;
+        }
+      }
+
+      const { error } = await supabase
+        .from("memberships")
+        .update({ role: newRole })
+        .eq("id", memberId);
+
+      if (error) {
+        throw error;
+      }
+
+      // 로컬 상태 업데이트
+      setProjectMembers((prev) =>
+        prev.map((member) =>
+          member.id === memberId ? { ...member, role: newRole } : member
+        )
+      );
+
+      showSuccess(
+        t("common.success_title"),
+        t("management.role_updated_successfully")
+      );
+    } catch (error) {
+      console.error("Failed to update member role:", error);
+      showError(t("common.error_title"), t("management.failed_to_update_role"));
+    } finally {
+      setUpdatingMember(null);
+    }
+  };
+
+  // 멤버 제거 핸들러
+  const handleRemoveMember = async (memberId: string) => {
+    if (removingMember) return; // 이미 제거 중이면 무시
+
+    try {
+      setRemovingMember(memberId);
+
+      const targetMember = projectMembers.find((m) => m.id === memberId);
+      if (!targetMember) return;
+
+      // 마지막 관리자 보호 로직
+      if (targetMember.role === "admin" && adminCount === 1) {
+        showError(
+          t("common.error_title"),
+          t("management.cannot_remove_last_admin")
+        );
+        return;
+      }
+
+      const { error } = await supabase
+        .from("memberships")
+        .delete()
+        .eq("id", memberId);
+
+      if (error) {
+        throw error;
+      }
+
+      // 로컬 상태 업데이트
+      setProjectMembers((prev) =>
+        prev.filter((member) => member.id !== memberId)
+      );
+
+      showSuccess(
+        t("common.success_title"),
+        t("management.member_removed_successfully")
+      );
+    } catch (error) {
+      console.error("Failed to remove member:", error);
+      showError(
+        t("common.error_title"),
+        t("management.failed_to_remove_member")
+      );
+    } finally {
+      setRemovingMember(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -247,34 +354,54 @@ export default function ManagementPage({ params }: ManagementPageProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {projectMembers.map((member) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className="font-medium">{member.email}</span>
+                  {projectMembers.map((member) => {
+                    const isLastAdmin =
+                      member.role === "admin" && adminCount === 1;
+                    const isUpdating = updatingMember === member.id;
+                    const isRemoving = removingMember === member.id;
+
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="font-medium">{member.email}</span>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <Select
+                            value={member.role}
+                            disabled={isUpdating || isRemoving || isLastAdmin}
+                            onValueChange={(value: "admin" | "member") =>
+                              handleRoleChange(member.id, value)
+                            }
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="member">
+                                {t("management.role_member")}
+                              </SelectItem>
+                              <SelectItem value="admin">
+                                {t("management.role_admin")}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isUpdating || isRemoving || isLastAdmin}
+                            onClick={() => handleRemoveMember(member.id)}
+                          >
+                            {isRemoving
+                              ? t("common.loading")
+                              : t("management.remove_member")}
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <Select value={member.role} disabled>
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="member">
-                              {t("management.role_member")}
-                            </SelectItem>
-                            <SelectItem value="admin">
-                              {t("management.role_admin")}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button variant="outline" size="sm" disabled>
-                          {t("management.remove_member")}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
