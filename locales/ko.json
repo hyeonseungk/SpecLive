@@ -112,6 +112,8 @@
     "error_excel": "Excel 파일 생성 중 오류가 발생했습니다.",
     "error_json": "JSON 파일 생성 중 오류가 발생했습니다.",
     "error_text": "텍스트 파일 생성 중 오류가 발생했습니다.",
+    "error_title": "내보내기 실패",
+    "project_id_required": "프로젝트 ID가 필요합니다.",
     "format_markdown": "Markdown (.md)",
     "format_csv": "CSV (.csv)",
     "format_excel": "Excel (.xlsx)",

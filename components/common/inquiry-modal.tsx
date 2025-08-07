@@ -8,7 +8,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { showError, showSuccess } from "@/lib/error-store";
+import { showError } from "@/lib/error-store";
+import { useGlobalT } from "@/lib/i18n";
+import { showSimpleSuccess } from "@/lib/success-store";
 import { supabase } from "@/lib/supabase-browser";
 import { useState } from "react";
 
@@ -24,27 +26,36 @@ export function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
 
   const handleSubmit = async () => {
     if (!contents.trim()) {
-      showError(t("inquiry.content_required"));
+      showError(t("inquiry.modal_title"), t("inquiry.content_required"));
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("사용자 인증 정보가 없습니다.");
+      }
+
       const { error } = await supabase.from("inquiries").insert({
         contents: contents.trim(),
+        user_id: user.id,
       });
 
       if (error) {
         throw error;
       }
 
-      showSuccess(t("inquiry.success"));
+      showSimpleSuccess(t("inquiry.success"));
       setContents("");
       onClose();
     } catch (error) {
       console.error("문의 전송 오류:", error);
-      showError(t("inquiry.error"));
+      showError(t("common.error_title"), t("inquiry.error"));
     } finally {
       setIsSubmitting(false);
     }

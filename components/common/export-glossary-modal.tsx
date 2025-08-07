@@ -25,7 +25,7 @@ export default function ExportModal({
 
   const exportAsMarkdown = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -97,7 +97,7 @@ export default function ExportModal({
       showSuccessToast(t("export.success_glossary_markdown"));
     } catch (error) {
       console.error("Error exporting as markdown:", error);
-      showError("내보내기 실패", t("export.error_glossary_markdown"));
+      showError(t("export.error_title"), t("export.error_glossary_markdown"));
     } finally {
       setExportingType(null);
     }
@@ -105,7 +105,7 @@ export default function ExportModal({
 
   const exportAsJson = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -159,7 +159,7 @@ export default function ExportModal({
       showSuccessToast(t("export.success_glossary_json"));
     } catch (error) {
       console.error("Error exporting as JSON:", error);
-      showError("내보내기 실패", t("export.error_glossary_json"));
+      showError(t("export.error_title"), t("export.error_glossary_json"));
     } finally {
       setExportingType(null);
     }
@@ -167,7 +167,7 @@ export default function ExportModal({
 
   const exportAsCsv = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -230,7 +230,7 @@ export default function ExportModal({
       showSuccessToast(t("export.success_glossary_csv"));
     } catch (error) {
       console.error("Error exporting as CSV:", error);
-      showError("내보내기 실패", t("export.error_glossary_csv"));
+      showError(t("export.error_title"), t("export.error_glossary_csv"));
     } finally {
       setExportingType(null);
     }
@@ -238,7 +238,7 @@ export default function ExportModal({
 
   const exportAsText = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -303,7 +303,7 @@ export default function ExportModal({
       showSuccessToast(t("export.success_glossary_text"));
     } catch (error) {
       console.error("Error exporting as text:", error);
-      showError("내보내기 실패", t("export.error_glossary_text"));
+      showError(t("export.error_title"), t("export.error_glossary_text"));
     } finally {
       setExportingType(null);
     }
@@ -311,7 +311,7 @@ export default function ExportModal({
 
   const exportAsExcel = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -411,7 +411,7 @@ export default function ExportModal({
       showSuccessToast(t("export.success_glossary_excel"));
     } catch (error) {
       console.error("Error exporting as Excel:", error);
-      showError("내보내기 실패", t("export.error_glossary_excel"));
+      showError(t("export.error_title"), t("export.error_glossary_excel"));
     } finally {
       setExportingType(null);
     }

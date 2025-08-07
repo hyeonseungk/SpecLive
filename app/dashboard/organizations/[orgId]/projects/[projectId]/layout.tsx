@@ -213,6 +213,11 @@ export default function ProjectLayout({
                   <span>{t("sidebar.management")}</span>
                 </button>
               </div>
+
+              {/* 문의하기 버튼 - 좌측 패널 하단 */}
+              <div className="mt-auto pt-4 border-t">
+                <InquiryButton position="sidebar-bottom" />
+              </div>
             </div>
           </>
         )}
@@ -220,9 +225,6 @@ export default function ProjectLayout({
 
       {/* 메인 콘텐츠 영역 */}
       <div className="flex-1 overflow-hidden">{children}</div>
-
-      {/* 문의하기 버튼 - 로그인된 사용자에게만 표시 */}
-      {user && <InquiryButton />}
     </div>
   );
 }

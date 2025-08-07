@@ -683,7 +683,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       setGlossaries(data || []);
     } catch (error) {
       console.error("Error loading glossaries:", error);
-      showError("용어 로드 실패", "용어를 불러오는 중 오류가 발생했습니다.");
+      showError(t("terms.load_error_title"), t("terms.load_error_desc"));
     } finally {
       setGlossariesLoading(false);
     }
@@ -1022,7 +1022,7 @@ export default function PolicyPage({ params }: PolicyPageProps) {
       showSuccessToast("액터가  삭제되었습니다.");
     } catch (error) {
       console.error("Error deleting actor:", error);
-      showError("액터 삭제 실패", "액터를 삭제하는 중 오류가 발생했습니다.");
+      showError(t("actor.delete_error_title"), t("actor.delete_error_desc"));
     } finally {
       setActorDeleting(false);
     }

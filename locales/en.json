@@ -60,6 +60,8 @@
     "error_excel": "An error occurred while creating the Excel file.",
     "error_json": "An error occurred while creating the JSON file.",
     "error_text": "An error occurred while creating the text file.",
+    "error_title": "Export Failed",
+    "project_id_required": "Project ID is required.",
     "format_markdown": "Markdown (.md)",
     "format_csv": "CSV (.csv)",
     "format_excel": "Excel (.xlsx)",

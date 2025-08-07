@@ -423,9 +423,9 @@ export default function Dashboard() {
         organization={editingOrg}
         mode={editMode}
       />
-      
-      {/* 문의하기 버튼 - 로그인된 사용자에게만 표시 */}
-      {user && <InquiryButton />}
+
+      {/* 문의하기 버튼 - 우측 하단 */}
+      {user && <InquiryButton position="bottom-right" />}
     </div>
   );
 }

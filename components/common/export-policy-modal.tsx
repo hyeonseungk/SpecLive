@@ -24,7 +24,7 @@ export default function ExportModal({
   const t = useGlobalT();
   const exportAsMarkdown = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -128,7 +128,7 @@ export default function ExportModal({
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", t("export.error_markdown"));
+      showError(t("export.error_title"), t("export.error_markdown"));
     } finally {
       setExportingType(null);
     }
@@ -136,7 +136,7 @@ export default function ExportModal({
 
   const exportAsJson = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -257,7 +257,7 @@ export default function ExportModal({
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", t("export.error_json"));
+      showError(t("export.error_title"), t("export.error_json"));
     } finally {
       setExportingType(null);
     }
@@ -265,7 +265,7 @@ export default function ExportModal({
 
   const exportAsCsv = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -379,7 +379,7 @@ export default function ExportModal({
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", t("export.error_csv"));
+      showError(t("export.error_title"), t("export.error_csv"));
     } finally {
       setExportingType(null);
     }
@@ -387,7 +387,7 @@ export default function ExportModal({
 
   const exportAsText = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -496,7 +496,7 @@ export default function ExportModal({
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", t("export.error_text"));
+      showError(t("export.error_title"), t("export.error_text"));
     } finally {
       setExportingType(null);
     }
@@ -504,7 +504,7 @@ export default function ExportModal({
 
   const exportAsExcel = async () => {
     if (!projectId) {
-      showSimpleError("프로젝트 ID가 필요합니다.");
+      showSimpleError(t("export.project_id_required"));
       return;
     }
 
@@ -629,7 +629,7 @@ export default function ExportModal({
       onClose();
     } catch (error) {
       console.error("Export error:", error);
-      showError("Export 실패", t("export.error_excel"));
+      showError(t("export.error_title"), t("export.error_excel"));
     } finally {
       setExportingType(null);
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { FullScreenLoading } from "@/components/common/full-screen-loading";
+import { InquiryButton } from "@/components/common/inquiry-button";
 import { ProjectCreateModal } from "@/components/common/project-create-modal";
 import ProjectEditModal from "@/components/common/project-edit-modal";
 import { Button } from "@/components/ui/button";
@@ -306,6 +307,9 @@ export default function OrganizationPage({ params }: OrganizationPageProps) {
         project={editingProject}
         mode={editMode}
       />
+
+      {/* 문의하기 버튼 - 우측 하단 */}
+      <InquiryButton position="bottom-right" />
     </div>
   );
 }
