@@ -53,42 +53,35 @@ serve(async (req) => {
 
     console.log("Processing userIds:", userIds);
 
-    // Get user emails using listUsers
+    // Get user emails using individual user lookups for better reliability
     const userEmails: Record<string, string> = {};
 
     try {
-      // 모든 사용자를 가져온 다음 필터링
-      const { data: usersData, error: listError } =
-        await supabaseClient.auth.admin.listUsers();
+      // 각 사용자 ID에 대해 개별적으로 조회 (더 안정적)
+      for (const userId of userIds) {
+        try {
+          const { data: userData, error: userError } =
+            await supabaseClient.auth.admin.getUserById(userId);
 
-      console.log("List users response:", { usersData, listError });
-
-      if (listError) {
-        console.log("Error listing users:", listError);
-        // 에러 발생 시 user_id를 fallback으로 사용
-        userIds.forEach((userId) => {
-          userEmails[userId] = userId;
-        });
-      } else if (usersData?.users) {
-        // 요청된 user_ids에 해당하는 사용자들의 이메일 매핑
-        usersData.users.forEach((user) => {
-          if (userIds.includes(user.id)) {
-            userEmails[user.id] = user.email || user.id;
-            console.log("Found email for user:", user.id, "->", user.email);
+          if (userError) {
+            console.log(`Error getting user ${userId}:`, userError);
+            userEmails[userId] = userId; // fallback
+          } else if (userData?.user) {
+            const email = userData.user.email;
+            userEmails[userId] = email || userId;
+            console.log(`Found email for user ${userId}:`, email);
+          } else {
+            console.log(`No user data found for ${userId}`);
+            userEmails[userId] = userId; // fallback
           }
-        });
-
-        // 찾지 못한 사용자들은 user_id를 fallback으로 사용
-        userIds.forEach((userId) => {
-          if (!userEmails[userId]) {
-            userEmails[userId] = userId;
-            console.log("No email found for user:", userId);
-          }
-        });
+        } catch (error) {
+          console.log(`Exception getting user ${userId}:`, error);
+          userEmails[userId] = userId; // fallback
+        }
       }
     } catch (error) {
-      console.log("Exception listing users:", error);
-      // 예외 발생 시 user_id를 fallback으로 사용
+      console.log("Exception in user lookup loop:", error);
+      // 전체 실패 시 user_id를 fallback으로 사용
       userIds.forEach((userId) => {
         userEmails[userId] = userId;
       });

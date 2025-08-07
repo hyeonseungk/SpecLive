@@ -56,6 +56,8 @@ export default function ManagementPage({ params }: ManagementPageProps) {
   );
   const [updatingMember, setUpdatingMember] = useState<string | null>(null);
   const [isRemovingLoading, setIsRemovingLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailRetryCount, setEmailRetryCount] = useState(0);
   const t = useGlobalT();
 
   const router = useRouter();
@@ -125,24 +127,36 @@ export default function ManagementPage({ params }: ManagementPageProps) {
         let userEmails: Record<string, string> = {};
 
         if (userIds.length > 0) {
+          setEmailLoading(true);
           try {
             console.log(
               "Calling get-user-emails function with userIds:",
               userIds
             );
 
-            const { data: emailsData, error } = await supabase.functions.invoke(
+            // 타임아웃 설정 (10초)
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(() => reject(new Error("Request timeout")), 10000);
+            });
+
+            const functionPromise = supabase.functions.invoke(
               "get-user-emails",
               {
                 body: { userIds },
               }
             );
 
+            const { data: emailsData, error } = (await Promise.race([
+              functionPromise,
+              timeoutPromise,
+            ])) as any;
+
             console.log("Edge function response:", { emailsData, error });
 
             if (!error && emailsData?.userEmails) {
               userEmails = emailsData.userEmails;
               console.log("Successfully got user emails:", userEmails);
+              setEmailRetryCount(0); // 성공 시 재시도 카운트 리셋
             } else {
               console.log("Failed to get user emails:", error);
               // Edge Function 실패 시 user_id를 그대로 사용
@@ -156,6 +170,8 @@ export default function ManagementPage({ params }: ManagementPageProps) {
             userIds.forEach((userId) => {
               userEmails[userId] = userId;
             });
+          } finally {
+            setEmailLoading(false);
           }
         }
 
@@ -192,6 +208,57 @@ export default function ManagementPage({ params }: ManagementPageProps) {
 
   const handleInviteClick = () => {
     setShowInviteModal(true);
+  };
+
+  // 이메일 재로딩 함수
+  const reloadEmails = async () => {
+    if (emailLoading) return;
+
+    setEmailRetryCount((prev) => prev + 1);
+
+    // 멤버 데이터가 있는 경우에만 재로딩
+    if (projectMembers.length > 0) {
+      const userIds = projectMembers
+        .map((member) => member.user_id)
+        .filter((id) => id !== null) as string[];
+
+      if (userIds.length > 0) {
+        setEmailLoading(true);
+        try {
+          const { data: emailsData, error } = await supabase.functions.invoke(
+            "get-user-emails",
+            {
+              body: { userIds },
+            }
+          );
+
+          if (!error && emailsData?.userEmails) {
+            const updatedMembers = projectMembers.map((member) => {
+              const emailFromFunction =
+                emailsData.userEmails[member.user_id || ""];
+              let displayEmail =
+                emailFromFunction || member.user_id || "Unknown";
+
+              if (displayEmail && !displayEmail.includes("@")) {
+                displayEmail = `사용자 ID: ${displayEmail}`;
+              }
+
+              return {
+                ...member,
+                email: displayEmail,
+              };
+            });
+
+            setProjectMembers(updatedMembers as ProjectMember[]);
+            setEmailRetryCount(0);
+          }
+        } catch (error) {
+          console.error("Failed to reload emails:", error);
+        } finally {
+          setEmailLoading(false);
+        }
+      }
+    }
   };
 
   // 관리자 수 계산
@@ -369,53 +436,102 @@ export default function ManagementPage({ params }: ManagementPageProps) {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {projectMembers.map((member) => {
-                    const isLastAdmin =
-                      member.role === "admin" && adminCount === 1;
-                    const isUpdating = updatingMember === member.id;
-                    const isRemoving = removingMember?.id === member.id;
-
-                    return (
-                      <div
-                        key={member.id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
+                {emailRetryCount > 0 && !emailLoading && (
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-yellow-800">
+                        일부 이메일을 가져오지 못했습니다. ({emailRetryCount}회
+                        시도)
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={reloadEmails}
+                        disabled={emailLoading}
                       >
-                        <div className="flex items-center space-x-3">
-                          <span className="font-medium">{member.email}</span>
+                        다시 시도
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-3">
+                  {emailLoading
+                    ? // 로딩 중일 때 스켈레톤 UI 표시
+                      projectMembers.map((member) => (
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                              <div className="flex items-center space-x-1">
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                                <span className="text-xs text-muted-foreground">
+                                  이메일 로딩 중...
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <div className="h-8 bg-gray-200 rounded animate-pulse w-20"></div>
+                            <div className="h-8 bg-gray-200 rounded animate-pulse w-24"></div>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                          <Select
-                            value={member.role}
-                            disabled={isUpdating || isRemoving || isLastAdmin}
-                            onValueChange={(value: "admin" | "member") =>
-                              handleRoleChange(member.id, value)
-                            }
+                      ))
+                    : // 로딩 완료 후 실제 멤버 목록 표시
+                      projectMembers.map((member) => {
+                        const isLastAdmin =
+                          member.role === "admin" && adminCount === 1;
+                        const isUpdating = updatingMember === member.id;
+                        const isRemoving = removingMember?.id === member.id;
+
+                        return (
+                          <div
+                            key={member.id}
+                            className="flex items-center justify-between p-3 border rounded-lg"
                           >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="member">
-                                {t("management.role_member")}
-                              </SelectItem>
-                              <SelectItem value="admin">
-                                {t("management.role_admin")}
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={isUpdating || isRemoving || isLastAdmin}
-                            onClick={() => handleRemoveMemberClick(member)}
-                          >
-                            {t("management.remove_member")}
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
+                            <div className="flex items-center space-x-3">
+                              <span className="font-medium">
+                                {member.email}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                              <Select
+                                value={member.role}
+                                disabled={
+                                  isUpdating || isRemoving || isLastAdmin
+                                }
+                                onValueChange={(value: "admin" | "member") =>
+                                  handleRoleChange(member.id, value)
+                                }
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="member">
+                                    {t("management.role_member")}
+                                  </SelectItem>
+                                  <SelectItem value="admin">
+                                    {t("management.role_admin")}
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={
+                                  isUpdating || isRemoving || isLastAdmin
+                                }
+                                onClick={() => handleRemoveMemberClick(member)}
+                              >
+                                {t("management.remove_member")}
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
                 </div>
               </CardContent>
             </Card>
