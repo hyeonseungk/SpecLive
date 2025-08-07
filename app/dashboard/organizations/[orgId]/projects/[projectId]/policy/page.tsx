@@ -1319,6 +1319,25 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         await loadPoliciesForTheFeature(completeFeature.id);
       }
 
+      // 새로 추가된 기능으로 스크롤 이동
+      setTimeout(() => {
+        const element = document.getElementById(
+          `feature-${completeFeature.id}`
+        );
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "end" });
+          // highlight effect
+          element.classList.add("ring-2", "ring-primary", "ring-opacity-50");
+          setTimeout(() => {
+            element.classList.remove(
+              "ring-2",
+              "ring-primary",
+              "ring-opacity-50"
+            );
+          }, 1000);
+        }
+      }, 300);
+
       showSuccessToast(t("feature.add_success"));
     } catch (error) {
       console.error("Error adding feature:", error);
@@ -1581,7 +1600,24 @@ export default function PolicyPage({ params }: PolicyPageProps) {
         await loadPoliciesForTheFeature(selectedFeature.id);
       }
 
-      // 7. 모달 초기화 및 닫기
+      // 7. 새로 추가된 정책으로 스크롤 이동
+      setTimeout(() => {
+        const element = document.getElementById(`policy-${policy.id}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "end" });
+          // highlight effect
+          element.classList.add("ring-2", "ring-primary", "ring-opacity-50");
+          setTimeout(() => {
+            element.classList.remove(
+              "ring-2",
+              "ring-primary",
+              "ring-opacity-50"
+            );
+          }, 1000);
+        }
+      }, 300);
+
+      // 8. 모달 초기화 및 닫기
       setPolicyContents("");
       setContextLinks([""]);
       setGeneralLinks([""]);
